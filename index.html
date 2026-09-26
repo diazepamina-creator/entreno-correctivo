@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F3A5F" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121416" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Registro del trabajo correctivo con kettlebells: mantenimiento P3, bloque correctivo y complejo bilateral.">
+<title>Correctivo</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f6f5f1; --surface:#ffffff; --surface-2:#efede6; --ink:#151515; --ink-2:#55534e; --ink-3:#77756f;
+  --line:#dedbd2; --brand:#1F3A5F; --brand-ink:#ffffff; --accent:#2E6B4F; --accent-soft:#e3efe8;
+  --amber:#7a4f00; --amber-bg:#fff2d9; --danger:#a8241c; --danger-bg:#fbe5e3;
+  --series-1:#2a78d6; --series-2:#eb6834;
+  --radius:14px; --gap:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --bg:#121416; --surface:#1b1e21; --surface-2:#252a2e; --ink:#f2f1ec; --ink-2:#bdbbb2; --ink-3:#9a988f;
+    --line:#343a3f; --brand:#9cbde3; --brand-ink:#0e1a28; --accent:#6cc79a; --accent-soft:#1d3329;
+    --amber:#f2c66e; --amber-bg:#3a2d12; --danger:#ff8a80; --danger-bg:#3d1c1a;
+    --series-1:#3987e5; --series-2:#d95926;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121416; --surface:#1b1e21; --surface-2:#252a2e; --ink:#f2f1ec; --ink-2:#bdbbb2; --ink-3:#9a988f;
+  --line:#343a3f; --brand:#9cbde3; --brand-ink:#0e1a28; --accent:#6cc79a; --accent-soft:#1d3329;
+  --amber:#f2c66e; --amber-bg:#3a2d12; --danger:#ff8a80; --danger-bg:#3d1c1a;
+  --series-1:#3987e5; --series-2:#d95926;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+  padding:calc(8px + env(safe-area-inset-top)) 16px 8px}
+.top-row{display:flex;align-items:center;gap:8px;max-width:640px;margin:0 auto}
+.top-title{font-weight:700;font-size:17px;flex:1;min-width:0}
+.top-title small{display:block;font-weight:500;font-size:13px;color:var(--ink-2)}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);border-radius:12px;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
+.icon-btn:disabled{opacity:.35}
+main{max-width:640px;margin:0 auto;padding:12px 16px 24px}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin:0 0 var(--gap);overflow:hidden}
+.card-h{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;width:100%;border:0;background:none;text-align:left}
+.card-h h2{margin:0;font-size:16px;flex:1}
+.card-h .sub{display:block;font-size:13px;font-weight:500;color:var(--ink-2)}
+.card-b{padding:0 16px 14px}
+.chev{transition:transform .2s;color:var(--ink-3)}
+.card.closed .card-b{display:none}.card.closed .chev{transform:rotate(-90deg)}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.pill.ok{background:var(--accent-soft);color:var(--accent)}
+.pill.warn{background:var(--amber-bg);color:var(--amber)}
+.daychip{display:inline-block;font-weight:700;font-size:14px;padding:6px 12px;border-radius:999px;background:var(--brand);color:var(--brand-ink)}
+.daychip.rest{background:var(--surface-2);color:var(--ink)}
+.daychip.opt{background:var(--accent-soft);color:var(--accent)}
+.hint{font-size:14px;color:var(--ink-2);margin:6px 0 0}
+.note{border-left:4px solid var(--amber);background:var(--amber-bg);color:var(--amber);padding:10px 12px;border-radius:8px;font-size:14px;margin:10px 0}
+.note.ok{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.note.bad{border-color:var(--danger);background:var(--danger-bg);color:var(--danger)}
+.ex{border-top:1px solid var(--line);padding:12px 0}
+.ex:first-child{border-top:0}
+.ex-t{font-weight:650;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.ex-t .n{color:var(--ink-3);font-weight:600;font-size:14px}
+.ex-p{font-size:14px;color:var(--ink-2);margin:2px 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.field{display:flex;flex-direction:column;gap:4px}
+.field>label{font-size:12px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.02em}
+.metric>label{color:var(--accent)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-2)}
+.stepper button{min-width:46px;min-height:44px;border:0;background:none;font-size:22px;cursor:pointer}
+.stepper button:active{background:var(--line)}
+.stepper output{min-width:44px;text-align:center;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.metric .stepper{border-color:var(--accent)}
+.stepper output.empty,.timer-val.empty{font-size:12px;font-weight:600;color:var(--ink-3);min-width:58px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;font-size:15px}
+.chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.chip.sm{min-height:36px;padding:6px 12px;font-size:14px}
+.check{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;border:0;background:none;text-align:left;cursor:pointer;padding:6px 0}
+.box{flex:0 0 28px;height:28px;border-radius:8px;border:2px solid var(--ink-3);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+.check[aria-pressed="true"] .box{background:var(--accent);border-color:var(--accent);color:#fff}
+.check .lbl{flex:1}.check .lbl small{display:block;color:var(--ink-2);font-size:13px}
+.p3-item{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding:6px 0}
+.p3-item:first-child{border-top:0}
+.btn{min-height:46px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:650;cursor:pointer}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.btn.block{width:100%}
+.timer-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border-radius:12px;border:1px solid var(--accent);color:var(--accent);background:var(--surface);font-weight:650;cursor:pointer}
+.timer-val{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;min-width:52px}
+.round{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--surface-2)}
+.round-h{display:flex;align-items:center;gap:8px;font-weight:650;margin-bottom:8px}
+.round-h .r{flex:1}
+textarea{width:100%;min-height:84px;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface-2);color:var(--ink);font:inherit;resize:vertical}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:var(--gap)}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+.stat b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--ink-2)}
+.hist-item{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:none;text-align:left;padding:12px 0;cursor:pointer;min-height:52px}
+.hist-item:first-child{border-top:0}
+.hist-item .d{flex:0 0 96px;font-weight:650}
+.hist-item .c{display:flex;flex-wrap:wrap;gap:6px}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.chart .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px;box-shadow:0 2px 10px rgba(0,0,0,.12);display:none;white-space:nowrap}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--ink-2);margin:4px 0 2px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+table.t{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+table.t th,table.t td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.t th{color:var(--ink-2);font-weight:600}
+.link{background:none;border:0;color:var(--accent);font-weight:650;cursor:pointer;padding:6px 0;min-height:44px;text-align:left}
+.guide h3{font-size:15px;margin:14px 0 6px}
+.guide p,.guide li{font-size:15px}
+.guide ul{padding-left:20px;margin:6px 0}
+.sched{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.sched button{min-height:58px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:15px}
+.sched button small{font-weight:600;font-size:11px;color:var(--ink-2)}
+.sched button.t{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.sched button.t small{color:var(--brand-ink)}
+.sched button.o{background:var(--accent-soft);border-color:var(--accent)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);
+  display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs div{display:flex;width:100%;max-width:640px}
+nav.tabs button{flex:1;min-height:62px;border:0;background:none;cursor:pointer;font-size:12px;font-weight:650;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-current="page"]{color:var(--brand)}
+.timer{position:fixed;inset:0;z-index:20;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.timer.on{display:flex}
+.t-label{font-size:18px;font-weight:650;max-width:420px}
+.t-phase{font-size:14px;color:var(--ink-2);margin-top:6px;min-height:20px}
+.t-big{font-size:min(28vw,150px);font-weight:800;font-variant-numeric:tabular-nums;line-height:1;margin:18px 0 8px}
+.t-big.lead{color:var(--amber)}
+.t-big.hit{color:var(--accent)}
+.t-marks{font-size:14px;color:var(--ink-2)}
+.t-btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px;margin-top:28px}
+.t-btns .btn{min-height:64px;font-size:19px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;display:none;max-width:90vw}
+.toast.on{display:block}
+.muted{color:var(--ink-3)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion: reduce){.chev{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <button class="icon-btn" data-action="day-prev" aria-label="Día anterior">‹</button>
+    <div class="top-title" id="topTitle">Correctivo</div>
+    <button class="icon-btn" data-action="day-today" id="btnToday" aria-label="Ir a hoy">Hoy</button>
+    <button class="icon-btn" data-action="day-next" id="btnNext" aria-label="Día siguiente">›</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel" id="p-hoy" aria-label="Hoy"></section>
+  <section class="panel" id="p-hist" aria-label="Historial"></section>
+  <section class="panel" id="p-guia" aria-label="Guía"></section>
+  <section class="panel" id="p-ajustes" aria-label="Ajustes"></section>
+</main>
+
+<nav class="tabs" aria-label="Secciones"><div>
+  <button data-action="tab" data-tab="hoy" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="14" r="6.5"/><path d="M8.5 8.5a3.5 3.5 0 0 1 7 0"/></svg>Sesión</button>
+  <button data-action="tab" data-tab="hist">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V5M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>Progreso</button>
+  <button data-action="tab" data-tab="guia">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z"/><path d="M9 9h6M9 13h6"/></svg>Guía</button>
+  <button data-action="tab" data-tab="ajustes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Ajustes</button>
+</div></nav>
+
+<div class="timer" id="timer" role="dialog" aria-modal="true" aria-labelledby="tLabel">
+  <div class="t-label" id="tLabel"></div>
+  <div class="t-phase" id="tPhase"></div>
+  <div class="t-big" id="tBig" aria-live="off">0:00</div>
+  <div class="t-marks" id="tMarks"></div>
+  <div class="t-btns">
+    <button class="btn accent" data-action="timer-stop" id="tStop">Parar y guardar</button>
+    <button class="btn" data-action="timer-cancel">Cancelar</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="fileIn" accept="application/json,.json" class="sr" aria-label="Importar copia de seguridad">
+
+<script>
+"use strict";
+const VERSION = "1.0.0";
+const KEY = "correctivo.v1";
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------------- Datos ---------------- */
+function fresh(){
+  return { version:1, settings:{ side:"izq", buKg:12, cxKg:24, leadIn:5,
+    sched:{0:"r",1:"t",2:"r",3:"t",4:"r",5:"t",6:"o"} }, days:{} };
+}
+function load(){
+  try{
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && d.days && d.settings) { const f = fresh(); d.settings = Object.assign(f.settings, d.settings); return d; }
+  }catch(e){}
+  return fresh();
+}
+let DB = load();
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch(e){ toast("No se ha podido guardar en el móvil"); }
+}
+const getp = (o, path) => path.split(".").reduce((a, k) => (a == null ? undefined : a[k]), o);
+function setp(o, path, v){
+  const ks = path.split("."); let a = o;
+  for (let i = 0; i < ks.length - 1; i++){ if (a[ks[i]] == null || typeof a[ks[i]] !== "object") a[ks[i]] = {}; a = a[ks[i]]; }
+  if (v === undefined) delete a[ks[ks.length-1]]; else a[ks[ks.length-1]] = v;
+}
+
+/* ---------------- Fechas ---------------- */
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseIso = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const todayIso = () => iso(new Date());
+const addDays = (s, n) => { const d = parseIso(s); d.setDate(d.getDate()+n); return iso(d); };
+const daysBetween = (a, b) => Math.round((parseIso(b) - parseIso(a)) / 864e5);
+const DOW = ["dom","lun","mar","mié","jue","vie","sáb"];
+const DOWL = ["D","L","M","X","J","V","S"];
+const MON = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const fmtDate = s => { const d = parseIso(s); return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`; };
+const fmtSecs = s => s == null ? "—" : `${Math.floor(s/60)}:${pad(Math.floor(s%60))}`;
+
+/* ---------------- Estado de UI ---------------- */
+const ui = { tab:"hoy", date: todayIso(), open:{ p3:true, a:true, b:true, cierre:true, opt:false, retest:false }, tables:{}, forceTrain:{} };
+const day = (d = ui.date) => DB.days[d] || {};
+const wday = (d = ui.date) => (DB.days[d] ||= {});
+const S = () => DB.settings;
+const sideL = () => S().side === "izq" ? "izquierdo" : "derecho";
+const otherL = () => S().side === "izq" ? "derecho" : "izquierdo";
+const dayType = d => S().sched[parseIso(d).getDay()] || "r";
+
+/* ---------------- Contenido ---------------- */
+const P3 = [
+  { k:"supino", t:"Supino", s:"Respiración diafragmática + neck nods + rotaciones de cabeza" },
+  { k:"slIzq",  t:"Side lying · izquierdo", s:"Respiración en la posición" },
+  { k:"slDer",  t:"Side lying · derecho", s:"Respiración en la posición" },
+  { k:"prono",  t:"Prono", s:"Respiración + nods + rotaciones" },
+  { k:"deadbug",t:"Dead Bug", s:"Rodilla flexionada → pierna recta al llegar cómodo a 30" },
+];
+const CX = [
+  { k:"clean", t:"Doble Clean", r:"×5" },
+  { k:"squat", t:"Doble Front Squat", r:"×5" },
+  { k:"swing", t:"Doble Swing", r:"×10" },
+  { k:"row",   t:"Remo doble en bisagra", r:"×8" },
+  { k:"carry", t:"Farmer's Carry", r:"20-30 m" },
+];
+const KGS = [8,12,16,20,24,28,32];
+
+/* ---------------- Componentes ---------------- */
+function stepper(path, o){
+  const v = getp(day(), path);
+  const cls = o.metric ? "field metric" : "field";
+  return `<div class="${cls}"><label>${esc(o.label)}</label>
+    <div class="stepper" role="group" aria-label="${esc(o.label)}">
+      <button data-action="step" data-path="${path}" data-d="-${o.step||1}" data-def="${o.def}" data-min="${o.min??0}" aria-label="Menos">−</button>
+      <output class="${v == null ? "empty" : ""}">${v == null ? "sin dato" : esc(v)}</output>
+      <button data-action="step" data-path="${path}" data-d="${o.step||1}" data-def="${o.def}" data-min="${o.min??0}" aria-label="Más">+</button>
+    </div></div>`;
+}
+function toggle(path, label){
+  const on = !!getp(day(), path);
+  return `<button class="chip sm" data-action="toggle" data-path="${path}" aria-pressed="${on}">${on ? "✓ " : ""}${esc(label)}</button>`;
+}
+function check(path, label, sub){
+  const on = !!getp(day(), path);
+  return `<button class="check" data-action="toggle" data-path="${path}" aria-pressed="${on}">
+    <span class="box">${on ? "✓" : ""}</span><span class="lbl">${esc(label)}${sub ? `<small>${esc(sub)}</small>` : ""}</span></button>`;
+}
+function kgChips(path, def, list = KGS){
+  const v = getp(day(), path) ?? def;
+  return `<div class="field"><label>Kg</label><div class="chips">${list.map(k =>
+    `<button class="chip sm" data-action="set" data-path="${path}" data-v="${k}" data-num="1" aria-pressed="${v===k}">${k}</button>`).join("")}</div></div>`;
+}
+function timerField(path, label, o = {}){
+  const v = getp(day(), path);
+  return `<div class="field"><label>${esc(label)}</label>
+    <div class="row" style="gap:10px"><span class="timer-val${v == null ? " empty" : ""}">${v == null ? "sin dato" : v + " s"}</span>
+    <button class="timer-btn" data-action="timer-start" data-path="${path}" data-label="${esc(label)}" data-marks="${o.marks||""}" data-lead="${o.lead?1:0}" data-kind="hold">▶ Cronometrar</button>
+    ${v != null ? `<button class="link" data-action="clear" data-path="${path}">borrar</button>` : ""}</div></div>`;
+}
+function card(key, title, sub, badge, body){
+  const closed = !ui.open[key];
+  return `<div class="card${closed ? " closed" : ""}">
+    <button class="card-h" data-action="card" data-key="${key}" aria-expanded="${!closed}">
+      <h2>${title}${sub ? `<span class="sub">${sub}</span>` : ""}</h2>${badge || ""}<span class="chev" aria-hidden="true">▾</span></button>
+    <div class="card-b">${body}</div></div>`;
+}
+
+/* ---------------- Cálculos ---------------- */
+const p3Done = d => P3.filter(i => getp(d, "p3."+i.k+".done")).length;
+const roundsDone = d => (getp(d, "b.rounds") || []).filter(r => CX.every(c => r[c.k])).length;
+const hasA = d => !!d.a && Object.keys(d.a).some(k => k !== "retest");
+function lastRetest(before){
+  const ds = Object.keys(DB.days).filter(x => x <= before && getp(DB.days[x], "a.retest.done")).sort();
+  return ds.length ? ds[ds.length-1] : null;
+}
+function retestDue(ref){
+  const lr = lastRetest(ref);
+  return { last: lr, days: lr ? daysBetween(lr, ref) : null, due: !lr || daysBetween(lr, ref) >= 14 };
+}
+function prevB(ref){
+  return Object.keys(DB.days).filter(x => x < ref && (getp(DB.days[x], "b.rounds") || []).length).sort();
+}
+function p3Streak(){
+  let d = todayIso(); let n = 0;
+  if (p3Done(day(d)) < P3.length) d = addDays(d, -1);
+  while (p3Done(day(d)) === P3.length){ n++; d = addDays(d, -1); }
+  return n;
+}
+
+/* ---------------- Render: cabecera ---------------- */
+function renderTop(){
+  const t = ui.date === todayIso();
+  $("#topTitle").innerHTML = `${t ? "Hoy" : esc(fmtDate(ui.date))}<small>${t ? esc(fmtDate(ui.date)) : "editando un día pasado"}</small>`;
+  $("#btnNext").disabled = ui.date >= todayIso();
+  $("#btnToday").style.visibility = t ? "hidden" : "visible";
+  document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === ui.tab ? "page" : "false"));
+}
+
+/* ---------------- Render: sesión ---------------- */
+function renderHoy(){
+  const d = day(); const type = dayType(ui.date);
+  const train = type !== "r" || ui.forceTrain[ui.date] || hasA(d) || (getp(d,"b.rounds")||[]).length;
+  const chip = type === "t" ? `<span class="daychip">Día de entreno</span>`
+             : type === "o" ? `<span class="daychip opt">Opcional · ligero</span>`
+             : `<span class="daychip rest">Descanso activo · solo P3</span>`;
+  const lead = type === "t" ? "P3 → Bloque A en fresco → Bloque B."
+             : type === "o" ? "Bloque A completo y Bloque B recortado (2-3 rondas, o solo swings + carry)."
+             : "Hoy solo el mantenimiento P3.";
+  let h = `<div style="margin:2px 0 12px">${chip}<p class="hint">${lead}</p></div>`;
+
+  const sleep = d.sueno;
+  h += `<div class="card"><div class="card-b" style="padding-top:14px">
+    <div class="row">
+      <div class="field"><label>Cómo has dormido</label><div class="chips">
+        ${["bien","regular","mal"].map(v => `<button class="chip sm" data-action="set" data-path="sueno" data-v="${v}" aria-pressed="${sleep===v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div></div>
+      <div class="field"><label>Energía</label><div class="chips">
+        ${[1,2,3,4,5].map(v => `<button class="chip sm" data-action="set" data-path="energia" data-v="${v}" data-num="1" aria-pressed="${d.energia===v}">${v}</button>`).join("")}</div></div>
+    </div>
+    ${sleep === "mal" && train ? `<div class="note">Has dormido mal: el Bloque A no cambia, pero en el complejo baja un escalón de kg o haz menos rondas.</div>` : ""}
+  </div></div>`;
+
+  // P3
+  const pd = p3Done(d);
+  h += card("p3", "P3 · mantenimiento diario", "Todos los días, también en descanso · meta: hasta 30 reps",
+    `<span class="pill ${pd === P3.length ? "ok" : ""}">${pd}/${P3.length}</span>`,
+    P3.map(i => `<div class="p3-item"><div style="flex:1">${check("p3."+i.k+".done", i.t, i.s)}</div>
+      ${stepper("p3."+i.k+".reps", { label:"Reps", def:10, step:5 })}</div>`).join("")
+    + `<div class="row" style="margin-top:8px">${["Rodilla flexionada","Pierna recta"].map(v =>
+      `<button class="chip sm" data-action="set" data-path="p3.deadbug.var" data-v="${v}" aria-pressed="${getp(d,"p3.deadbug.var")===v}">Dead Bug: ${v.toLowerCase()}</button>`).join("")}</div>
+      <p class="hint">Cue de fondo en todo lo demás: exhala del todo antes de tensar («sopla las costillas hacia abajo»).</p>`);
+
+  if (!train){
+    h += `<div class="card"><div class="card-b" style="padding-top:14px">
+      <p class="hint" style="margin-top:0">Día de descanso activo. Si hoy toca entrenar de todas formas:</p>
+      <button class="btn block" data-action="force-train">Entrenar igualmente</button></div></div>`;
+  } else {
+    h += renderA(d) + renderB(d);
+  }
+
+  h += card("cierre", "Cierre", "Vídeo y notas", "",
+    `${check("video", "Sesión grabada en vídeo", "De perfil, cámara a la altura de la cadera, clips cortos")}
+     <div class="field" style="margin-top:8px"><label for="notas">Notas</label>
+     <textarea id="notas" data-bind="notas" placeholder="Sensaciones, dónde apareció el ardor, qué cambió…">${esc(d.notas||"")}</textarea></div>`);
+  $("#p-hoy").innerHTML = h;
+}
+
+function renderA(d){
+  const S_ = sideL(), O_ = otherL();
+  const rt = retestDue(ui.date);
+  const aBadge = rt.due ? `<span class="pill warn">Retest TGU</span>` : (hasA(d) ? `<span class="pill ok">en marcha</span>` : "");
+  let b = `<div class="note ok">Ardor con la costilla en su sitio = sigue. La costilla cede = para esa repetición, no termines el rango.</div>`;
+
+  b += `<div class="ex"><div class="ex-t"><span class="n">1</span>Bottoms-Up Press · ${S_}</div>
+    <p class="ex-p">2-3 series de 2-3 reps. Imprime la posición antes del agarre normal.</p>
+    <div class="row">${kgChips("a.bu.kg", S().buKg, [8,12,16])}
+    ${stepper("a.bu.series", { label:"Series", def:2 })}${stepper("a.bu.reps", { label:"Reps/serie", def:3 })}</div></div>`;
+
+  b += `<div class="ex"><div class="ex-t"><span class="n">2</span>Press normal justo después · ${S_}</div>
+    <p class="ex-p">Misma postura, 5 reps. Anota cuántas salieron con la costilla guardada de inicio a fin.</p>
+    <div class="row">${stepper("a.arr.reps", { label:"Reps limpias", def:5, metric:true })}
+    ${toggle("a.arr.sinBU", "Hoy sin bottoms-up previo")}</div>
+    <p class="hint">Cuando salga igual de limpio sin el bottoms-up delante, el patrón ya no depende de él.</p></div>`;
+
+  b += `<div class="ex"><div class="ex-t"><span class="n">3</span>TGU hasta mano</div>
+    <p class="ex-p">2-3 series por lado. Progresión de habilidad hacia el TGU completo.</p>
+    <div class="row">${kgChips("a.tgu.kg", S().buKg, [8,12,16,20,24])}
+    ${stepper("a.tgu.izq", { label:"Series izq.", def:1 })}${stepper("a.tgu.der", { label:"Series der.", def:1 })}</div></div>`;
+
+  b += `<div class="ex"><div class="ex-t"><span class="n">4</span>Half Kneeling Press · ${S_}</div>
+    <p class="ex-p">Campana en la mano opuesta a la rodilla apoyada. 3 series de 2-3 reps + 1 repetición sonda por serie.</p>
+    <div class="row">${stepper("a.hk.series", { label:"Series", def:3 })}${stepper("a.hk.reps", { label:"Reps/serie", def:3 })}
+    ${stepper("a.hk.ardor", { label:"Reps antes del ardor", def:3, metric:true })}</div>
+    <div class="row" style="margin-top:8px">${toggle("a.hk.sondaOk", "Sonda: la costilla aguantó")}</div></div>`;
+
+  b += `<div class="ex"><div class="ex-t"><span class="n">5</span>Press de pie · ${S_}</div>
+    <p class="ex-p">1-2 reps sonda. Ardor esperado; para solo si la costilla se abre de verdad.</p>
+    <div class="row">${stepper("a.pie.ardor", { label:"Reps antes del ardor", def:1, metric:true })}
+    ${toggle("a.pie.abre", "La costilla se abrió")}</div></div>`;
+
+  b += `<div class="ex"><div class="ex-t"><span class="n">6</span>Overhead Hold</div>
+    <p class="ex-p">Bottoms-up ${S_} primero, luego normal a una mano. 15-20 s por lado. Avisos a los 15 y 20 s.</p>
+    <div class="row" style="flex-direction:column;align-items:flex-start;gap:12px">
+    ${timerField("a.oh.bu", "Bottoms-up · " + S_, { marks:"15,20", lead:true })}
+    ${timerField("a.oh.lado", "Normal · " + S_, { marks:"15,20", lead:true })}
+    ${timerField("a.oh.otro", "Normal · " + O_, { marks:"15,20", lead:true })}</div></div>`;
+
+  // Opcionales
+  const oc = !ui.open.opt;
+  b += `<div class="ex"><button class="link" data-action="card" data-key="opt">${oc ? "▸" : "▾"} Opcionales</button>
+    ${oc ? "" : `<div style="margin-top:6px">
+      ${check("a.opt.slIzq", "Side lying " + S_ + " extra", "2 series de 5-8; en la última, aguanta 2-3 s en el borde")}
+      ${check("a.opt.mano", "Press desde la posición de mano del TGU", "Volumen de bajo coste; no cuenta como test")}
+      ${check("a.opt.tall", "Tall Kneeling Press", "Ambas rodillas en el suelo; volumen extra de menor fatiga")}</div>`}</div>`;
+
+  // Retest
+  const rc = !ui.open.retest;
+  const rtTxt = rt.last ? `último hace ${rt.days} días` : "sin retest todavía";
+  b += `<div class="ex"><button class="link" data-action="card" data-key="retest">${rc ? "▸" : "▾"} Retest TGU cada 2 semanas · ${rtTxt}</button>
+    ${rc ? "" : `<div style="margin-top:6px">
+      <p class="ex-p">TGU bottoms-up primero (peso ligero, solo ${S_}) y después el TGU normal, ambos hasta la fase de half kneeling. Busca el mismo efecto de arrastre que en el press.</p>
+      ${check("a.retest.done", "Retest hecho hoy")}
+      <div class="row">${toggle("a.retest.buOk", "Bottoms-up: costilla en su sitio")}${toggle("a.retest.normOk", "Normal: costilla en su sitio")}</div>
+      <div class="row" style="margin-top:8px">${kgChips("a.retest.kg", 8, [6,8,12,16,20,24])}</div></div>`}</div>`;
+
+  return card("a", "Bloque A · correctivo", "En fresco, al principio · ~15-20 min", aBadge, b);
+}
+
+function renderB(d){
+  const rounds = getp(d, "b.rounds") || [];
+  const kg = getp(d, "b.kg") ?? lastBkg() ?? S().cxKg;
+  const done = roundsDone(d);
+  let b = `<p class="ex-p" style="margin-top:0">Todo bilateral: mantiene fuerza y condición sin tocar el patrón. 3-5 rondas; las primeras semanas, descansa hasta recuperarte.</p>`;
+  b += `<div class="row">${kgChipsB(kg)}</div>`;
+
+  const prev = prevB(ui.date);
+  if (prev.length){
+    const maxKg = Math.max(...prev.map(x => getp(DB.days[x], "b.kg") || 0));
+    const last2 = prev.slice(-2);
+    const clean = last2.length === 2 && last2.every(x => getp(DB.days[x], "b.limpia"));
+    if (kg > maxKg && !clean) b += `<div class="note">Subes por encima de tu máximo previo (${maxKg} kg) sin dos sesiones seguidas confirmadas limpias en vídeo.</div>`;
+  }
+
+  rounds.forEach((r, i) => {
+    const full = CX.every(c => r[c.k]);
+    b += `<div class="round"><div class="round-h"><span class="r">Ronda ${i+1}</span>
+      ${r.rest != null ? `<span class="pill">descanso ${fmtSecs(r.rest)}</span>` : ""}${full ? `<span class="pill ok">completa</span>` : ""}</div>
+      <div class="chips">${CX.map(c => `<button class="chip sm" data-action="round-item" data-i="${i}" data-k="${c.k}" aria-pressed="${!!r[c.k]}">${r[c.k] ? "✓ " : ""}${c.t} ${c.r}</button>`).join("")}</div>
+      ${full ? `<div style="margin-top:8px"><button class="timer-btn" data-action="rest-start" data-i="${i}">⏱ ${r.rest != null ? "Repetir descanso" : "Descanso"}</button></div>` : ""}</div>`;
+  });
+  b += `<div class="row" style="margin-top:6px"><button class="btn primary" data-action="round-add">+ Ronda ${rounds.length+1}</button>
+    ${rounds.length ? `<button class="btn" data-action="round-del">Quitar la última</button>` : ""}</div>`;
+  b += `<div style="margin-top:10px">${toggle("b.limpia", "Técnica limpia confirmada en vídeo")}</div>`;
+  const badge = rounds.length ? `<span class="pill ${done >= 3 ? "ok" : ""}">${kg} kg · ${done} ronda${done===1?"":"s"}</span>` : "";
+  return card("b", "Bloque B · complejo bilateral", "Clean · Front Squat · Swing · Remo · Carry", badge, b);
+}
+function kgChipsB(kg){
+  return `<div class="field"><label>Kg por campana</label><div class="chips">${[12,16,20,24,28,32].map(k =>
+    `<button class="chip sm" data-action="set" data-path="b.kg" data-v="${k}" data-num="1" aria-pressed="${kg===k}">${k}</button>`).join("")}</div></div>`;
+}
+function lastBkg(){ const p = prevB(ui.date); return p.length ? getp(DB.days[p[p.length-1]], "b.kg") : null; }
+
+/* ---------------- Render: progreso ---------------- */
+function series(path){
+  return Object.keys(DB.days).sort().map(x => ({ x, y: getp(DB.days[x], path) })).filter(p => typeof p.y === "number");
+}
+function renderHist(){
+  const all = Object.keys(DB.days).sort();
+  const month = todayIso().slice(0,7);
+  const trained = all.filter(x => x.startsWith(month) && (hasA(DB.days[x]) || (getp(DB.days[x],"b.rounds")||[]).length)).length;
+  const rt = retestDue(todayIso());
+  let h = `<div class="stats">
+    <div class="stat"><b>${p3Streak()}</b><span>días seguidos con P3 completo</span></div>
+    <div class="stat"><b>${trained}</b><span>sesiones de entreno este mes</span></div>
+    <div class="stat"><b>${rt.last ? rt.days : "—"}</b><span>${rt.last ? "días desde el retest TGU" : "retest TGU pendiente"}</span></div></div>`;
+  if (rt.due) h += `<div class="note">Toca retest del TGU (cada 2 semanas). Está al final del Bloque A.</div>`;
+
+  h += chartCard("c1", "Reps limpias tras el bottoms-up", "Press normal · " + sideL() + " · de 5", [
+    { name:"Reps limpias", pts: series("a.arr.reps"), c:"var(--series-1)" }], " reps");
+  h += chartCard("c2", "Reps antes del ardor", "Si sube, el ardor se está desplazando a umbrales más altos", [
+    { name:"Half kneeling", pts: series("a.hk.ardor"), c:"var(--series-1)" },
+    { name:"De pie", pts: series("a.pie.ardor"), c:"var(--series-2)" }], " reps");
+  h += chartCard("c3", "Overhead hold normal", "Segundos por lado · la meta es que se igualen", [
+    { name:"Lado " + sideL(), pts: series("a.oh.lado"), c:"var(--series-1)" },
+    { name:"Lado " + otherL(), pts: series("a.oh.otro"), c:"var(--series-2)" }], " s");
+
+  h += `<div class="card"><div class="card-b" style="padding-top:12px"><h2 style="font-size:16px;margin:0 0 4px">Días registrados</h2>`;
+  if (!all.length) h += `<p class="hint">Todavía no hay nada registrado. Empieza en la pestaña Sesión.</p>`;
+  all.slice().reverse().forEach(x => {
+    const d = DB.days[x]; const c = [];
+    const pd = p3Done(d); if (pd) c.push(`<span class="pill ${pd===P3.length?"ok":""}">P3 ${pd}/${P3.length}</span>`);
+    if (hasA(d)) c.push(`<span class="pill ok">Bloque A</span>`);
+    const r = (getp(d,"b.rounds")||[]).length; if (r) c.push(`<span class="pill">${getp(d,"b.kg") ?? "?"} kg × ${roundsDone(d)}</span>`);
+    if (getp(d,"a.retest.done")) c.push(`<span class="pill warn">Retest</span>`);
+    if (d.video) c.push(`<span class="pill">vídeo</span>`);
+    if (d.sueno === "mal") c.push(`<span class="pill">durmió mal</span>`);
+    h += `<button class="hist-item" data-action="goto-day" data-d="${x}"><span class="d">${esc(fmtDate(x))}</span><span class="c">${c.join("") || '<span class="muted">sin datos</span>'}</span></button>`;
+  });
+  h += `</div></div>`;
+  $("#p-hist").innerHTML = h;
+}
+function chartCard(id, title, sub, ser, unit){
+  const has = ser.some(s => s.pts.length);
+  let body;
+  if (!has) body = `<p class="hint">Aparecerá cuando registres este dato.</p>`;
+  else if (ui.tables[id]){
+    const xs = [...new Set(ser.flatMap(s => s.pts.map(p => p.x)))].sort();
+    body = `<table class="t"><thead><tr><th>Día</th>${ser.map(s => `<th>${esc(s.name)}</th>`).join("")}</tr></thead><tbody>${
+      xs.map(x => `<tr><td>${esc(fmtDate(x))}</td>${ser.map(s => { const p = s.pts.find(q => q.x === x); return `<td>${p ? p.y : "—"}</td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
+  } else body = lineChart(id, ser, unit);
+  const legend = ser.length > 1 && has && !ui.tables[id] ? `<div class="legend">${ser.map(s => `<span><i style="background:${s.c}"></i>${esc(s.name)}</span>`).join("")}</div>` : "";
+  return `<div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0">${esc(title)}</h2><p class="hint" style="margin:2px 0 6px">${esc(sub)}</p>
+    ${legend}${body}${has ? `<button class="link" data-action="tbl" data-id="${id}">${ui.tables[id] ? "Ver gráfica" : "Ver tabla"}</button>` : ""}</div></div>`;
+}
+function lineChart(id, ser, unit){
+  const xs = [...new Set(ser.flatMap(s => s.pts.map(p => p.x)))].sort();
+  const W = 340, H = 170, L = 30, R = 44, T = 12, B = 26;
+  const maxY = Math.max(1, ...ser.flatMap(s => s.pts.map(p => p.y)));
+  const niceMax = maxY <= 5 ? 5 : maxY <= 10 ? 10 : Math.ceil(maxY / 5) * 5;
+  const X = i => xs.length === 1 ? L + (W-L-R)/2 : L + i * (W-L-R) / (xs.length-1);
+  const Y = v => T + (H-T-B) * (1 - v / niceMax);
+  let g = "";
+  [0, niceMax/2, niceMax].forEach(v => {
+    g += `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+    g += `<text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink-3)">${+v.toFixed(1)}</text>`;
+  });
+  const lbl = [0, xs.length-1].filter((v,i,a) => a.indexOf(v) === i);
+  lbl.forEach(i => { const d = parseIso(xs[i]); g += `<text x="${X(i)}" y="${H-6}" text-anchor="${xs.length===1?"middle":i===0?"start":"end"}" font-size="11" fill="var(--ink-3)">${d.getDate()} ${MON[d.getMonth()]}</text>`; });
+  ser.forEach(s => {
+    if (!s.pts.length) return;
+    const pts = s.pts.map(p => [X(xs.indexOf(p.x)), Y(p.y)]);
+    if (pts.length > 1) g += `<polyline fill="none" stroke="${s.c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p => p.join(",")).join(" ")}"/>`;
+    pts.forEach(p => g += `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${s.c}" stroke="var(--surface)" stroke-width="2"/>`);
+    const last = pts[pts.length-1], lv = s.pts[s.pts.length-1].y;
+    g += `<text x="${last[0]+8}" y="${last[1]+4}" font-size="12" font-weight="600" fill="var(--ink-2)">${lv}${unit.trim()==="s"?" s":""}</text>`;
+  });
+  g += `<line class="xh" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>`;
+  const data = esc(JSON.stringify({ xs, ser: ser.map(s => ({ n:s.name, c:s.c, pts:s.pts })), L, R, W, unit }));
+  return `<div class="chart" data-chart="${data}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfica de evolución">${g}</svg><div class="tip"></div></div>`;
+}
+function chartHover(el, ev){
+  const cfg = JSON.parse(el.dataset.chart); const svg = el.querySelector("svg"); const tip = el.querySelector(".tip");
+  const r = svg.getBoundingClientRect(); const sx = (ev.clientX - r.left) * cfg.W / r.width;
+  const n = cfg.xs.length; if (!n) return;
+  let i = n === 1 ? 0 : Math.round((sx - cfg.L) / ((cfg.W - cfg.L - cfg.R) / (n-1)));
+  i = Math.max(0, Math.min(n-1, i));
+  const x = cfg.xs[i];
+  const px = n === 1 ? cfg.L + (cfg.W-cfg.L-cfg.R)/2 : cfg.L + i*(cfg.W-cfg.L-cfg.R)/(n-1);
+  const xh = svg.querySelector(".xh"); xh.setAttribute("x1", px); xh.setAttribute("x2", px); xh.setAttribute("visibility", "visible");
+  const rows = cfg.ser.map(s => { const p = s.pts.find(q => q.x === x); return p ? `<div><i style="display:inline-block;width:10px;height:3px;background:${s.c};vertical-align:middle;margin-right:6px"></i>${esc(s.n)}: <b>${p.y}${cfg.unit}</b></div>` : ""; }).join("");
+  tip.innerHTML = `<div class="muted">${esc(fmtDate(x))}</div>${rows || '<div class="muted">sin dato</div>'}`;
+  tip.style.display = "block";
+  const left = px * r.width / cfg.W; const tw = tip.offsetWidth;
+  tip.style.left = Math.max(0, Math.min(r.width - tw, left - tw/2)) + "px"; tip.style.top = "-6px";
+}
+
+/* ---------------- Render: guía ---------------- */
+function renderGuia(){
+  const S_ = sideL();
+  $("#p-guia").innerHTML = `<div class="card guide"><div class="card-b" style="padding-top:12px">
+  <h3>Cómo leer cada serie</h3>
+  <ul><li><b>Ardor con la costilla en su sitio:</b> correcto. Es la cadena lateral trabajando; sigue.</li>
+  <li><b>La costilla cede:</b> para esa repetición ahí. No termines el rango «aunque sea con algo de flare».</li>
+  <li><b>Dolor</b> (no ardor): para la sesión y consúltalo. Cambia todo el planteamiento.</li></ul>
+  <h3>Orden de la sesión</h3>
+  <p>P3 → Bloque A en fresco (necesita atención) → Bloque B (bilateral, se puede cansar sin riesgo para el patrón).</p>
+  <h3>Cuándo subir peso</h3>
+  <ul><li>Nunca por sensación ni por calendario: «se siente ligero» no es «está limpio».</li>
+  <li>Solo con dos sesiones seguidas confirmadas en vídeo con el patrón limpio.</li>
+  <li>En el correctivo, progresa antes en rango y repeticiones que en kilos.</li></ul>
+  <h3>Señales de progreso</h3>
+  <ul><li>Más reps antes del ardor en half kneeling y de pie.</li>
+  <li>Más reps limpias tras el bottoms-up, y que salgan igual sin él.</li>
+  <li>Overhead hold ${S_} acercándose al otro lado.</li>
+  <li>Transferencias que no entrenas directamente (recepción del clean más simétrica, dorsales igualándose).</li></ul>
+  <h3>Puertas de salida</h3>
+  <ul><li><b>A la fase 2</b> (double trigger, más volumen de holds): cuando el ardor ${S_} tarde en aparecer lo mismo que en el otro lado.</li>
+  <li><b>A la fase 3</b> (doble press desde 6-8 kg, see-saw press como puente): cuando press y overhead hold ${S_} sean simétricos sin ayuda consciente.</li>
+  <li><b>Snatch a una mano, swing a una mano:</b> tras la puerta de la fase 2.</li>
+  <li><b>Snatch doble, clean &amp; jerk:</b> con el doble press de 24 kg limpio y «aburrido».</li>
+  <li><b>Complejos largos</b> (Lucky 13, Kettlebell Muscle, The Wolf): cuando el patrón aguante limpio en vídeo bajo fatiga moderada.</li></ul>
+  <h3>Qué evitar por ahora</h3>
+  <ul><li>Cualquier press fuera del Bloque A.</li><li>Snatch, windmill, jerk y swing a una mano.</li>
+  <li>Renegade row (anti-rotación en plancha sin testear).</li><li>Complejos completos con press.</li></ul>
+  <h3>Cómo grabarte</h3>
+  <p>De perfil, cámara a la altura de la cadera, clips cortos: bottoms-up, la serie normal de después, half kneeling con alguna sonda, de pie y overhead hold.</p>
+  </div></div>`;
+}
+
+/* ---------------- Render: ajustes ---------------- */
+function renderAjustes(){
+  const s = S(); const lbl = { t:"entreno", o:"opcional", r:"descanso" };
+  const order = [1,2,3,4,5,6,0];
+  $("#p-ajustes").innerHTML = `
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 8px">Lado que se corrige</h2>
+    <div class="chips">${[["izq","Izquierdo"],["der","Derecho"]].map(([v,t]) => `<button class="chip" data-action="setting" data-k="side" data-v="${v}" aria-pressed="${s.side===v}">${t}</button>`).join("")}</div>
+  </div></div>
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">Semana</h2><p class="hint" style="margin:0 0 10px">Toca un día para cambiar entre entreno, opcional y descanso.</p>
+    <div class="sched">${order.map(i => `<button class="${s.sched[i]}" data-action="sched" data-i="${i}" aria-label="${DOW[i]}: ${lbl[s.sched[i]]}">${DOWL[i]}<small>${lbl[s.sched[i]]}</small></button>`).join("")}</div>
+  </div></div>
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 8px">Pesos por defecto</h2>
+    <div class="field"><label>Bloque A (bottoms-up, TGU)</label><div class="chips">${[8,12,16].map(k => `<button class="chip sm" data-action="setting" data-k="buKg" data-v="${k}" data-num="1" aria-pressed="${s.buKg===k}">${k} kg</button>`).join("")}</div></div>
+    <div class="field" style="margin-top:10px"><label>Complejo (por campana)</label><div class="chips">${[12,16,20,24,28,32].map(k => `<button class="chip sm" data-action="setting" data-k="cxKg" data-v="${k}" data-num="1" aria-pressed="${s.cxKg===k}">${k} kg</button>`).join("")}</div></div>
+    <div class="field" style="margin-top:10px"><label>Cuenta atrás antes de los holds</label><div class="chips">${[0,3,5,8].map(k => `<button class="chip sm" data-action="setting" data-k="leadIn" data-v="${k}" data-num="1" aria-pressed="${s.leadIn===k}">${k ? k + " s" : "sin cuenta"}</button>`).join("")}</div></div>
+  </div></div>
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">Copia de seguridad</h2>
+    <p class="hint" style="margin:0 0 10px">Tus datos solo están en este móvil. Guarda una copia de vez en cuando (por ejemplo, en Drive).</p>
+    <div class="row">
+      ${navigator.canShare ? `<button class="btn primary" data-action="share">Compartir copia</button>` : ""}
+      <button class="btn" data-action="export">Descargar copia</button>
+      <button class="btn" data-action="import">Importar copia</button>
+      <button class="btn" data-action="csv">Exportar CSV</button></div>
+    <p class="hint" id="persistInfo"></p>
+  </div></div>
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">Instalar</h2>
+    <p class="hint" style="margin:0 0 10px">En Android: Chrome → menú ⋮ → <b>Instalar aplicación</b>. Funciona sin conexión.</p>
+    ${deferredPrompt ? `<button class="btn accent" data-action="install">Instalar ahora</button>` : ""}
+  </div></div>
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <button class="btn danger" data-action="wipe">Borrar todos los datos</button>
+    <p class="hint">Versión ${VERSION}</p>
+  </div></div>`;
+  if (navigator.storage && navigator.storage.persisted) navigator.storage.persisted().then(p => {
+    const el = $("#persistInfo"); if (el) el.textContent = p ? "Almacenamiento protegido: el navegador no borrará los datos por falta de espacio." : "El navegador podría borrar los datos si le falta espacio: instala la app y guarda copias.";
+  });
+}
+
+/* ---------------- Render general ---------------- */
+function render(){
+  renderTop();
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === "p-" + ui.tab));
+  ({ hoy:renderHoy, hist:renderHist, guia:renderGuia, ajustes:renderAjustes })[ui.tab]();
+}
+
+/* ---------------- Temporizador ---------------- */
+const T = { on:false };
+let actx = null, wakeLock = null;
+function beep(freq = 880, ms = 160){
+  try{
+    actx ||= new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = freq; o.connect(g); g.connect(actx.destination);
+    g.gain.setValueAtTime(0.0001, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.35, actx.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + ms/1000);
+    o.start(); o.stop(actx.currentTime + ms/1000 + 0.02);
+  }catch(e){}
+}
+const vib = p => { try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} };
+async function lockScreen(){ try{ if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen"); }catch(e){} }
+function unlockScreen(){ try{ wakeLock && wakeLock.release(); }catch(e){} wakeLock = null; }
+function timerStart(o){
+  Object.assign(T, { on:true, path:o.path, label:o.label, kind:o.kind, marks:o.marks, idx:o.idx,
+    lead: o.lead ? S().leadIn : 0, t0: performance.now(), hit: new Set(), lastLeadSec: null });
+  if (actx && actx.state === "suspended") actx.resume();
+  beep(1, 1); // desbloquea el audio con el gesto del usuario
+  $("#tLabel").textContent = o.label;
+  $("#tMarks").textContent = o.marks.length ? "Avisos: " + o.marks.map(m => m >= 60 ? fmtSecs(m) : m + " s").join(" · ") : "";
+  $("#tStop").textContent = o.kind === "rest" ? "Listo, recuperado" : "Parar y guardar";
+  $("#timer").classList.add("on");
+  lockScreen(); tick(); T.iv = setInterval(tick, 100);
+}
+function tick(){
+  if (!T.on) return;
+  const el = (performance.now() - T.t0) / 1000;
+  const big = $("#tBig"), ph = $("#tPhase");
+  if (el < T.lead){
+    const left = Math.ceil(T.lead - el);
+    big.textContent = left; big.className = "t-big lead"; ph.textContent = "Colócate: empieza al pitido";
+    if (left <= 3 && T.lastLeadSec !== left){ T.lastLeadSec = left; beep(660, 90); }
+    return;
+  }
+  if (T.lead && !T.hit.has("go")){ T.hit.add("go"); beep(990, 260); vib(120); }
+  const s = el - T.lead;
+  big.textContent = fmtSecs(s);
+  big.className = "t-big" + (T.marks.some(m => s >= m) ? " hit" : "");
+  ph.textContent = T.kind === "rest" ? "Descansa hasta sentirte recuperado" : "Para en cuanto la costilla ceda";
+  T.marks.forEach(m => { if (s >= m && !T.hit.has(m)){ T.hit.add(m); beep(1175, 220); setTimeout(() => beep(1175, 220), 280); vib([150, 80, 150]); } });
+}
+function timerEnd(keep){
+  if (!T.on) return;
+  clearInterval(T.iv); T.on = false; unlockScreen(); $("#timer").classList.remove("on");
+  const secs = Math.max(0, Math.round((performance.now() - T.t0) / 1000 - T.lead));
+  if (keep){
+    if (T.kind === "rest"){ const r = getp(wday(), "b.rounds"); if (r && r[T.idx]) r[T.idx].rest = secs; }
+    else setp(wday(), T.path, secs);
+    save(); toast(T.kind === "rest" ? `Descanso: ${fmtSecs(secs)}` : `Guardado: ${secs} s`);
+  }
+  render();
+}
+document.addEventListener("visibilitychange", () => { if (T.on && document.visibilityState === "visible") lockScreen(); });
+
+/* ---------------- Acciones ---------------- */
+let saveTimer = null;
+function commit(){ save(); render(); }
+const A = {
+  "tab": b => { ui.tab = b.dataset.tab; render(); window.scrollTo(0, 0); },
+  "day-prev": () => { ui.date = addDays(ui.date, -1); render(); },
+  "day-next": () => { if (ui.date < todayIso()) { ui.date = addDays(ui.date, 1); render(); } },
+  "day-today": () => { ui.date = todayIso(); render(); },
+  "card": b => { ui.open[b.dataset.key] = !ui.open[b.dataset.key]; render(); },
+  "step": b => {
+    const p = b.dataset.path, dlt = Number(b.dataset.d), def = Number(b.dataset.def), min = Number(b.dataset.min);
+    const d = wday(); const v = getp(d, p);
+    const kgDef = { "a.bu.": S().buKg, "a.tgu.": S().buKg };
+    for (const pre in kgDef) if (p.startsWith(pre) && getp(d, pre + "kg") == null) setp(d, pre + "kg", kgDef[pre]);
+    let nv;
+    if (v == null) nv = def;
+    else if (dlt < 0 && v <= min) nv = undefined;   // por debajo del mínimo = sin dato
+    else nv = Math.max(min, v + dlt);
+    setp(d, p, nv); commit();
+  },
+  "toggle": b => { const d = wday(); const p = b.dataset.path; setp(d, p, getp(d, p) ? undefined : true); commit(); },
+  "set": b => {
+    const d = wday(); const p = b.dataset.path; const v = b.dataset.num ? Number(b.dataset.v) : b.dataset.v;
+    setp(d, p, getp(d, p) === v ? undefined : v); commit();
+  },
+  "clear": b => { setp(wday(), b.dataset.path, undefined); commit(); },
+  "force-train": () => { ui.forceTrain[ui.date] = true; render(); },
+  "timer-start": b => timerStart({ path:b.dataset.path, label:b.dataset.label, kind:"hold",
+    marks:(b.dataset.marks || "").split(",").filter(Boolean).map(Number), lead:b.dataset.lead === "1" }),
+  "rest-start": b => timerStart({ kind:"rest", idx:Number(b.dataset.i), label:`Descanso tras la ronda ${Number(b.dataset.i)+1}`, marks:[90,120], lead:false }),
+  "timer-stop": () => timerEnd(true),
+  "timer-cancel": () => timerEnd(false),
+  "round-add": () => {
+    const d = wday(); d.b ||= {}; d.b.rounds ||= [];
+    if (d.b.kg == null) d.b.kg = lastBkg() ?? S().cxKg;
+    d.b.rounds.push({}); commit();
+  },
+  "round-del": () => { const r = getp(wday(), "b.rounds"); if (r && r.length && confirm("¿Quitar la última ronda?")) { r.pop(); commit(); } },
+  "round-item": b => {
+    const d = wday(); const r = d.b.rounds[Number(b.dataset.i)]; const k = b.dataset.k;
+    const was = CX.every(c => r[c.k]);
+    r[k] = !r[k]; save(); render();
+    const now = CX.every(c => r[c.k]);
+    if (!was && now && ui.date === todayIso() && r.rest == null && Number(b.dataset.i) === d.b.rounds.length - 1)
+      timerStart({ kind:"rest", idx:Number(b.dataset.i), label:`Descanso tras la ronda ${Number(b.dataset.i)+1}`, marks:[90,120], lead:false });
+  },
+  "goto-day": b => { ui.date = b.dataset.d; ui.tab = "hoy"; render(); window.scrollTo(0, 0); },
+  "tbl": b => { ui.tables[b.dataset.id] = !ui.tables[b.dataset.id]; render(); },
+  "setting": b => { S()[b.dataset.k] = b.dataset.num ? Number(b.dataset.v) : b.dataset.v; commit(); },
+  "sched": b => { const i = b.dataset.i; const nx = { t:"o", o:"r", r:"t" }; S().sched[i] = nx[S().sched[i] || "r"]; commit(); },
+  "export": () => downloadBlob(backupBlob(), backupName()),
+  "share": async () => {
+    const f = new File([backupBlob()], backupName(), { type:"application/json" });
+    try{ if (navigator.canShare({ files:[f] })) await navigator.share({ files:[f], title:"Copia · Correctivo" }); else downloadBlob(f, f.name); }
+    catch(e){ if (e.name !== "AbortError") downloadBlob(f, f.name); }
+  },
+  "import": () => $("#fileIn").click(),
+  "csv": () => downloadBlob(new Blob(["﻿" + toCSV()], { type:"text/csv;charset=utf-8" }), `correctivo-${todayIso()}.csv`),
+  "install": async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; render(); },
+  "wipe": () => { if (confirm("¿Borrar todos los registros de este móvil? No se puede deshacer.") && confirm("Última confirmación: se borra todo.")) { DB = fresh(); commit(); toast("Datos borrados"); } },
+};
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-action]"); if (!b) return;
+  const f = A[b.dataset.action]; if (f){ f(b, e); requestPersist(); }
+});
+document.addEventListener("input", e => {
+  const t = e.target; if (!t.dataset || !t.dataset.bind) return;
+  setp(wday(), t.dataset.bind, t.value || undefined);
+  clearTimeout(saveTimer); saveTimer = setTimeout(save, 400);
+});
+document.addEventListener("pointermove", e => { const c = e.target.closest && e.target.closest(".chart"); if (c) chartHover(c, e); });
+document.addEventListener("pointerdown", e => { const c = e.target.closest && e.target.closest(".chart"); if (c) chartHover(c, e); });
+document.addEventListener("pointerout", e => {
+  const c = e.target.closest && e.target.closest(".chart");
+  if (c && !c.contains(e.relatedTarget)){ const t = c.querySelector(".tip"); if (t) t.style.display = "none"; const x = c.querySelector(".xh"); if (x) x.setAttribute("visibility","hidden"); }
+});
+
+/* ---------------- Copias ---------------- */
+const backupName = () => `correctivo-copia-${todayIso()}.json`;
+const backupBlob = () => new Blob([JSON.stringify({ app:"correctivo", exported:new Date().toISOString(), ...DB }, null, 1)], { type:"application/json" });
+function downloadBlob(blob, name){
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+$("#fileIn").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try{
+    const d = JSON.parse(await f.text());
+    if (!d || d.app !== "correctivo" || !d.days) throw new Error("formato");
+    const n = Object.keys(d.days).length;
+    if (!confirm(`La copia tiene ${n} días. Se combinará con lo que hay: si un día existe en los dos, gana el de la copia. ¿Seguir?`)) return;
+    Object.assign(DB.days, d.days); if (d.settings) DB.settings = Object.assign(DB.settings, d.settings);
+    commit(); toast(`Importados ${n} días`);
+  }catch(err){ toast("Ese archivo no es una copia válida de esta app"); }
+});
+function toCSV(){
+  const cols = ["fecha","sueno","energia","p3_completos","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
+    "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","retest",
+    "b_kg","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
+  const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
+  const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d),
+    g("a.bu.kg"), g("a.bu.series"), g("a.bu.reps"), g("a.arr.reps"), g("a.arr.sinBU") ? 1 : "", g("a.tgu.kg"), g("a.tgu.izq"), g("a.tgu.der"),
+    g("a.hk.series"), g("a.hk.reps"), g("a.hk.ardor"), g("a.hk.sondaOk") ? 1 : "", g("a.pie.ardor"), g("a.pie.abre") ? 1 : "",
+    g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.retest.done") ? 1 : "",
+    g("b.kg"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
+  return [cols.join(","), ...rows].join("\n");
+}
+
+/* ---------------- Utilidades ---------------- */
+let toastT = null;
+function toast(m){ const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2200); }
+let persistAsked = false;
+function requestPersist(){ if (persistAsked) return; persistAsked = true; try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){} }
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; if (ui.tab === "ajustes") render(); });
+window.addEventListener("storage", e => { if (e.key === KEY){ DB = load(); render(); } });
+// Si la app queda abierta pasada la medianoche, "hoy" se actualiza al volver.
+let lastToday = todayIso();
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  const t = todayIso(); if (t !== lastToday){ if (ui.date === lastToday) ui.date = t; lastToday = t; render(); }
+});
+if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+render();
+</script>
+</body>
+</html>
