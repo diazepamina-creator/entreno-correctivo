@@ -195,7 +195,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand)}
 
 <script>
 "use strict";
-const VERSION = "1.3.0";
+const VERSION = "1.4.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -378,6 +378,7 @@ function renderHoy(){
       ${stepper("p3."+i.k+".reps", { label:"Reps", def:10, step:5 })}</div>`).join("")
     + `<div class="row" style="margin-top:8px">${["Rodilla flexionada","Pierna recta"].map(v =>
       `<button class="chip sm" data-action="set" data-path="p3.deadbug.var" data-v="${v}" aria-pressed="${getp(d,"p3.deadbug.var")===v}">Dead Bug: ${v.toLowerCase()}</button>`).join("")}</div>
+      <div class="row" style="margin-top:8px">${toggle("p3.lateral", "Supino: expansión lateral simétrica (con presión en el izq.)")}</div>
       <div class="p3-item" style="margin-top:10px;border-top:1px solid var(--line,rgba(127,127,127,.25));padding-top:10px"><div style="flex:1">${check("extra.frog.done", "Frog stretch · opcional", "Exhala largo, llena la espalda · primer antes del bottoms-up")}</div>
       ${stepper("extra.frog.resp", { label:"Respiraciones", def:5 })}</div>
       <div class="p3-item"><div style="flex:1">${check("extra.pull.done", "Dead bug con pullover · opcional", "Campana ligera con las dos manos; costillas y lumbar pegadas. 2×5 lentos")}</div>
@@ -397,8 +398,11 @@ function renderHoy(){
     h += renderA(d) + renderB(d);
   }
 
-  h += card("cierre", "Cierre", "Vídeo y notas", "",
-    `${check("video", "Sesión grabada en vídeo", "De perfil, cámara a la altura de la cadera, clips cortos")}
+  h += card("cierre", "Cierre", "Costilla al final del día, vídeo y notas", "",
+    `<div class="field" style="margin-bottom:10px"><label>Costilla izquierda al final del día</label><div class="chips">${["Guardada","A medias","Perdida"].map(v =>
+       `<button class="chip sm" data-action="set" data-path="finDia" data-v="${v}" aria-pressed="${d.finDia===v}">${v}</button>`).join("")}</div>
+       <p class="hint">Chequeo rápido tumbado o de pie: borde costal simétrico y expansión lateral igual.</p></div>
+     ${check("video", "Sesión grabada en vídeo", "De perfil, cámara a la altura de la cadera, clips cortos")}
      <div class="field" style="margin-top:8px"><label for="notas">Notas</label>
      <textarea id="notas" data-bind="notas" placeholder="Sensaciones, dónde apareció el ardor, qué cambió…">${esc(d.notas||"")}</textarea></div>`);
   $("#p-hoy").innerHTML = h;
@@ -409,6 +413,7 @@ function renderA(d){
   const rt = retestDue(ui.date);
   const aBadge = rt.due ? `<span class="pill warn">Retest TGU</span>` : (hasA(d) ? `<span class="pill ok">en marcha</span>` : "");
   let b = `<div class="note ok">Ardor con la costilla en su sitio = sigue. La costilla cede = para esa repetición, no termines el rango.</div>`;
+  b += `<div class="ex">${check("extra.flex.done", "Antes: flexor de cadera en half kneeling · opcional", "Pelvis metida y crece hacia arriba; 5 pulsos adelante al exhalar sin perder la pelvis, por lado")}</div>`;
 
   b += `<div class="ex"><div class="ex-t"><span class="n">1</span>Bottoms-Up Press · ${S_}</div>
     <p class="ex-p">2-3 series de 2-3 reps. Imprime la posición antes del agarre normal.</p>
@@ -422,7 +427,7 @@ function renderA(d){
     <p class="hint">Cuando salga igual de limpio sin el bottoms-up delante, el patrón ya no depende de él.</p></div>`;
 
   b += `<div class="ex"><div class="ex-t"><span class="n">3</span>TGU hasta mano</div>
-    <p class="ex-p">2-3 series por lado. Progresión de habilidad hacia el TGU completo.</p>
+    <p class="ex-p">2-3 series por lado. Progresión de habilidad hacia el TGU completo. Si haces puente, hazlo en el codo, no en la mano: así extiendes cadera y no lumbar.</p>
     <div class="row">${kgChips("a.tgu.kg", S().buKg, [8,12,16,20,24])}
     ${stepper("a.tgu.izq", { label:"Series izq.", def:1 })}${stepper("a.tgu.der", { label:"Series der.", def:1 })}</div></div>`;
 
@@ -444,9 +449,9 @@ function renderA(d){
     ${timerField("a.oh.lado", "Normal · " + S_, { marks:"15,20", lead:true })}
     ${timerField("a.oh.otro", "Normal · " + O_, { marks:"15,20", lead:true })}</div></div>`;
 
-  b += `<div class="ex"><div class="ex-t"><span class="n">7</span>Carry · ${S_} <span class="muted" style="font-weight:400">· opcional</span></div>
-    <p class="ex-p">2-3 paseos cortos (20-30 m) sin ladearte ni abrir la costilla. Suitcase: campana colgando. Bottoms-up: en rack o camarero.</p>
-    <div class="row" style="margin-bottom:8px">${["Suitcase","BU rack","BU camarero"].map(v =>
+  b += `<div class="ex"><div class="ex-t"><span class="n">7</span>Carry / march · ${S_} <span class="muted" style="font-weight:400">· opcional</span></div>
+    <p class="ex-p">2-3 paseos cortos (20-30 m) sin ladearte ni abrir la costilla. Suitcase: campana colgando. Bottoms-up: en rack o camarero. BU march: clean boca abajo y 10-20 pasos de marcha en el sitio; se puede hacer con dos campanas.</p>
+    <div class="row" style="margin-bottom:8px">${["Suitcase","BU rack","BU camarero","BU march"].map(v =>
       `<button class="chip sm" data-action="set" data-path="a.carry.var" data-v="${v}" aria-pressed="${getp(d,"a.carry.var")===v}">${v}</button>`).join("")}</div>
     <div class="row">${kgChips("a.carry.kg", undefined, [8,12,16,20,24])}${stepper("a.carry.paseos", { label:"Paseos", def:2 })}</div></div>`;
 
@@ -539,6 +544,7 @@ function renderHist(){
     const r = (getp(d,"b.rounds")||[]).length; if (r) c.push(`<span class="pill">${kgSummary(d)} × ${roundsDone(d)}</span>`);
     if (getp(d,"a.retest.done")) c.push(`<span class="pill warn">Retest</span>`);
     if (d.video) c.push(`<span class="pill">vídeo</span>`);
+    if (d.finDia) c.push(`<span class="pill ${d.finDia==="Guardada"?"ok":d.finDia==="Perdida"?"warn":""}">costilla: ${d.finDia.toLowerCase()}</span>`);
     if (d.sueno === "mal") c.push(`<span class="pill">durmió mal</span>`);
     h += `<button class="hist-item" data-action="goto-day" data-d="${x}"><span class="d">${esc(fmtDate(x))}</span><span class="c">${c.join("") || '<span class="muted">sin datos</span>'}</span></button>`;
   });
@@ -842,11 +848,11 @@ $("#fileIn").addEventListener("change", async e => {
   }catch(err){ toast("Ese archivo no es una copia válida de esta app"); }
 });
 function toCSV(){
-  const cols = ["fecha","sueno","energia","p3_completos","frog_resp","pullover_reps","pullover_kg","oso","oso_s","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
+  const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
     "b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
-  const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
+  const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("p3.lateral") ? 1 : "", d.finDia, g("extra.flex.done") ? 1 : "", g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
     g("a.bu.kg"), g("a.bu.series"), g("a.bu.reps"), g("a.arr.reps"), g("a.arr.sinBU") ? 1 : "", g("a.tgu.kg"), g("a.tgu.izq"), g("a.tgu.der"),
     g("a.hk.series"), g("a.hk.reps"), g("a.hk.ardor"), g("a.hk.sondaOk") ? 1 : "", g("a.pie.ardor"), g("a.pie.abre") ? 1 : "",
