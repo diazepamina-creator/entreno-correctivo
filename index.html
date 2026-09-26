@@ -195,7 +195,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand)}
 
 <script>
 "use strict";
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -306,6 +306,19 @@ function card(key, title, sub, badge, body){
 /* ---------------- Cálculos ---------------- */
 const p3Done = d => P3.filter(i => getp(d, "p3."+i.k+".done")).length;
 const roundsDone = d => (getp(d, "b.rounds") || []).filter(r => CX.every(c => r[c.k])).length;
+const CXKGS = [12,16,20,24,28,32];
+const roundKg = (d, r) => r.kg ?? getp(d, "b.kg");
+const roundKgs = d => (getp(d, "b.rounds") || []).map(r => roundKg(d, r)).filter(k => k != null);
+const maxBkg = d => { const k = roundKgs(d); return k.length ? Math.max(...k) : (getp(d, "b.kg") ?? null); };
+function kgSummary(d){
+  const k = roundKgs(d); if (!k.length) return (getp(d, "b.kg") ?? "?") + " kg";
+  const seq = k.filter((x, i) => i === 0 || x !== k[i-1]);
+  return seq.join("→") + " kg";
+}
+function syncBkg(d){ // fija el peso en las rondas antiguas (sin kg propio) antes de recalcular el máximo
+  if (!d.b) return; (d.b.rounds || []).forEach(r => { if (r.kg == null && d.b.kg != null) r.kg = d.b.kg; });
+  const m = roundKgs(d); if (m.length) d.b.kg = Math.max(...m);
+}
 const hasA = d => !!d.a && Object.keys(d.a).some(k => k !== "retest");
 function lastRetest(before){
   const ds = Object.keys(DB.days).filter(x => x <= before && getp(DB.days[x], "a.retest.done")).sort();
@@ -445,37 +458,38 @@ function renderA(d){
 
 function renderB(d){
   const rounds = getp(d, "b.rounds") || [];
-  const kg = getp(d, "b.kg") ?? lastBkg() ?? S().cxKg;
+  const kg = maxBkg(d);
   const done = roundsDone(d);
-  let b = `<p class="ex-p" style="margin-top:0">Todo bilateral: mantiene fuerza y condición sin tocar el patrón. 3-5 rondas; las primeras semanas, descansa hasta recuperarte.</p>`;
-  b += `<div class="row">${kgChipsB(kg)}</div>`;
+  let b = `<p class="ex-p" style="margin-top:0">Todo bilateral: mantiene fuerza y condición sin tocar el patrón. 3-5 rondas; las primeras semanas, descansa hasta recuperarte. Cada ronda lleva su propio peso: la nueva empieza con el de la anterior.</p>`;
 
   const prev = prevB(ui.date);
   if (prev.length){
-    const maxKg = Math.max(...prev.map(x => getp(DB.days[x], "b.kg") || 0));
+    const maxKg = Math.max(...prev.map(x => maxBkg(DB.days[x]) || 0));
     const last2 = prev.slice(-2);
     const clean = last2.length === 2 && last2.every(x => getp(DB.days[x], "b.limpia"));
-    if (kg > maxKg && !clean) b += `<div class="note">Subes por encima de tu máximo previo (${maxKg} kg) sin dos sesiones seguidas confirmadas limpias en vídeo.</div>`;
+    if (kg != null && kg > maxKg && !clean) b += `<div class="note">Subes por encima de tu máximo previo (${maxKg} kg) sin dos sesiones seguidas confirmadas limpias en vídeo.</div>`;
   }
 
   rounds.forEach((r, i) => {
     const full = CX.every(c => r[c.k]);
-    b += `<div class="round"><div class="round-h"><span class="r">Ronda ${i+1}</span>
+    b += `<div class="round"><div class="round-h"><span class="r">Ronda ${i+1}</span>${roundKg(d, r) != null ? `<span class="pill">${roundKg(d, r)} kg</span>` : ""}
       ${r.rest != null ? `<span class="pill">descanso ${fmtSecs(r.rest)}</span>` : ""}${full ? `<span class="pill ok">completa</span>` : ""}</div>
+      <div class="field" style="margin-bottom:6px"><label>Kg por campana</label><div class="chips">${CXKGS.map(k =>
+        `<button class="chip sm" data-action="round-kg" data-i="${i}" data-v="${k}" aria-pressed="${roundKg(d, r)===k}">${k}</button>`).join("")}</div></div>
       <div class="chips">${CX.map(c => `<button class="chip sm" data-action="round-item" data-i="${i}" data-k="${c.k}" aria-pressed="${!!r[c.k]}">${r[c.k] ? "✓ " : ""}${c.t} ${c.r}</button>`).join("")}</div>
       ${full ? `<div style="margin-top:8px"><button class="timer-btn" data-action="rest-start" data-i="${i}">⏱ ${r.rest != null ? "Repetir descanso" : "Descanso"}</button></div>` : ""}</div>`;
   });
   b += `<div class="row" style="margin-top:6px"><button class="btn primary" data-action="round-add">+ Ronda ${rounds.length+1}</button>
     ${rounds.length ? `<button class="btn" data-action="round-del">Quitar la última</button>` : ""}</div>`;
   b += `<div style="margin-top:10px">${toggle("b.limpia", "Técnica limpia confirmada en vídeo")}</div>`;
-  const badge = rounds.length ? `<span class="pill ${done >= 3 ? "ok" : ""}">${kg} kg · ${done} ronda${done===1?"":"s"}</span>` : "";
+  const badge = rounds.length ? `<span class="pill ${done >= 3 ? "ok" : ""}">${kgSummary(d)} · ${done} ronda${done===1?"":"s"}</span>` : "";
   return card("b", "Bloque B · complejo bilateral", "Clean · Front Squat · Swing · Remo · Carry", badge, b);
 }
-function kgChipsB(kg){
-  return `<div class="field"><label>Kg por campana</label><div class="chips">${[12,16,20,24,28,32].map(k =>
-    `<button class="chip sm" data-action="set" data-path="b.kg" data-v="${k}" data-num="1" aria-pressed="${kg===k}">${k}</button>`).join("")}</div></div>`;
+function lastBkg(){ // peso de la primera ronda de la última sesión con complejo
+  const p = prevB(ui.date); if (!p.length) return null;
+  const d = DB.days[p[p.length-1]]; const r = (getp(d, "b.rounds") || [])[0];
+  return r ? roundKg(d, r) : getp(d, "b.kg");
 }
-function lastBkg(){ const p = prevB(ui.date); return p.length ? getp(DB.days[p[p.length-1]], "b.kg") : null; }
 
 /* ---------------- Render: progreso ---------------- */
 function series(path){
@@ -507,7 +521,7 @@ function renderHist(){
     const d = DB.days[x]; const c = [];
     const pd = p3Done(d); if (pd) c.push(`<span class="pill ${pd===P3.length?"ok":""}">P3 ${pd}/${P3.length}</span>`);
     if (hasA(d)) c.push(`<span class="pill ok">Bloque A</span>`);
-    const r = (getp(d,"b.rounds")||[]).length; if (r) c.push(`<span class="pill">${getp(d,"b.kg") ?? "?"} kg × ${roundsDone(d)}</span>`);
+    const r = (getp(d,"b.rounds")||[]).length; if (r) c.push(`<span class="pill">${kgSummary(d)} × ${roundsDone(d)}</span>`);
     if (getp(d,"a.retest.done")) c.push(`<span class="pill warn">Retest</span>`);
     if (d.video) c.push(`<span class="pill">vídeo</span>`);
     if (d.sueno === "mal") c.push(`<span class="pill">durmió mal</span>`);
@@ -746,10 +760,15 @@ const A = {
   "timer-cancel": () => timerEnd(false),
   "round-add": () => {
     const d = wday(); d.b ||= {}; d.b.rounds ||= [];
-    if (d.b.kg == null) d.b.kg = lastBkg() ?? S().cxKg;
-    d.b.rounds.push({}); commit();
+    const prevR = d.b.rounds[d.b.rounds.length - 1];
+    const kg = prevR ? roundKg(d, prevR) : (lastBkg() ?? S().cxKg);
+    d.b.rounds.push({ kg }); syncBkg(d); commit();
   },
-  "round-del": () => { const r = getp(wday(), "b.rounds"); if (r && r.length && confirm("¿Quitar la última ronda?")) { r.pop(); commit(); } },
+  "round-kg": b => {
+    const d = wday(); const r = d.b.rounds[Number(b.dataset.i)]; if (!r) return;
+    syncBkg(d); r.kg = Number(b.dataset.v); syncBkg(d); commit();
+  },
+  "round-del": () => { const d = wday(); const r = getp(d, "b.rounds"); if (r && r.length && confirm("¿Quitar la última ronda?")) { r.pop(); syncBkg(d); commit(); } },
   "round-item": b => {
     const d = wday(); const r = d.b.rounds[Number(b.dataset.i)]; const k = b.dataset.k;
     const was = CX.every(c => r[c.k]);
@@ -810,13 +829,13 @@ $("#fileIn").addEventListener("change", async e => {
 function toCSV(){
   const cols = ["fecha","sueno","energia","p3_completos","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","retest",
-    "b_kg","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
+    "b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d),
     g("a.bu.kg"), g("a.bu.series"), g("a.bu.reps"), g("a.arr.reps"), g("a.arr.sinBU") ? 1 : "", g("a.tgu.kg"), g("a.tgu.izq"), g("a.tgu.der"),
     g("a.hk.series"), g("a.hk.reps"), g("a.hk.ardor"), g("a.hk.sondaOk") ? 1 : "", g("a.pie.ardor"), g("a.pie.abre") ? 1 : "",
     g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.retest.done") ? 1 : "",
-    g("b.kg"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
+    maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
   return [cols.join(","), ...rows].join("\n");
 }
 
