@@ -195,7 +195,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand)}
 
 <script>
 "use strict";
-const VERSION = "1.2.0";
+const VERSION = "1.3.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -380,6 +380,13 @@ function renderHoy(){
       `<button class="chip sm" data-action="set" data-path="p3.deadbug.var" data-v="${v}" aria-pressed="${getp(d,"p3.deadbug.var")===v}">Dead Bug: ${v.toLowerCase()}</button>`).join("")}</div>
       <div class="p3-item" style="margin-top:10px;border-top:1px solid var(--line,rgba(127,127,127,.25));padding-top:10px"><div style="flex:1">${check("extra.frog.done", "Frog stretch · opcional", "Exhala largo, llena la espalda · primer antes del bottoms-up")}</div>
       ${stepper("extra.frog.resp", { label:"Respiraciones", def:5 })}</div>
+      <div class="p3-item"><div style="flex:1">${check("extra.pull.done", "Dead bug con pullover · opcional", "Campana ligera con las dos manos; costillas y lumbar pegadas. 2×5 lentos")}</div>
+      ${stepper("extra.pull.reps", { label:"Reps totales", def:10 })}</div>
+      <div class="row" style="margin:-2px 0 6px">${kgChips("extra.pull.kg", undefined, [4,6,8,12])}</div>
+      <div class="p3-item"><div style="flex:1">${check("extra.bear.done", "Cuadrupedia / oso · opcional", "Espalda redonda, costillas abajo, rodillas a 2-3 cm del suelo")}</div>
+      ${stepper("extra.bear.secs", { label:"Segundos", def:20, step:10 })}</div>
+      <div class="row" style="margin:-2px 0 6px">${["Bear hold","Bear crawl"].map(v =>
+        `<button class="chip sm" data-action="set" data-path="extra.bear.var" data-v="${v}" aria-pressed="${getp(d,"extra.bear.var")===v}">${v}</button>`).join("")}</div>
       <p class="hint">Cue de fondo en todo lo demás: exhala del todo antes de tensar («sopla las costillas hacia abajo»).</p>`);
 
   if (!train){
@@ -436,6 +443,12 @@ function renderA(d){
     ${timerField("a.oh.bu", "Bottoms-up · " + S_, { marks:"15,20", lead:true })}
     ${timerField("a.oh.lado", "Normal · " + S_, { marks:"15,20", lead:true })}
     ${timerField("a.oh.otro", "Normal · " + O_, { marks:"15,20", lead:true })}</div></div>`;
+
+  b += `<div class="ex"><div class="ex-t"><span class="n">7</span>Carry · ${S_} <span class="muted" style="font-weight:400">· opcional</span></div>
+    <p class="ex-p">2-3 paseos cortos (20-30 m) sin ladearte ni abrir la costilla. Suitcase: campana colgando. Bottoms-up: en rack o camarero.</p>
+    <div class="row" style="margin-bottom:8px">${["Suitcase","BU rack","BU camarero"].map(v =>
+      `<button class="chip sm" data-action="set" data-path="a.carry.var" data-v="${v}" aria-pressed="${getp(d,"a.carry.var")===v}">${v}</button>`).join("")}</div>
+    <div class="row">${kgChips("a.carry.kg", undefined, [8,12,16,20,24])}${stepper("a.carry.paseos", { label:"Paseos", def:2 })}</div></div>`;
 
   // Opcionales
   const oc = !ui.open.opt;
@@ -829,14 +842,15 @@ $("#fileIn").addEventListener("change", async e => {
   }catch(err){ toast("Ese archivo no es una copia válida de esta app"); }
 });
 function toCSV(){
-  const cols = ["fecha","sueno","energia","p3_completos","frog_resp","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
-    "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","retest",
+  const cols = ["fecha","sueno","energia","p3_completos","frog_resp","pullover_reps","pullover_kg","oso","oso_s","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
+    "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
     "b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
+    g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
     g("a.bu.kg"), g("a.bu.series"), g("a.bu.reps"), g("a.arr.reps"), g("a.arr.sinBU") ? 1 : "", g("a.tgu.kg"), g("a.tgu.izq"), g("a.tgu.der"),
     g("a.hk.series"), g("a.hk.reps"), g("a.hk.ardor"), g("a.hk.sondaOk") ? 1 : "", g("a.pie.ardor"), g("a.pie.abre") ? 1 : "",
-    g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.retest.done") ? 1 : "",
+    g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.carry.var"), g("a.carry.kg"), g("a.carry.paseos"), g("a.retest.done") ? 1 : "",
     maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
   return [cols.join(","), ...rows].join("\n");
 }
