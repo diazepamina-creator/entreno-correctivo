@@ -195,7 +195,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand)}
 
 <script>
 "use strict";
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -378,6 +378,8 @@ function renderHoy(){
       ${stepper("p3."+i.k+".reps", { label:"Reps", def:10, step:5 })}</div>`).join("")
     + `<div class="row" style="margin-top:8px">${["Rodilla flexionada","Pierna recta"].map(v =>
       `<button class="chip sm" data-action="set" data-path="p3.deadbug.var" data-v="${v}" aria-pressed="${getp(d,"p3.deadbug.var")===v}">Dead Bug: ${v.toLowerCase()}</button>`).join("")}</div>
+      <div class="p3-item" style="margin-top:10px;border-top:1px solid var(--line,rgba(127,127,127,.25));padding-top:10px"><div style="flex:1">${check("extra.frog.done", "Frog stretch · opcional", "Exhala largo, llena la espalda · primer antes del bottoms-up")}</div>
+      ${stepper("extra.frog.resp", { label:"Respiraciones", def:5 })}</div>
       <p class="hint">Cue de fondo en todo lo demás: exhala del todo antes de tensar («sopla las costillas hacia abajo»).</p>`);
 
   if (!train){
@@ -827,11 +829,11 @@ $("#fileIn").addEventListener("change", async e => {
   }catch(err){ toast("Ese archivo no es una copia válida de esta app"); }
 });
 function toCSV(){
-  const cols = ["fecha","sueno","energia","p3_completos","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
+  const cols = ["fecha","sueno","energia","p3_completos","frog_resp","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","retest",
     "b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
-  const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d),
+  const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("a.bu.kg"), g("a.bu.series"), g("a.bu.reps"), g("a.arr.reps"), g("a.arr.sinBU") ? 1 : "", g("a.tgu.kg"), g("a.tgu.izq"), g("a.tgu.der"),
     g("a.hk.series"), g("a.hk.reps"), g("a.hk.ardor"), g("a.hk.sondaOk") ? 1 : "", g("a.pie.ardor"), g("a.pie.abre") ? 1 : "",
     g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.retest.done") ? 1 : "",
