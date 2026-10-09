@@ -196,7 +196,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand)}
 
 <script>
 "use strict";
-const VERSION = "1.4.0";
+const VERSION = "1.5.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -239,7 +239,7 @@ const fmtDate = s => { const d = parseIso(s); return `${DOW[d.getDay()]} ${d.get
 const fmtSecs = s => s == null ? "—" : `${Math.floor(s/60)}:${pad(Math.floor(s%60))}`;
 
 /* ---------------- Estado de UI ---------------- */
-const ui = { tab:"hoy", date: todayIso(), open:{ p3:true, a:true, b:true, cierre:true, opt:false, retest:false }, tables:{}, forceTrain:{} };
+const ui = { tab:"hoy", date: todayIso(), open:{ p3:true, extras:true, a:true, b:true, cierre:true, opt:false, retest:false }, tables:{}, forceTrain:{} };
 const day = (d = ui.date) => DB.days[d] || {};
 const wday = (d = ui.date) => (DB.days[d] ||= {});
 const S = () => DB.settings;
@@ -380,16 +380,9 @@ function renderHoy(){
     + `<div class="row" style="margin-top:8px">${["Rodilla flexionada","Pierna recta"].map(v =>
       `<button class="chip sm" data-action="set" data-path="p3.deadbug.var" data-v="${v}" aria-pressed="${getp(d,"p3.deadbug.var")===v}">Dead Bug: ${v.toLowerCase()}</button>`).join("")}</div>
       <div class="row" style="margin-top:8px">${toggle("p3.lateral", "Supino: expansión lateral simétrica (con presión en el izq.)")}</div>
-      <div class="p3-item" style="margin-top:10px;border-top:1px solid var(--line,rgba(127,127,127,.25));padding-top:10px"><div style="flex:1">${check("extra.frog.done", "Frog stretch · opcional", "Exhala largo, llena la espalda · primer antes del bottoms-up")}</div>
-      ${stepper("extra.frog.resp", { label:"Respiraciones", def:5 })}</div>
-      <div class="p3-item"><div style="flex:1">${check("extra.pull.done", "Dead bug con pullover · opcional", "Campana ligera con las dos manos; costillas y lumbar pegadas. 2×5 lentos")}</div>
-      ${stepper("extra.pull.reps", { label:"Reps totales", def:10 })}</div>
-      <div class="row" style="margin:-2px 0 6px">${kgChips("extra.pull.kg", undefined, [4,6,8,12])}</div>
-      <div class="p3-item"><div style="flex:1">${check("extra.bear.done", "Cuadrupedia / oso · opcional", "Espalda redonda, costillas abajo, rodillas a 2-3 cm del suelo")}</div>
-      ${stepper("extra.bear.secs", { label:"Segundos", def:20, step:10 })}</div>
-      <div class="row" style="margin:-2px 0 6px">${["Bear hold","Bear crawl"].map(v =>
-        `<button class="chip sm" data-action="set" data-path="extra.bear.var" data-v="${v}" aria-pressed="${getp(d,"extra.bear.var")===v}">${v}</button>`).join("")}</div>
       <p class="hint">Cue de fondo en todo lo demás: exhala del todo antes de tensar («sopla las costillas hacia abajo»).</p>`);
+
+  h += renderExtras(d);
 
   if (!train){
     h += `<div class="card"><div class="card-b" style="padding-top:14px">
@@ -409,12 +402,50 @@ function renderHoy(){
   $("#p-hoy").innerHTML = h;
 }
 
+const ROT = [[3,"Fácil"],[2,"Media"],[1,"Costosa"]];
+function rotChips(path){
+  const v = getp(day(), path);
+  return `<div class="chips">${ROT.map(([n,t]) => `<button class="chip sm" data-action="set" data-path="${path}" data-v="${n}" data-num="1" aria-pressed="${v===n}">${t}</button>`).join("")}</div>`;
+}
+function renderExtras(d){
+  const keys = ["frog","pull","bear","hollow","legr","hang","rot","bench","ribgrab"];
+  const n = keys.filter(k => getp(d, "extra."+k+".done")).length;
+  const sep = t => `<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:14px 0 4px">${t}</h3>`;
+  let b = `<p class="hint" style="margin-top:0">Elige 2-3 cada día, no todos. Regla común: si la lumbar se despega o la costilla se abre, termina la serie.</p>`;
+  b += sep("Respiración y suelo") + `      <div class="p3-item" ><div style="flex:1">${check("extra.frog.done", "Frog stretch", "Exhala largo, llena la espalda · primer antes del bottoms-up")}</div>
+      ${stepper("extra.frog.resp", { label:"Respiraciones", def:5 })}</div>
+      <div class="p3-item"><div style="flex:1">${check("extra.pull.done", "Dead bug con pullover", "Campana ligera con las dos manos; costillas y lumbar pegadas. 2×5 lentos")}</div>
+      ${stepper("extra.pull.reps", { label:"Reps totales", def:10 })}</div>
+      <div class="row" style="margin:-2px 0 6px">${kgChips("extra.pull.kg", undefined, [4,6,8,12])}</div>
+      <div class="p3-item"><div style="flex:1">${check("extra.bear.done", "Cuadrupedia / oso", "Espalda redonda, costillas abajo, rodillas a 2-3 cm del suelo")}</div>
+      ${stepper("extra.bear.secs", { label:"Segundos", def:20, step:10 })}</div>
+      <div class="row" style="margin:-2px 0 6px">${["Bear hold","Bear crawl"].map(v =>
+        `<button class="chip sm" data-action="set" data-path="extra.bear.var" data-v="${v}" aria-pressed="${getp(d,"extra.bear.var")===v}">${v}</button>`).join("")}</div>
+`;
+  b += `<div class="p3-item"><div style="flex:1">${check("extra.hollow.done", "Hollow hold", "Lumbar pegada y costillas abajo; progresión de Neupert")}</div>
+      ${stepper("extra.hollow.secs", { label:"Segundos", def:15, step:5 })}</div>
+    <div class="row" style="margin:-2px 0 6px">${["Rodillas recogidas","Brazos arriba","Piernas estiradas"].map(v =>
+      `<button class="chip sm" data-action="set" data-path="extra.hollow.var" data-v="${v}" aria-pressed="${getp(d,"extra.hollow.var")===v}">${v}</button>`).join("")}</div>
+    <div class="p3-item"><div style="flex:1">${check("extra.legr.done", "Short-lever leg raises", "Brazos atrás agarrando una campana (dorsal activo); estira las piernas sin despegar la lumbar")}</div>
+      ${stepper("extra.legr.reps", { label:"Reps", def:5 })}</div>
+    <div class="p3-item"><div style="flex:1">${check("extra.hang.done", "Hanging hollow hold", "Colgado, hombros abajo; acerca pelvis y costillas llevando las piernas delante. Sin balanceo")}</div>
+      ${stepper("extra.hang.reps", { label:"Reps", def:5 })}</div>`;
+  b += sep("Columna torácica") + `<div class="ex" style="margin-top:4px">${check("extra.rot.done", "Rotación con lumbar bloqueada", "Postura del niño, mano detrás de la espalda; gira el pecho al techo exhalando. Haz más series hacia el lado que cueste")}
+      <div class="row" style="margin-top:8px;gap:14px">
+        <div class="field"><label>Izquierda (hombro izq. al techo)</label>${rotChips("extra.rot.izq")}</div>
+        <div class="field"><label>Derecha (hombro der. al techo)</label>${rotChips("extra.rot.der")}</div></div></div>
+    ${check("extra.bench.done", "Extensión torácica en banco", "Codos en un banco, manos tras la cabeza; caderas a los talones y deja caer el pecho. 5 respiraciones")}
+    ${check("extra.ribgrab.done", "Rib grab / Brettzel", "De lado, rodilla arriba sujeta; gira ojos, cuello y hombros dejando que la exhalación haga el trabajo")}`;
+  return card("extras", "Core y movilidad · opcionales", "Todos los días que quieras, también en descanso", n ? `<span class="pill ok">${n}</span>` : "", b);
+}
+
 function renderA(d){
   const S_ = sideL(), O_ = otherL();
   const rt = retestDue(ui.date);
   const aBadge = rt.due ? `<span class="pill warn">Retest TGU</span>` : (hasA(d) ? `<span class="pill ok">en marcha</span>` : "");
   let b = `<div class="note ok">Ardor con la costilla en su sitio = sigue. La costilla cede = para esa repetición, no termines el rango.</div>`;
-  b += `<div class="ex">${check("extra.flex.done", "Antes: flexor de cadera en half kneeling · opcional", "Pelvis metida y crece hacia arriba; 5 pulsos adelante al exhalar sin perder la pelvis, por lado")}</div>`;
+  b += `<div class="ex">${check("extra.flex.done", "Antes: flexor de cadera en half kneeling · opcional", "Pelvis metida y crece hacia arriba; 5 pulsos adelante al exhalar sin perder la pelvis, por lado")}
+    ${check("extra.wall.done", "Antes: wall slides · opcional", "Talones, glúteos y espalda en la pared; sube los brazos exhalando y para donde la lumbar se despegue. 5-8 reps")}</div>`;
 
   b += `<div class="ex"><div class="ex-t"><span class="n">1</span>Bottoms-Up Press · ${S_}</div>
     <p class="ex-p">2-3 series de 2-3 reps. Imprime la posición antes del agarre normal.</p>
@@ -536,12 +567,16 @@ function renderHist(){
     { name:"Lado " + sideL(), pts: series("a.oh.lado"), c:"var(--series-1)" },
     { name:"Lado " + otherL(), pts: series("a.oh.otro"), c:"var(--series-2)" }], " s");
 
+  h += chartCard("c4", "Rotación torácica con lumbar bloqueada", "1 costosa · 2 media · 3 fácil · la meta es que se igualen", [
+    { name:"Izquierda", pts: series("extra.rot.izq"), c:"var(--series-1)" },
+    { name:"Derecha", pts: series("extra.rot.der"), c:"var(--series-2)" }], "");
   h += `<div class="card"><div class="card-b" style="padding-top:12px"><h2 style="font-size:16px;margin:0 0 4px">Días registrados</h2>`;
   if (!all.length) h += `<p class="hint">Todavía no hay nada registrado. Empieza en la pestaña Sesión.</p>`;
   all.slice().reverse().forEach(x => {
     const d = DB.days[x]; const c = [];
     const pd = p3Done(d); if (pd) c.push(`<span class="pill ${pd===P3.length?"ok":""}">P3 ${pd}/${P3.length}</span>`);
     if (hasA(d)) c.push(`<span class="pill ok">Bloque A</span>`);
+    const nx = Object.keys(d.extra || {}).filter(k => d.extra[k] && d.extra[k].done).length; if (nx) c.push(`<span class="pill">${nx} extra${nx===1?"":"s"}</span>`);
     const r = (getp(d,"b.rounds")||[]).length; if (r) c.push(`<span class="pill">${kgSummary(d)} × ${roundsDone(d)}</span>`);
     if (getp(d,"a.retest.done")) c.push(`<span class="pill warn">Retest</span>`);
     if (d.video) c.push(`<span class="pill">vídeo</span>`);
@@ -849,12 +884,14 @@ $("#fileIn").addEventListener("change", async e => {
   }catch(err){ toast("Ese archivo no es una copia válida de esta app"); }
 });
 function toCSV(){
-  const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
+  const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
     "b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("p3.lateral") ? 1 : "", d.finDia, g("extra.flex.done") ? 1 : "", g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
+    g("extra.hollow.done") ? (g("extra.hollow.secs") ?? "sí") : "", g("extra.hollow.var"), g("extra.legr.done") ? (g("extra.legr.reps") ?? "sí") : "",
+    g("extra.hang.done") ? (g("extra.hang.reps") ?? "sí") : "", g("extra.rot.izq"), g("extra.rot.der"), g("extra.bench.done") ? 1 : "", g("extra.ribgrab.done") ? 1 : "", g("extra.wall.done") ? 1 : "",
     g("a.bu.kg"), g("a.bu.series"), g("a.bu.reps"), g("a.arr.reps"), g("a.arr.sinBU") ? 1 : "", g("a.tgu.kg"), g("a.tgu.izq"), g("a.tgu.der"),
     g("a.hk.series"), g("a.hk.reps"), g("a.hk.ardor"), g("a.hk.sondaOk") ? 1 : "", g("a.pie.ardor"), g("a.pie.abre") ? 1 : "",
     g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.carry.var"), g("a.carry.kg"), g("a.carry.paseos"), g("a.retest.done") ? 1 : "",
