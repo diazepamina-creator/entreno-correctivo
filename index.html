@@ -196,7 +196,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand)}
 
 <script>
 "use strict";
-const VERSION = "1.5.0";
+const VERSION = "1.6.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -408,7 +408,7 @@ function rotChips(path){
   return `<div class="chips">${ROT.map(([n,t]) => `<button class="chip sm" data-action="set" data-path="${path}" data-v="${n}" data-num="1" aria-pressed="${v===n}">${t}</button>`).join("")}</div>`;
 }
 function renderExtras(d){
-  const keys = ["frog","pull","bear","hollow","legr","hang","rot","bench","ribgrab"];
+  const keys = ["frog","pull","bear","hollow","legr","hang","plank","rot","bench","ribgrab"];
   const n = keys.filter(k => getp(d, "extra."+k+".done")).length;
   const sep = t => `<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:14px 0 4px">${t}</h3>`;
   let b = `<p class="hint" style="margin-top:0">Elige 2-3 cada día, no todos. Regla común: si la lumbar se despega o la costilla se abre, termina la serie.</p>`;
@@ -429,7 +429,9 @@ function renderExtras(d){
     <div class="p3-item"><div style="flex:1">${check("extra.legr.done", "Short-lever leg raises", "Brazos atrás agarrando una campana (dorsal activo); estira las piernas sin despegar la lumbar")}</div>
       ${stepper("extra.legr.reps", { label:"Reps", def:5 })}</div>
     <div class="p3-item"><div style="flex:1">${check("extra.hang.done", "Hanging hollow hold", "Colgado, hombros abajo; acerca pelvis y costillas llevando las piernas delante. Sin balanceo")}</div>
-      ${stepper("extra.hang.reps", { label:"Reps", def:5 })}</div>`;
+      ${stepper("extra.hang.reps", { label:"Reps", def:5 })}</div>
+    <div class="p3-item"><div style="flex:1">${check("extra.plank.done", "Plancha con pies en la pared", "Antebrazos en el suelo, pies apoyados en la pared; si se hunde la lumbar, resbalas. Meta: 1 minuto sólido")}</div>
+      ${stepper("extra.plank.secs", { label:"Segundos", def:20, step:5 })}</div>`;
   b += sep("Columna torácica") + `<div class="ex" style="margin-top:4px">${check("extra.rot.done", "Rotación con lumbar bloqueada", "Postura del niño, mano detrás de la espalda; gira el pecho al techo exhalando. Haz más series hacia el lado que cueste")}
       <div class="row" style="margin-top:8px;gap:14px">
         <div class="field"><label>Izquierda (hombro izq. al techo)</label>${rotChips("extra.rot.izq")}</div>
@@ -456,10 +458,17 @@ function renderA(d){
     <p class="ex-p">Misma postura, 5 reps. Anota cuántas salieron con la costilla guardada de inicio a fin.</p>
     <div class="row">${stepper("a.arr.reps", { label:"Reps limpias", def:5, metric:true })}
     ${toggle("a.arr.sinBU", "Hoy sin bottoms-up previo")}</div>
-    <p class="hint">Cuando salga igual de limpio sin el bottoms-up delante, el patrón ya no depende de él.</p></div>`;
+    <div class="row" style="margin-top:8px">${toggle("a.arr.cadera", "Cadera desplazada hacia la " + (S().side === "izq" ? "izquierda" : "derecha") + ", bajo la campana")}</div>
+    <p class="hint">Cuando salga igual de limpio sin el bottoms-up delante, el patrón ya no depende de él.</p>
+    <div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">
+      ${check("a.contra.done", "Test: press contralateral", "Presiona con el " + S_ + " mientras tiras hacia abajo con la otra mano de una goma anclada arriba o del marco de una puerta, como en el see-saw press")}
+      <div class="field" style="margin-top:6px"><label>Comparado con el press normal</label><div class="chips">${["Más limpio","Igual","Peor"].map(v =>
+        `<button class="chip sm" data-action="set" data-path="a.contra.res" data-v="${v}" aria-pressed="${getp(d,"a.contra.res")===v}">${v}</button>`).join("")}</div></div></div></div>`;
+
+  b += `<div class="ex">${check("a.iso.done", "Isometría en 3 posiciones · opcional", "Con la campana ligera: salida, punto de bloqueo (brazo algo por encima de la horizontal) y arriba. 30 s en cada una con tensión suave (15-20 %), costilla guardada y cadera bajo la campana")}</div>`;
 
   b += `<div class="ex"><div class="ex-t"><span class="n">3</span>TGU hasta mano</div>
-    <p class="ex-p">2-3 series por lado. Progresión de habilidad hacia el TGU completo. Si haces puente, hazlo en el codo, no en la mano: así extiendes cadera y no lumbar.</p>
+    <p class="ex-p">2-3 series por lado. Progresión de habilidad hacia el TGU completo. Si haces puente, hazlo en el codo, no en la mano: así extiendes cadera y no lumbar. En el codo, empuja el esternón lejos del apoyo y muévelo adelante y atrás unas veces: movilidad torácica dentro del TGU.</p>
     <div class="row">${kgChips("a.tgu.kg", S().buKg, [8,12,16,20,24])}
     ${stepper("a.tgu.izq", { label:"Series izq.", def:1 })}${stepper("a.tgu.der", { label:"Series der.", def:1 })}</div></div>`;
 
@@ -884,7 +893,7 @@ $("#fileIn").addEventListener("change", async e => {
   }catch(err){ toast("Ese archivo no es una copia válida de esta app"); }
 });
 function toCSV(){
-  const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","tgu_kg","tgu_izq","tgu_der",
+  const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","cadera_bajo_campana","contralateral","isometria_3pos","plancha_pared_s","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
     "b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
@@ -892,7 +901,7 @@ function toCSV(){
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
     g("extra.hollow.done") ? (g("extra.hollow.secs") ?? "sí") : "", g("extra.hollow.var"), g("extra.legr.done") ? (g("extra.legr.reps") ?? "sí") : "",
     g("extra.hang.done") ? (g("extra.hang.reps") ?? "sí") : "", g("extra.rot.izq"), g("extra.rot.der"), g("extra.bench.done") ? 1 : "", g("extra.ribgrab.done") ? 1 : "", g("extra.wall.done") ? 1 : "",
-    g("a.bu.kg"), g("a.bu.series"), g("a.bu.reps"), g("a.arr.reps"), g("a.arr.sinBU") ? 1 : "", g("a.tgu.kg"), g("a.tgu.izq"), g("a.tgu.der"),
+    g("a.bu.kg"), g("a.bu.series"), g("a.bu.reps"), g("a.arr.reps"), g("a.arr.sinBU") ? 1 : "", g("a.arr.cadera") ? 1 : "", g("a.contra.done") ? (g("a.contra.res") ?? "sí") : "", g("a.iso.done") ? 1 : "", g("extra.plank.done") ? (g("extra.plank.secs") ?? "sí") : "", g("a.tgu.kg"), g("a.tgu.izq"), g("a.tgu.der"),
     g("a.hk.series"), g("a.hk.reps"), g("a.hk.ardor"), g("a.hk.sondaOk") ? 1 : "", g("a.pie.ardor"), g("a.pie.abre") ? 1 : "",
     g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.carry.var"), g("a.carry.kg"), g("a.carry.paseos"), g("a.retest.done") ? 1 : "",
     maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
