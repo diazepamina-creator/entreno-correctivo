@@ -220,7 +220,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand)}
 
 <script>
 "use strict";
-const VERSION = "1.8.0";
+const VERSION = "1.8.1";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -334,9 +334,9 @@ function card(key, title, sub, badge, body){
 const p3Done = d => P3.filter(i => getp(d, "p3."+i.k+".done")).length;
 const FZ = [
   { k:"fsq",   t:"Doble front squat", r:"5×5 → 5×8, luego siguiente pareja", kgs:[16,20,24,28,32], s:5, n:5, unit:"reps", pair:true },
-  { k:"swing", t:"Swing a dos manos", r:"5×10 · plancha de pie arriba", kgs:[16,20,24,28,32,36,40], s:5, n:10, unit:"reps" },
+  { k:"swing", t:"Swing a dos manos · una campana", r:"5×10 · plancha de pie arriba", kgs:[16,20,24,28,32,36,40], s:5, n:10, unit:"reps" },
   { k:"row",   t:"Remo doble en bisagra", r:"5×6-8", kgs:[16,20,24,28], s:5, n:6, unit:"reps", pair:true },
-  { k:"carry", t:"Suitcase carry", r:"3 paseos por lado, sin ladearte", kgs:[16,20,24,28,32], s:3, n:1, unit:"paseos/lado" },
+  { k:"carry", t:"Suitcase carry · una campana", r:"3 paseos por lado, sin ladearte", kgs:[16,20,24,28,32], s:3, n:1, unit:"paseos/lado" },
 ];
 const fzDone = d => FZ.filter(e => getp(d, "b.f."+e.k+".done")).length;
 const hasB = d => (getp(d, "b.rounds") || []).length > 0 || fzDone(d) > 0;
