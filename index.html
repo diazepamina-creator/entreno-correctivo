@@ -103,6 +103,7 @@ main{max-width:640px;margin:0 auto;padding:12px 16px 24px}
 .round{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--surface-2)}
 .round-h{display:flex;align-items:center;gap:8px;font-weight:650;margin-bottom:8px}
 .round-h .r{flex:1}
+input.num{width:100px;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:6px 10px;background:var(--surface-2);color:var(--ink);font:inherit;font-variant-numeric:tabular-nums}
 textarea{width:100%;min-height:84px;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface-2);color:var(--ink);font:inherit;resize:vertical}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:var(--gap)}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
@@ -196,7 +197,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand)}
 
 <script>
 "use strict";
-const VERSION = "1.6.0";
+const VERSION = "1.7.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -306,6 +307,19 @@ function card(key, title, sub, badge, body){
 
 /* ---------------- Cálculos ---------------- */
 const p3Done = d => P3.filter(i => getp(d, "p3."+i.k+".done")).length;
+const FZ = [
+  { k:"fsq",   t:"Doble front squat", r:"5×5 → 5×8, luego siguiente pareja", kgs:[16,20,24,28,32], s:5, n:5, unit:"reps", pair:true },
+  { k:"swing", t:"Swing a dos manos", r:"5×10 · plancha de pie arriba", kgs:[16,20,24,28,32,36,40], s:5, n:10, unit:"reps" },
+  { k:"row",   t:"Remo doble en bisagra", r:"5×6-8", kgs:[16,20,24,28], s:5, n:6, unit:"reps", pair:true },
+  { k:"carry", t:"Suitcase carry", r:"3 paseos por lado, sin ladearte", kgs:[16,20,24,28,32], s:3, n:1, unit:"paseos/lado" },
+];
+const fzDone = d => FZ.filter(e => getp(d, "b.f."+e.k+".done")).length;
+const hasB = d => (getp(d, "b.rounds") || []).length > 0 || fzDone(d) > 0;
+const bMode = (d, date) => getp(d, "b.mode") || ([1,5].includes(parseIso(date).getDay()) ? "fuerza" : "complejo");
+function lastFz(k, ref){
+  const ds = Object.keys(DB.days).filter(x => x < ref && getp(DB.days[x], "b.f."+k+".done")).sort();
+  return ds.length ? { date: ds[ds.length-1], v: getp(DB.days[ds[ds.length-1]], "b.f."+k) } : null;
+}
 const roundsDone = d => (getp(d, "b.rounds") || []).filter(r => CX.every(c => r[c.k])).length;
 const CXKGS = [12,16,20,24,28,32];
 const roundKg = (d, r) => r.kg ?? getp(d, "b.kg");
@@ -351,13 +365,14 @@ function renderTop(){
 /* ---------------- Render: sesión ---------------- */
 function renderHoy(){
   const d = day(); const type = dayType(ui.date);
-  const train = type !== "r" || ui.forceTrain[ui.date] || hasA(d) || (getp(d,"b.rounds")||[]).length;
-  const chip = type === "t" ? `<span class="daychip">Día de entreno</span>`
+  const train = type !== "r" || ui.forceTrain[ui.date] || hasA(d) || hasB(d);
+  const chip = type === "t" ? `<span class="daychip">${S().mant ? "Entreno · mantenimiento" : "Día de entreno"}</span>`
              : type === "o" ? `<span class="daychip opt">Opcional · ligero</span>`
              : `<span class="daychip rest">Descanso activo · solo P3</span>`;
-  const lead = type === "t" ? "P3 → Bloque A en fresco → Bloque B."
-             : type === "o" ? "Bloque A completo y Bloque B recortado (2-3 rondas, o solo swings + carry)."
-             : "Hoy solo el mantenimiento P3.";
+  const mant = !!S().mant;
+  const lead = type === "t" ? (mant ? "Modo mantenimiento: P3 → Bloque A → una ronda corta de fuerza. 30 minutos." : "P3 → Bloque A en fresco → Bloque B.")
+             : type === "o" ? "Comodín: recupera aquí la sesión perdida de la semana. Si no falta ninguna, paseo largo o comba."
+             : "Descanso activo: P3 y paseo con los temas.";
   let h = `<div style="margin:2px 0 12px">${chip}<p class="hint">${lead}</p></div>`;
 
   const sleep = d.sueno;
@@ -368,6 +383,8 @@ function renderHoy(){
       <div class="field"><label>Energía</label><div class="chips">
         ${[1,2,3,4,5].map(v => `<button class="chip sm" data-action="set" data-path="energia" data-v="${v}" data-num="1" aria-pressed="${d.energia===v}">${v}</button>`).join("")}</div></div>
     </div>
+    <div class="row" style="margin-top:10px">${stepper("despertares", { label:"Despertares esta noche", def:1 })}
+      ${toggle("hab.luz", "Anoche, luz apagada antes de las 23:30")}</div>
     ${sleep === "mal" && train ? `<div class="note">Has dormido mal: el Bloque A no cambia, pero en el complejo baja un escalón de kg o haz menos rondas.</div>` : ""}
   </div></div>`;
 
@@ -392,10 +409,15 @@ function renderHoy(){
     h += renderA(d) + renderB(d);
   }
 
-  h += card("cierre", "Cierre", "Costilla al final del día, vídeo y notas", "",
+  h += card("cierre", "Cierre", "Costilla, hábitos, paseo, cuerpo y notas", "",
     `<div class="field" style="margin-bottom:10px"><label>Costilla izquierda al final del día</label><div class="chips">${["Guardada","A medias","Perdida"].map(v =>
        `<button class="chip sm" data-action="set" data-path="finDia" data-v="${v}" aria-pressed="${d.finDia===v}">${v}</button>`).join("")}</div>
        <p class="hint">Chequeo rápido tumbado o de pie: borde costal simétrico y expansión lateral igual.</p></div>
+     <div class="p3-item"><div style="flex:1">${check("paseo.done", "Paseo con los temas", "Por la playa, a ritmo cómodo")}</div>${stepper("paseo.min", { label:"Minutos", def:45, step:5 })}</div>
+     <div class="row" style="margin:8px 0">${stepper("hab.prot", { label:"Tomas con proteína", def:3 })}${toggle("hab.cafe", "Café solo antes de las 14:00")}</div>
+     <div class="row" style="margin-bottom:10px;gap:16px">
+       <div class="field"><label for="peso">Peso (kg)</label><input class="num" id="peso" inputmode="decimal" data-bind="cuerpo.peso" data-num="1" value="${getp(d,"cuerpo.peso") ?? ""}" placeholder="en ayunas"></div>
+       <div class="field"><label for="cintura">Cintura (cm)</label><input class="num" id="cintura" inputmode="decimal" data-bind="cuerpo.cintura" data-num="1" value="${getp(d,"cuerpo.cintura") ?? ""}" placeholder="ombligo"></div></div>
      ${check("video", "Sesión grabada en vídeo", "De perfil, cámara a la altura de la cadera, clips cortos")}
      <div class="field" style="margin-top:8px"><label for="notas">Notas</label>
      <textarea id="notas" data-bind="notas" placeholder="Sensaciones, dónde apareció el ardor, qué cambió…">${esc(d.notas||"")}</textarea></div>`);
@@ -518,17 +540,41 @@ function renderA(d){
 }
 
 function renderB(d){
+  const mode = bMode(d, ui.date);
+  const modeChips = `<div class="chips" style="margin-bottom:10px">${[["fuerza","Fuerza"],["complejo","Complejo"]].map(([v,t]) =>
+    `<button class="chip" data-action="set-bmode" data-v="${v}" aria-pressed="${mode===v}">${t}</button>`).join("")}</div>`;
+  if (mode === "fuerza") return renderFuerza(d, modeChips);
+  return renderComplejo(d, modeChips);
+}
+function renderFuerza(d, modeChips){
+  let b = modeChips + `<p class="ex-p" style="margin-top:0">Sube reps antes que peso: de 5×5 a 5×8 y entonces la siguiente pareja. ${S().mant ? "<b>Mantenimiento:</b> una ronda corta de cada, sin buscar más." : ""}</p>
+    <div class="note">Vigila la costilla en el rack: si el vídeo muestra que el doble front squat te la abre, ese peso todavía no toca.</div>`;
+  FZ.forEach(e => {
+    const base = "b.f." + e.k; const last = lastFz(e.k, ui.date);
+    const lastTxt = last && last.v ? `Última vez (${esc(fmtDate(last.date))}): ${last.v.kg ?? "?"} kg · ${last.v.series ?? "?"}×${last.v.reps ?? "?"}` : "";
+    const kg = getp(d, base + ".kg") ?? (last && last.v ? last.v.kg : undefined);
+    b += `<div class="ex"><div class="ex-t">${check(base + ".done", e.t, e.r)}</div>
+      ${lastTxt ? `<p class="hint" style="margin:0 0 6px">${lastTxt}</p>` : ""}
+      <div class="field"><label>Kg${e.pair ? " por campana" : ""}</label><div class="chips">${e.kgs.map(k =>
+        `<button class="chip sm" data-action="set" data-path="${base}.kg" data-v="${k}" data-num="1" aria-pressed="${kg===k}">${k}</button>`).join("")}</div></div>
+      <div class="row" style="margin-top:8px">${stepper(base + ".series", { label:"Series", def:e.s })}${stepper(base + ".reps", { label:e.unit === "reps" ? "Reps/serie" : "Paseos por lado", def:e.n })}</div></div>`;
+  });
+  b += `<div style="margin-top:10px">${toggle("b.limpia", "Técnica limpia confirmada en vídeo")}</div>`;
+  const n = fzDone(d);
+  return card("b", "Bloque B · fuerza", "Front squat · Swing · Remo · Carry", n ? `<span class="pill ${n === FZ.length ? "ok" : ""}">${n}/${FZ.length}</span>` : "", b);
+}
+function renderComplejo(d, modeChips){
   const rounds = getp(d, "b.rounds") || [];
   const kg = maxBkg(d);
   const done = roundsDone(d);
-  let b = `<p class="ex-p" style="margin-top:0">Todo bilateral: mantiene fuerza y condición sin tocar el patrón. 3-5 rondas; las primeras semanas, descansa hasta recuperarte. Cada ronda lleva su propio peso: la nueva empieza con el de la anterior.</p>`;
+  let b = modeChips + `<p class="ex-p" style="margin-top:0">Todo bilateral: mantiene fuerza y condición sin tocar el patrón. 3-5 rondas; las primeras semanas, descansa hasta recuperarte. Cada ronda lleva su propio peso: la nueva empieza con el de la anterior.</p>`;
 
   const prev = prevB(ui.date);
   if (prev.length){
     const maxKg = Math.max(...prev.map(x => maxBkg(DB.days[x]) || 0));
     const last2 = prev.slice(-2);
     const clean = last2.length === 2 && last2.every(x => getp(DB.days[x], "b.limpia"));
-    if (kg != null && kg > maxKg && !clean) b += `<div class="note">Subes por encima de tu máximo previo (${maxKg} kg) sin dos sesiones seguidas confirmadas limpias en vídeo.</div>`;
+    if (kg != null && isFinite(maxKg) && kg > maxKg && !clean) b += `<div class="note">Subes por encima de tu máximo previo (${maxKg} kg) sin dos sesiones seguidas confirmadas limpias en vídeo.</div>`;
   }
 
   rounds.forEach((r, i) => {
@@ -559,11 +605,13 @@ function series(path){
 function renderHist(){
   const all = Object.keys(DB.days).sort();
   const month = todayIso().slice(0,7);
-  const trained = all.filter(x => x.startsWith(month) && (hasA(DB.days[x]) || (getp(DB.days[x],"b.rounds")||[]).length)).length;
+  const wk = addDays(todayIso(), -((parseIso(todayIso()).getDay() + 6) % 7));
+  const trained = all.filter(x => x >= wk && (hasA(DB.days[x]) || hasB(DB.days[x]))).length;
+  const walks = all.filter(x => x >= wk && getp(DB.days[x], "paseo.done")).length;
   const rt = retestDue(todayIso());
   let h = `<div class="stats">
     <div class="stat"><b>${p3Streak()}</b><span>días seguidos con P3 completo</span></div>
-    <div class="stat"><b>${trained}</b><span>sesiones de entreno este mes</span></div>
+    <div class="stat"><b>${trained}<small style="font-size:13px;font-weight:600;color:var(--ink-2)">/3</small></b><span>sesiones esta semana · ${walks} paseo${walks===1?"":"s"}</span></div>
     <div class="stat"><b>${rt.last ? rt.days : "—"}</b><span>${rt.last ? "días desde el retest TGU" : "retest TGU pendiente"}</span></div></div>`;
   if (rt.due) h += `<div class="note">Toca retest del TGU (cada 2 semanas). Está al final del Bloque A.</div>`;
 
@@ -576,6 +624,15 @@ function renderHist(){
     { name:"Lado " + sideL(), pts: series("a.oh.lado"), c:"var(--series-1)" },
     { name:"Lado " + otherL(), pts: series("a.oh.otro"), c:"var(--series-2)" }], " s");
 
+  h += chartCard("c5", "Doble front squat", "Kg por campana × reps por serie: sube reps y luego peso", [
+    { name:"Kg", pts: series("b.f.fsq.kg"), c:"var(--series-1)" },
+    { name:"Reps", pts: series("b.f.fsq.reps"), c:"var(--series-2)" }], "");
+  h += chartCard("c6", "Cintura", "Cada dos semanas, en ayunas, a la altura del ombligo", [
+    { name:"Cintura", pts: series("cuerpo.cintura"), c:"var(--series-1)" }], " cm");
+  h += chartCard("c7", "Peso", "En ayunas; importa la tendencia, no el día", [
+    { name:"Peso", pts: series("cuerpo.peso"), c:"var(--series-1)" }], " kg");
+  h += chartCard("c8", "Despertares por noche", "Si baja, el plan de sueño funciona", [
+    { name:"Despertares", pts: series("despertares"), c:"var(--series-1)" }], "");
   h += chartCard("c4", "Rotación torácica con lumbar bloqueada", "1 costosa · 2 media · 3 fácil · la meta es que se igualen", [
     { name:"Izquierda", pts: series("extra.rot.izq"), c:"var(--series-1)" },
     { name:"Derecha", pts: series("extra.rot.der"), c:"var(--series-2)" }], "");
@@ -585,6 +642,8 @@ function renderHist(){
     const d = DB.days[x]; const c = [];
     const pd = p3Done(d); if (pd) c.push(`<span class="pill ${pd===P3.length?"ok":""}">P3 ${pd}/${P3.length}</span>`);
     if (hasA(d)) c.push(`<span class="pill ok">Bloque A</span>`);
+    const fz = fzDone(d); if (fz) c.push(`<span class="pill">Fuerza ${fz}/${FZ.length}</span>`);
+    if (getp(d, "paseo.done")) c.push(`<span class="pill">paseo${getp(d,"paseo.min") ? " " + getp(d,"paseo.min") + "′" : ""}</span>`);
     const nx = Object.keys(d.extra || {}).filter(k => d.extra[k] && d.extra[k].done).length; if (nx) c.push(`<span class="pill">${nx} extra${nx===1?"":"s"}</span>`);
     const r = (getp(d,"b.rounds")||[]).length; if (r) c.push(`<span class="pill">${kgSummary(d)} × ${roundsDone(d)}</span>`);
     if (getp(d,"a.retest.done")) c.push(`<span class="pill warn">Retest</span>`);
@@ -656,6 +715,23 @@ function chartHover(el, ev){
 function renderGuia(){
   const S_ = sideL();
   $("#p-guia").innerHTML = `<div class="card guide"><div class="card-b" style="padding-top:12px">
+  <h3>Plan 2026-2028</h3>
+  <p>Doble 24 limpio en primavera de 2027, recomposición y rutina intacta durante las oposiciones; Inevitable Strength desde el mes 1 en octubre de 2027. <a href="https://claude.ai/artifact/6Zn1JEHhPf8W2R4AWimrDp" target="_blank" rel="noopener">Ver el plan completo</a>.</p>
+  <ul><li><b>Correctivo</b> (oct 26 – ene 27) → puerta: 5/5 reps limpias sin bottoms-up delante, dos sesiones en vídeo.</li>
+  <li><b>Doble ligero</b> (feb – abr 27): see-saw y dobles de 12 a 20 → puerta: limpio en vídeo en cada peso.</li>
+  <li><b>Doble 24</b> (abr – jul 27): series de 5 limpias en vídeo.</li>
+  <li><b>Mantenimiento</b> (ago – sep 27): 2 × 30 min por semana; actívalo en Ajustes.</li>
+  <li><b>Inevitable Strength</b> desde octubre de 2027.</li></ul>
+  <h3>Semana</h3>
+  <ul><li>Lunes y viernes: correctivo + <b>fuerza</b>. Miércoles: correctivo + <b>complejo</b> o airbike. 40-45 minutos, por la tarde.</li>
+  <li>Martes, jueves y domingo: P3 y paseo con los temas. Sábado por la mañana: comodín.</li>
+  <li><b>Nunca dos días seguidos a cero:</b> un día malo, versión mínima de 10 minutos (P3, bottoms-up 2×2, press normal, un hold por lado).</li>
+  <li>Sesión perdida: se recupera el sábado o se deja; nunca dos el mismo día.</li></ul>
+  <h3>Sueño y comida</h3>
+  <ul><li>Luz apagada a las 23:15, levantarse a las 6:50 todos los días. Entreno acabado antes de las 20:15, cena antes de las 21:00.</li>
+  <li>Café solo hasta las 14:00; por la tarde, kukicha o malta.</li>
+  <li>Unos 150 g de proteína al día en 3-4 tomas: pescado, huevos, legumbres, tofu, tempeh, suero. Plato: mitad verduras, un cuarto proteína, un cuarto integrales.</li>
+  <li>Cintura cada dos semanas y peso 3 días por semana, en ayunas.</li></ul>
   <h3>Cómo leer cada serie</h3>
   <ul><li><b>Ardor con la costilla en su sitio:</b> correcto. Es la cadena lateral trabajando; sigue.</li>
   <li><b>La costilla cede:</b> para esa repetición ahí. No termines el rango «aunque sea con algo de flare».</li>
@@ -697,6 +773,11 @@ function renderAjustes(){
   <div class="card"><div class="card-b" style="padding-top:12px">
     <h2 style="font-size:16px;margin:0 0 4px">Semana</h2><p class="hint" style="margin:0 0 10px">Toca un día para cambiar entre entreno, opcional y descanso.</p>
     <div class="sched">${order.map(i => `<button class="${s.sched[i]}" data-action="sched" data-i="${i}" aria-label="${DOW[i]}: ${lbl[s.sched[i]]}">${DOWL[i]}<small>${lbl[s.sched[i]]}</small></button>`).join("")}</div>
+  </div></div>
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">Modo mantenimiento</h2>
+    <p class="hint" style="margin:0 0 10px">Para la recta final de las oposiciones o semanas imposibles: 2 sesiones de 30 minutos (correctivo + una ronda corta de fuerza). Pon martes y jueves, o los días que puedas, como descanso en la semana.</p>
+    <div class="chips">${[[false,"Normal"],[true,"Mantenimiento"]].map(([v,t]) => `<button class="chip" data-action="mant" data-v="${v ? 1 : 0}" aria-pressed="${!!s.mant===v}">${t}</button>`).join("")}</div>
   </div></div>
   <div class="card"><div class="card-b" style="padding-top:12px">
     <h2 style="font-size:16px;margin:0 0 8px">Pesos por defecto</h2>
@@ -812,7 +893,15 @@ const A = {
     else nv = Math.max(min, v + dlt);
     setp(d, p, nv); commit();
   },
-  "toggle": b => { const d = wday(); const p = b.dataset.path; setp(d, p, getp(d, p) ? undefined : true); commit(); },
+  "toggle": b => {
+    const d = wday(); const p = b.dataset.path; setp(d, p, getp(d, p) ? undefined : true);
+    const m = p.match(/^b\.f\.(\w+)\.done$/);
+    if (m && getp(d, p)){ const e = FZ.find(x => x.k === m[1]); const last = lastFz(m[1], ui.date); const base = "b.f." + m[1];
+      if (getp(d, base + ".kg") == null && last && last.v && last.v.kg) setp(d, base + ".kg", last.v.kg);
+      if (getp(d, base + ".series") == null) setp(d, base + ".series", e.s);
+      if (getp(d, base + ".reps") == null) setp(d, base + ".reps", e.n); }
+    commit();
+  },
   "set": b => {
     const d = wday(); const p = b.dataset.path; const v = b.dataset.num ? Number(b.dataset.v) : b.dataset.v;
     setp(d, p, getp(d, p) === v ? undefined : v); commit();
@@ -824,6 +913,8 @@ const A = {
   "rest-start": b => timerStart({ kind:"rest", idx:Number(b.dataset.i), label:`Descanso tras la ronda ${Number(b.dataset.i)+1}`, marks:[90,120], lead:false }),
   "timer-stop": () => timerEnd(true),
   "timer-cancel": () => timerEnd(false),
+  "mant": b => { S().mant = b.dataset.v === "1"; commit(); },
+  "set-bmode": b => { const d = wday(); d.b ||= {}; d.b.mode = b.dataset.v; commit(); },
   "round-add": () => {
     const d = wday(); d.b ||= {}; d.b.rounds ||= [];
     const prevR = d.b.rounds[d.b.rounds.length - 1];
@@ -864,7 +955,9 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("input", e => {
   const t = e.target; if (!t.dataset || !t.dataset.bind) return;
-  setp(wday(), t.dataset.bind, t.value || undefined);
+  let v = t.value || undefined;
+  if (v !== undefined && t.dataset.num){ const n = Number(String(v).replace(",", ".")); v = isFinite(n) ? n : undefined; }
+  setp(wday(), t.dataset.bind, v);
   clearTimeout(saveTimer); saveTimer = setTimeout(save, 400);
 });
 document.addEventListener("pointermove", e => { const c = e.target.closest && e.target.closest(".chart"); if (c) chartHover(c, e); });
@@ -895,7 +988,7 @@ $("#fileIn").addEventListener("change", async e => {
 function toCSV(){
   const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","cadera_bajo_campana","contralateral","isometria_3pos","plancha_pared_s","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
-    "b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
+    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("p3.lateral") ? 1 : "", d.finDia, g("extra.flex.done") ? 1 : "", g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
@@ -904,6 +997,8 @@ function toCSV(){
     g("a.bu.kg"), g("a.bu.series"), g("a.bu.reps"), g("a.arr.reps"), g("a.arr.sinBU") ? 1 : "", g("a.arr.cadera") ? 1 : "", g("a.contra.done") ? (g("a.contra.res") ?? "sí") : "", g("a.iso.done") ? 1 : "", g("extra.plank.done") ? (g("extra.plank.secs") ?? "sí") : "", g("a.tgu.kg"), g("a.tgu.izq"), g("a.tgu.der"),
     g("a.hk.series"), g("a.hk.reps"), g("a.hk.ardor"), g("a.hk.sondaOk") ? 1 : "", g("a.pie.ardor"), g("a.pie.abre") ? 1 : "",
     g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.carry.var"), g("a.carry.kg"), g("a.carry.paseos"), g("a.retest.done") ? 1 : "",
+    hasB(d) ? bMode(d, x) : "", ...FZ.flatMap(e => getp(d, "b.f."+e.k+".done") ? [g("b.f."+e.k+".kg"), g("b.f."+e.k+".series"), g("b.f."+e.k+".reps")] : ["","",""]),
+    d.despertares, g("hab.luz") ? 1 : "", g("hab.cafe") ? 1 : "", g("hab.prot"), g("paseo.done") ? (g("paseo.min") ?? "sí") : "", g("cuerpo.peso"), g("cuerpo.cintura"),
     maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
   return [cols.join(","), ...rows].join("\n");
 }
