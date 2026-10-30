@@ -1,12 +1,10 @@
 # Correctivo
 
-App web instalable (PWA) para registrar el trabajo correctivo con kettlebells:
+App web instalable (PWA) para registrar entrenamiento y hábitos:
 
-- **P3 · mantenimiento diario**: checklist con contador de repeticiones.
-- **Bloque A · correctivo**: bottoms-up press → press normal (reps limpias), TGU hasta mano,
-  half kneeling press, press de pie, overhead holds con cronómetro, opcionales y retest del TGU cada 2 semanas.
-- **Bloque B · complejo bilateral**: rondas de clean, front squat, swing, remo y carry, con descanso cronometrado.
-- **Progreso**: gráficas de reps limpias, reps antes del ardor y overhead hold por lado.
+- **Hoy**: resumen del día, mañana (sueño, energía, suplementos), mantenimiento P3, core y movilidad, bloque correctivo, bloque de fuerza o complejo, airbike y cierre (hábitos, paseo, peso y cintura).
+- **Semana**: calendario de la semana y resumen de sesiones, sueño, proteína, paseos y medidas.
+- **Progreso**: gráficas e historial.
 - **Copia de seguridad** en JSON y exportación a CSV.
 
 Los registros se guardan **solo en el navegador del móvil**; este repositorio no contiene datos personales.
