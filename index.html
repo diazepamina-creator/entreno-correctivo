@@ -19,7 +19,7 @@
   --amber:#7a4f00; --amber-bg:#fff2d9; --danger:#a8241c; --danger-bg:#fbe5e3;
   --series-1:#2a78d6; --series-2:#eb6834;
   --radius:16px; --gap:14px;
-  --k-p3:#2E6B4F; --k-extras:#6a4c9c; --k-a:#1F3A5F; --k-b:#b5541c; --k-cierre:#6b6a64; --k-sleep:#3f5f8a; --k-air:#0f7d8c;
+  --k-p3:#2E6B4F; --k-extras:#6a4c9c; --k-a:#1F3A5F; --k-b:#b5541c; --k-cierre:#6b6a64; --k-sleep:#3f5f8a; --k-air:#0f7d8c; --k-cocina:#5b7a1f;
   --shadow:0 1px 2px rgba(20,20,20,.04),0 4px 14px rgba(20,20,20,.05);
 }
 @media (prefers-color-scheme: dark){
@@ -29,7 +29,7 @@
     --line:#343a3f; --brand:#9cbde3; --brand-ink:#0e1a28; --accent:#6cc79a; --accent-soft:#1d3329;
     --amber:#f2c66e; --amber-bg:#3a2d12; --danger:#ff8a80; --danger-bg:#3d1c1a;
     --series-1:#3987e5; --series-2:#d95926;
-    --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6;
+    --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a;
     --shadow:none;
   }
 }
@@ -39,7 +39,7 @@
   --line:#343a3f; --brand:#9cbde3; --brand-ink:#0e1a28; --accent:#6cc79a; --accent-soft:#1d3329;
   --amber:#f2c66e; --amber-bg:#3a2d12; --danger:#ff8a80; --danger-bg:#3d1c1a;
   --series-1:#3987e5; --series-2:#d95926;
-  --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6;
+  --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a;
   --shadow:none;
 }
 *{box-sizing:border-box}
@@ -191,8 +191,8 @@ nav.tabs div{display:flex;width:100%;max-width:640px}
 nav.tabs button{flex:1;min-height:62px;border:0;background:none;cursor:pointer;font-size:11.5px;font-weight:650;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 nav.tabs button svg{width:24px;height:24px}
 nav.tabs button[aria-current="page"]{color:var(--brand)}
-nav.tabs button[aria-current="page"] svg{background:color-mix(in srgb,var(--brand) 14%,transparent);border-radius:10px;padding:2px 10px;width:44px;box-sizing:content-box}
-nav.tabs button svg{padding:2px 10px;width:44px;box-sizing:content-box}
+nav.tabs button[aria-current="page"] svg{background:color-mix(in srgb,var(--brand) 14%,transparent);border-radius:10px;padding:2px 8px;width:40px;box-sizing:content-box}
+nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
 .timer{position:fixed;inset:0;z-index:20;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
 .timer.on{display:flex}
 .t-label{font-size:18px;font-weight:650;max-width:420px}
@@ -203,6 +203,29 @@ nav.tabs button svg{padding:2px 10px;width:44px;box-sizing:content-box}
 .t-marks{font-size:14px;color:var(--ink-2)}
 .t-btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px;margin-top:28px}
 .t-btns .btn{min-height:64px;font-size:19px}
+.card.k-desp,.card.k-menu,.card.k-tanda,.card.k-pesc,.card.k-compra{--k:var(--k-cocina)}
+.pill.bad{background:var(--danger-bg);color:var(--danger)}
+.ck-cat{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:16px 0 2px}
+.dsp{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;border:0;border-top:1px solid var(--line);background:none;text-align:left;padding:6px 0;cursor:pointer;font-weight:600;font-size:15px}
+.dsp .st{margin-left:auto}
+.dsp.hidden-item{opacity:.45}
+.ck-cat + .dsp{border-top:0}
+.msday{display:grid;grid-template-columns:44px 1fr;gap:6px 10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.msday:first-child{border-top:0}
+.msday .dl{grid-row:span 2;font-weight:750;font-size:14px;text-align:center;line-height:1.15}
+.msday .dl small{display:block;font-weight:500;font-size:12px;color:var(--ink-2)}
+.msday.today .dl{color:var(--k-cocina)}
+.mslot{display:flex;align-items:center;gap:8px;min-width:0}
+.mslot span{flex:0 0 46px;font-size:12px;font-weight:600;color:var(--ink-3)}
+.sel{flex:1;min-width:0;width:100%;min-height:42px;border:1px solid var(--line);border-radius:12px;padding:6px 10px;background:var(--surface-2);color:var(--ink);font:inherit;font-size:14.5px}
+.txt{flex:1;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:6px 10px;background:var(--surface-2);color:var(--ink);font:inherit}
+.pz{display:grid;grid-template-columns:1fr auto auto;gap:8px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.pz:first-of-type{border-top:0}
+.pz .nm{font-weight:650}.pz .nm small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-2)}
+.pz .tot{font-variant-numeric:tabular-nums;font-weight:750;min-width:44px;text-align:right}
+.mini-step{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.mini-step button{min-width:36px;min-height:36px;border:0;background:var(--surface-2);cursor:pointer;font-weight:700}
+.mini-step output{min-width:28px;text-align:center;font-variant-numeric:tabular-nums}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;display:none;max-width:90vw}
 .toast.on{display:block}
 .muted{color:var(--ink-3)}
@@ -223,6 +246,7 @@ nav.tabs button svg{padding:2px 10px;width:44px;box-sizing:content-box}
 <main>
   <section class="panel" id="p-hoy" aria-label="Hoy"></section>
   <section class="panel" id="p-semana" aria-label="Semana"></section>
+  <section class="panel" id="p-cocina" aria-label="Cocina"></section>
   <section class="panel" id="p-hist" aria-label="Historial"></section>
   <section class="panel" id="p-guia" aria-label="Guía"></section>
   <section class="panel" id="p-ajustes" aria-label="Ajustes"></section>
@@ -233,6 +257,8 @@ nav.tabs button svg{padding:2px 10px;width:44px;box-sizing:content-box}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="14" r="6.5"/><path d="M8.5 8.5a3.5 3.5 0 0 1 7 0"/></svg>Hoy</button>
   <button data-action="tab" data-tab="semana">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Semana</button>
+  <button data-action="tab" data-tab="cocina">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M9 4c0 2 1.5 2 1.5 4M13.5 4c0 2 1.5 2 1.5 4"/></svg>Cocina</button>
   <button data-action="tab" data-tab="hist">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V5M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>Progreso</button>
   <button data-action="tab" data-tab="guia">
@@ -256,7 +282,7 @@ nav.tabs button svg{padding:2px 10px;width:44px;box-sizing:content-box}
 
 <script>
 "use strict";
-const VERSION = "2.1.0";
+const VERSION = "2.2.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -299,7 +325,7 @@ const fmtDate = s => { const d = parseIso(s); return `${DOW[d.getDay()]} ${d.get
 const fmtSecs = s => s == null ? "—" : `${Math.floor(s/60)}:${pad(Math.floor(s%60))}`;
 
 /* ---------------- Estado de UI ---------------- */
-const ui = { tab:"hoy", date: todayIso(), open:{ p3:true, extras:false, air:false, a:true, b:true, cierre:true, opt:false, retest:false }, tables:{}, forceTrain:{} };
+const ui = { tab:"hoy", date: todayIso(), open:{ p3:true, extras:false, air:false, a:true, b:true, cierre:true, opt:false, retest:false, compra:true, pesc:true, menu:true, tanda:false, desp:false }, tables:{}, forceTrain:{} };
 const day = (d = ui.date) => DB.days[d] || {};
 const wday = (d = ui.date) => (DB.days[d] ||= {});
 const S = () => DB.settings;
@@ -356,7 +382,7 @@ function timerField(path, label, o = {}){
     <button class="timer-btn" data-action="timer-start" data-path="${path}" data-label="${esc(label)}" data-marks="${o.marks||""}" data-lead="${o.lead?1:0}" data-kind="hold">▶ Cronometrar</button>
     ${v != null ? `<button class="link" data-action="clear" data-path="${path}">borrar</button>` : ""}</div></div>`;
 }
-const CARD_ICO = { p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋" };
+const CARD_ICO = { p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋", compra:"≡", pesc:"≈", menu:"M", tanda:"T", desp:"D" };
 function card(key, title, sub, badge, body){
   const closed = !ui.open[key];
   const ico = CARD_ICO[key];
@@ -933,6 +959,10 @@ function renderGuia(){
   <li>Café solo hasta las 14:00; por la tarde, kukicha o malta.</li>
   <li>Unos 150 g de proteína al día en 3-4 tomas: pescado, huevos, legumbres, tofu, tempeh, suero. Plato: mitad verduras, un cuarto proteína, un cuarto integrales.</li>
   <li>Cintura cada dos semanas y peso 3 días por semana, en ayunas.</li></ul>
+  <h3>Cocina</h3>
+  <ul><li>Viernes: revisa la despensa y compra con la lista. Sábado o domingo: una hora de tanda (arroz, legumbre o caldo, verduras al horno, huevos).</li>
+  <li>Menú con platos tipo que se repiten: elige primero la proteína.</li>
+  <li><b>Bonito o atún: máximo 3 raciones a la semana.</b> El resto de latas, caballa, sardinas o mejillones (mercurio bajo). Fuera de la lista: pez espada, atún rojo, tiburón y lucio.</li></ul>
   <h3>Cómo leer cada serie</h3>
   <ul><li><b>Ardor con la costilla en su sitio:</b> correcto. Es la cadena lateral trabajando; sigue.</li>
   <li><b>La costilla cede:</b> para esa repetición ahí. No termines el rango «aunque sea con algo de flare».</li>
@@ -1018,11 +1048,140 @@ function renderAjustes(){
   });
 }
 
+
+/* ---------------- Cocina ---------------- */
+const DESP = [
+  { cat:"Proteína", items:[["huevos","Huevos"],["bonito","Bonito o atún en cristal"],["caballa","Caballa en lata"],["sardinas","Sardinas en lata"],["mejillones","Mejillones en lata"],["merluza","Merluza o bacalao congelado"],["salmon","Salmón"],["tofu","Tofu"],["tempeh","Tempeh"],["edamame","Edamame congelado"],["lentejas","Lentejas"],["garbanzos","Garbanzos"],["alubias","Alubias"],["suero","Proteína de suero"]] },
+  { cat:"Integrales", items:[["arroz","Arroz integral"],["pan","Pan integral"],["pasta","Pasta integral"],["patata","Patata o boniato"]] },
+  { cat:"Verdura", items:[["brocoli","Brócoli"],["coliflor","Coliflor"],["ensalada","Ensalada o espinacas"],["zanahoria","Zanahoria"],["cebolla","Cebolla"],["puerro","Puerro"],["calabacin","Calabacín"],["pimiento","Pimiento"],["vcong","Verdura congelada"]] },
+  { cat:"Fruta", items:[["manzanas","Manzanas"],["pina","Piña"],["citricos","Kiwis o naranjas"],["frutosrojos","Frutos rojos congelados"]] },
+  { cat:"Despensa", items:[["miso","Miso"],["alga","Kombu o wakame"],["tamari","Tamari o salsa de soja"],["aove","Aceite de oliva virgen extra"],["fsecos","Frutos secos naturales"],["sesamo","Sésamo"],["kukicha","Té kukicha"],["malta","Malta de cebada"],["infus","Boldo, genciana, cardo mariano"],["creatina","Creatina"],["cafe","Café"]] },
+];
+const PESC = [
+  { k:"bonito", t:"Bonito o atún", lvl:"medio", cap:3 },
+  { k:"caballa", t:"Caballa", lvl:"bajo" },
+  { k:"sardinas", t:"Sardinas", lvl:"bajo" },
+  { k:"mejillones", t:"Mejillones", lvl:"bajo" },
+  { k:"blanco", t:"Merluza o bacalao", lvl:"bajo" },
+  { k:"salmon", t:"Salmón", lvl:"bajo" },
+];
+const PLATOS = [
+  { k:"bol-caballa", t:"Bol de arroz integral, verduras al horno y caballa", f:"caballa" },
+  { k:"bol-tofu", t:"Bol de arroz integral, verduras al horno y tofu" },
+  { k:"pasta-bonito", t:"Pasta integral con bonito y brócoli", f:"bonito" },
+  { k:"ens-bonito", t:"Ensalada completa con bonito", f:"bonito" },
+  { k:"legumbre", t:"Lentejas o garbanzos con verduras" },
+  { k:"merluza", t:"Merluza con caldo de miso y verdura", f:"blanco" },
+  { k:"huevos", t:"Huevos con ensalada y pan integral" },
+  { k:"tempeh", t:"Salteado de tempeh o edamame con verduras" },
+  { k:"sardinas", t:"Ensalada de patata con sardinas", f:"sardinas" },
+  { k:"mejillones", t:"Arroz con mejillones y verduras", f:"mejillones" },
+  { k:"salmon", t:"Salmón con boniato y brócoli", f:"salmon" },
+  { k:"libre", t:"Libre o fuera de casa" },
+];
+const TANDA = [
+  { k:"arroz", t:"Olla de arroz integral", s:"Para 3-4 días; en la nevera, tapado" },
+  { k:"legumbre", t:"Olla de legumbre o caldo", s:"Caldo con kombu y verduras; el miso, al servir" },
+  { k:"horno", t:"Bandeja de verduras al horno", s:"Brócoli, coliflor, calabacín, pimiento, cebolla" },
+  { k:"huevos", t:"Huevos cocidos", s:"6-8, para las tomas rápidas" },
+  { k:"lavar", t:"Ensalada lavada y fruta a mano", s:"Para que lo fácil sea lo sano" },
+];
+const DSTATE = { hay:["Hay","ok"], poco:["Queda poco","warn"], falta:["Falta","bad"] };
+const K = () => {
+  const c = (DB.cocina ||= {});
+  c.desp ||= {}; c.oculto ||= {}; c.propios ||= []; c.platos ||= []; c.menu ||= {}; c.tanda ||= {}; c.sueltas ||= {}; c.carro ||= {};
+  return c;
+};
+const allPlatos = () => [...PLATOS.filter(p => p.k !== "libre"), ...K().platos, PLATOS.find(p => p.k === "libre")];
+const monOf = x => addDays(x, -((parseIso(x).getDay() + 6) % 7));
+const cWeek = () => addDays(monOf(todayIso()), 7 * (ui.cwk || 0));
+function despItems(){
+  const c = K();
+  return DESP.map(g => ({ cat:g.cat, items:[...g.items.map(([k, t]) => ({ k, t })), ...c.propios.filter(p => p.cat === g.cat).map(p => ({ k:p.k, t:p.t, own:true }))] }));
+}
+function fishCount(wk){
+  const c = K(), m = c.menu[wk] || {}, out = {};
+  PESC.forEach(f => out[f.k] = { menu:0, sueltas: getp(c.sueltas, wk + "." + f.k) || 0 });
+  Object.values(m).forEach(pk => { const pl = allPlatos().find(p => p.k === pk); if (pl && pl.f && out[pl.f]) out[pl.f].menu++; });
+  return out;
+}
+function shopList(){
+  const c = K(); const out = [];
+  despItems().forEach(g => g.items.forEach(i => { const st = c.desp[i.k]; if (!c.oculto[i.k] && (st === "poco" || st === "falta")) out.push({ ...i, cat:g.cat, st }); }));
+  return out;
+}
+function renderCocina(){
+  const c = K(), wk = cWeek(), isNow = (ui.cwk || 0) === 0, today = todayIso();
+  const fmtShort = x => { const d = parseIso(x); return `${d.getDate()} ${MON[d.getMonth()]}`; };
+  const fc = fishCount(wk);
+  const bon = fc.bonito.menu + fc.bonito.sueltas;
+  const totF = PESC.reduce((a, f) => a + fc[f.k].menu + fc[f.k].sueltas, 0);
+  const list = shopList();
+  let h = `<div class="wkhead"><button class="icon-btn" data-action="c-wk" data-d="-1" aria-label="Semana anterior">‹</button>
+    <h2>${isNow ? "Esta semana" : (ui.cwk > 0 ? "Semana que viene" : "Semana")}<small>${fmtShort(wk)} – ${fmtShort(addDays(wk, 6))}</small></h2>
+    <button class="icon-btn" data-action="c-wk" data-d="1" aria-label="Semana siguiente" ${(ui.cwk || 0) >= 1 ? "disabled" : ""}>›</button></div>`;
+
+  // Lista de la compra
+  const groups = {}; list.forEach(i => (groups[i.cat] ||= []).push(i));
+  const nCarro = list.filter(i => c.carro[i.k]).length;
+  h += card("compra", "Lista de la compra", list.length ? `${list.length} productos · ${nCarro} en el carro` : "Nada pendiente", "",
+    list.length ? `${Object.keys(groups).map(cat => `<div class="ck-cat">${esc(cat)}</div>${groups[cat].map(i =>
+      `<button class="check" data-action="c-carro" data-k="${i.k}" aria-pressed="${!!c.carro[i.k]}"><span class="box">${c.carro[i.k] ? "✓" : ""}</span><span class="lbl">${esc(i.t)}<small>${i.st === "falta" ? "Falta" : "Queda poco"}</small></span></button>`).join("")}`).join("")}
+      <div class="row" style="margin-top:12px"><button class="btn accent" data-action="c-compra-hecha" ${nCarro ? "" : "disabled"}>Compra hecha (${nCarro})</button><button class="btn" data-action="c-share">Compartir lista</button></div>
+      <p class="muted" style="font-size:13px;margin:8px 0 0">Marca lo que metes en el carro. «Compra hecha» lo pasa a «Hay» en la despensa.</p>`
+    : `<p class="muted" style="margin:4px 0 0">Marca en la despensa lo que queda poco o falta y aparecerá aquí.</p>`);
+
+  // Pescado y topes
+  const bonCls = bon > 3 ? "bad" : bon === 3 ? "warn" : "ok";
+  h += card("pesc", "Pescado de la semana", `${totF} raciones · bonito ${bon}/3`, `<span class="pill ${bonCls}">${bon > 3 ? "Bonito: pasado" : bon === 3 ? "Bonito: en el tope" : "Bonito: bien"}</span>`,
+    `${bon > 3 ? `<div class="note bad">Llevas ${bon} raciones de bonito o atún; el tope es 3. Cambia alguna por caballa, sardinas o mejillones.</div>` : ""}
+    ${PESC.map(f => { const v = fc[f.k], t = v.menu + v.sueltas;
+      return `<div class="pz"><div class="nm">${esc(f.t)}<small>Mercurio ${f.lvl}${f.cap ? ` · tope ${f.cap}/semana` : ""} · ${v.menu} en el menú</small></div>
+      <div class="mini-step" role="group" aria-label="Raciones sueltas de ${esc(f.t)}"><button data-action="c-suelta" data-k="${f.k}" data-d="-1" aria-label="Menos">−</button><output>${v.sueltas}</output><button data-action="c-suelta" data-k="${f.k}" data-d="1" aria-label="Más">+</button></div>
+      <div class="tot" style="${f.cap && t > f.cap ? "color:var(--danger)" : ""}">${t}${f.cap ? `/${f.cap}` : ""}</div></div>`; }).join("")}
+    <p class="muted" style="font-size:13px;margin:10px 0 0">Las del menú se cuentan solas; con −/+ apuntas las sueltas (una lata de merienda, una comida fuera). Recomendación general: 3-4 raciones a la semana alternando blanco y azul. Fuera de la lista: pez espada o emperador, atún rojo, tiburón (cazón) y lucio.</p>`);
+
+  // Menú semanal
+  const m = c.menu[wk] || {};
+  const opts = (sel, ph) => `<option value="">${ph}</option>${allPlatos().map(p => `<option value="${p.k}"${p.k === sel ? " selected" : ""}>${esc(p.t)}</option>`).join("")}`;
+  h += card("menu", "Menú", `${Object.keys(m).length}/14 comidas · ${fc.bonito.menu} con bonito`, "",
+    `${Array.from({ length: 7 }, (_, i) => { const x = addDays(wk, i), dd = parseIso(x);
+      return `<div class="msday${x === today ? " today" : ""}"><div class="dl">${["L","M","X","J","V","S","D"][i]}<small>${dd.getDate()}</small></div>
+        <div class="mslot"><span>Comida</span><select class="sel" data-cbind="menu.${wk}.${i}c" aria-label="Comida del ${esc(fmtDate(x))}">${opts(m[i + "c"], "—")}</select></div>
+        <div class="mslot"><span>Cena</span><select class="sel" data-cbind="menu.${wk}.${i}n" aria-label="Cena del ${esc(fmtDate(x))}">${opts(m[i + "n"], "—")}</select></div></div>`; }).join("")}
+    <div class="row" style="margin-top:12px"><button class="btn" data-action="c-copy-menu">Copiar la semana anterior</button>${Object.keys(m).length ? `<button class="link" data-action="c-clear-menu">vaciar</button>` : ""}</div>
+    <div class="ck-cat">Añadir un plato tipo</div>
+    <div class="row" style="flex-wrap:nowrap"><input class="txt" id="cPlatoName" placeholder="Nombre del plato" autocomplete="off">
+      <select class="sel" id="cPlatoFish" style="flex:0 0 120px" aria-label="Pescado del plato"><option value="">Sin pescado</option>${PESC.map(f => `<option value="${f.k}">${esc(f.t)}</option>`).join("")}</select></div>
+    <div class="row" style="margin-top:8px"><button class="btn" data-action="c-add-plato">Añadir plato</button></div>
+    ${c.platos.length ? `<div class="chips" style="margin-top:10px">${c.platos.map(p => `<button class="chip sm" data-action="c-del-plato" data-k="${p.k}" aria-label="Quitar ${esc(p.t)}">${esc(p.t)} ✕</button>`).join("")}</div>` : ""}`);
+
+  // Tanda
+  const td = c.tanda[wk] || {}, tn = TANDA.filter(t => td[t.k]).length;
+  h += card("tanda", "Tanda de cocina", "Sábado o domingo, una hora", `<span class="pill ${tn === TANDA.length ? "ok" : ""}">${tn}/${TANDA.length}</span>`,
+    TANDA.map(t => `<button class="check" data-action="c-tanda" data-k="${t.k}" aria-pressed="${!!td[t.k]}"><span class="box">${td[t.k] ? "✓" : ""}</span><span class="lbl">${esc(t.t)}<small>${esc(t.s)}</small></span></button>`).join(""));
+
+  // Despensa
+  const edit = !!ui.cEdit;
+  h += card("desp", "Despensa", edit ? "Editando: toca para quitar o recuperar" : "Toca para cambiar: hay → queda poco → falta", "",
+    `${despItems().map(g => { const its = g.items.filter(i => edit || !c.oculto[i.k]); if (!its.length) return "";
+      return `<div class="ck-cat">${esc(g.cat)}</div>${its.map(i => { const hid = !!c.oculto[i.k];
+        if (edit) return `<button class="dsp${hid ? " hidden-item" : ""}" data-action="${i.own ? "c-del-prod" : "c-hide"}" data-k="${i.k}">${esc(i.t)}<span class="st pill ${hid ? "" : "bad"}">${i.own ? "Borrar" : hid ? "Recuperar" : "Quitar"}</span></button>`;
+        const st = c.desp[i.k] || "hay", [lab, cls] = DSTATE[st];
+        return `<button class="dsp" data-action="c-desp" data-k="${i.k}">${esc(i.t)}<span class="st pill ${cls}">${lab}</span></button>`; }).join("")}`; }).join("")}
+    ${edit ? `<div class="ck-cat">Añadir producto</div>
+      <div class="row" style="flex-wrap:nowrap"><input class="txt" id="cProdName" placeholder="Producto" autocomplete="off">
+      <select class="sel" id="cProdCat" style="flex:0 0 120px" aria-label="Sección">${DESP.map(g => `<option>${esc(g.cat)}</option>`).join("")}</select></div>
+      <div class="row" style="margin-top:8px"><button class="btn" data-action="c-add-prod">Añadir</button></div>` : ""}
+    <div class="row" style="margin-top:12px"><button class="btn" data-action="c-edit">${edit ? "Hecho" : "Editar productos"}</button></div>`);
+  $("#p-cocina").innerHTML = h;
+}
+
 /* ---------------- Render general ---------------- */
 function render(){
   renderTop();
   document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === "p-" + ui.tab));
-  ({ hoy:renderHoy, semana:renderSemana, hist:renderHist, guia:renderGuia, ajustes:renderAjustes })[ui.tab]();
+  ({ hoy:renderHoy, semana:renderSemana, cocina:renderCocina, hist:renderHist, guia:renderGuia, ajustes:renderAjustes })[ui.tab]();
 }
 
 /* ---------------- Temporizador ---------------- */
@@ -1135,6 +1294,34 @@ const A = {
     if (!S().airStart){ const dw = parseIso(ui.date).getDay(); S().airStart = addDays(ui.date, dw === 1 ? 7 : (8 - dw) % 7 || 7); }
     commit(); toast("Tests guardados: los ritmos se calculan con ellos");
   },
+  "c-wk": b => { ui.cwk = Math.max(-8, Math.min(1, (ui.cwk || 0) + Number(b.dataset.d))); render(); },
+  "c-desp": b => { const c = K(), k = b.dataset.k, nx = { hay:"poco", poco:"falta", falta:"hay" }; const v = nx[c.desp[k] || "hay"];
+    if (v === "hay"){ delete c.desp[k]; delete c.carro[k]; } else c.desp[k] = v; commit(); },
+  "c-carro": b => { const c = K(), k = b.dataset.k; if (c.carro[k]) delete c.carro[k]; else c.carro[k] = true; commit(); },
+  "c-compra-hecha": () => { const c = K(); const ks = Object.keys(c.carro); ks.forEach(k => { delete c.desp[k]; delete c.carro[k]; }); commit(); toast(`${ks.length} productos a la despensa`); },
+  "c-share": async () => {
+    const list = shopList(); if (!list.length) return;
+    const groups = {}; list.forEach(i => (groups[i.cat] ||= []).push(i));
+    const txt = "Compra\n" + Object.keys(groups).map(cat => `\n${cat}\n` + groups[cat].map(i => `- ${i.t}`).join("\n")).join("\n");
+    try{ if (navigator.share){ await navigator.share({ title:"Lista de la compra", text:txt }); return; } }catch(e){ if (e.name === "AbortError") return; }
+    try{ await navigator.clipboard.writeText(txt); toast("Lista copiada"); }catch(e){ toast("No se ha podido copiar"); }
+  },
+  "c-suelta": b => { const c = K(), p = cWeek() + "." + b.dataset.k; const v = Math.max(0, (getp(c.sueltas, p) || 0) + Number(b.dataset.d)); setp(c.sueltas, p, v || undefined); commit(); },
+  "c-tanda": b => { const c = K(), wk = cWeek(); c.tanda[wk] ||= {}; if (c.tanda[wk][b.dataset.k]) delete c.tanda[wk][b.dataset.k]; else c.tanda[wk][b.dataset.k] = true; commit(); },
+  "c-copy-menu": () => { const c = K(), wk = cWeek(), prev = c.menu[addDays(wk, -7)];
+    if (!prev || !Object.keys(prev).length){ toast("La semana anterior no tiene menú"); return; }
+    if (c.menu[wk] && Object.keys(c.menu[wk]).length && !confirm("¿Sustituir el menú de esta semana por el de la anterior?")) return;
+    c.menu[wk] = { ...prev }; commit(); },
+  "c-clear-menu": () => { const c = K(); if (confirm("¿Vaciar el menú de esta semana?")){ delete c.menu[cWeek()]; commit(); } },
+  "c-add-plato": () => { const t = ($("#cPlatoName").value || "").trim(); if (!t){ toast("Escribe el nombre del plato"); return; }
+    const f = $("#cPlatoFish").value || undefined; K().platos.push({ k:"u" + Date.now().toString(36), t, f }); commit(); toast("Plato añadido al menú"); },
+  "c-del-plato": b => { const c = K(), pl = c.platos.find(p => p.k === b.dataset.k); if (!pl || !confirm(`¿Quitar «${pl.t}» de los platos tipo?`)) return;
+    c.platos = c.platos.filter(p => p !== pl); Object.values(c.menu).forEach(m => Object.keys(m).forEach(s => { if (m[s] === pl.k) delete m[s]; })); commit(); },
+  "c-edit": () => { ui.cEdit = !ui.cEdit; render(); },
+  "c-hide": b => { const c = K(), k = b.dataset.k; if (c.oculto[k]) delete c.oculto[k]; else { c.oculto[k] = true; delete c.desp[k]; delete c.carro[k]; } commit(); },
+  "c-add-prod": () => { const t = ($("#cProdName").value || "").trim(); if (!t){ toast("Escribe el producto"); return; }
+    K().propios.push({ k:"u" + Date.now().toString(36), t, cat:$("#cProdCat").value }); commit(); },
+  "c-del-prod": b => { const c = K(), k = b.dataset.k; c.propios = c.propios.filter(p => p.k !== k); delete c.desp[k]; delete c.carro[k]; commit(); },
   "wk": b => { ui.wk = Math.min(0, (ui.wk || 0) + Number(b.dataset.d)); render(); },
   "set-bmode": b => { const d = wday(); d.b ||= {}; d.b.mode = b.dataset.v; commit(); },
   "round-add": () => {
@@ -1179,6 +1366,7 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("input", e => {
   const t0 = e.target;
+  if (t0.dataset && t0.dataset.cbind){ setp(K(), t0.dataset.cbind, t0.value || undefined); commit(); return; }
   if (t0.dataset && t0.dataset.sbind){
     let v = t0.value || undefined;
     if (v !== undefined && t0.dataset.num){ const n = Number(String(v).replace(",", ".")); v = isFinite(n) ? n : undefined; }
@@ -1214,7 +1402,7 @@ $("#fileIn").addEventListener("change", async e => {
     if (!d || d.app !== "correctivo" || !d.days) throw new Error("formato");
     const n = Object.keys(d.days).length;
     if (!confirm(`La copia tiene ${n} días. Se combinará con lo que hay: si un día existe en los dos, gana el de la copia. ¿Seguir?`)) return;
-    Object.assign(DB.days, d.days); if (d.settings) DB.settings = Object.assign(DB.settings, d.settings);
+    Object.assign(DB.days, d.days); if (d.settings) DB.settings = Object.assign(DB.settings, d.settings); if (d.cocina) DB.cocina = d.cocina;
     commit(); toast(`Importados ${n} días`);
   }catch(err){ toast("Ese archivo no es una copia válida de esta app"); }
 });
