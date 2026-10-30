@@ -284,7 +284,7 @@ nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
 
 <script>
 "use strict";
-const VERSION = "2.3.0";
+const VERSION = "2.4.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -556,6 +556,10 @@ function renderHoy(){
      <div class="row" style="margin-bottom:10px;gap:16px">
        <div class="field"><label for="peso">Peso (kg)</label><input class="num" id="peso" inputmode="decimal" data-bind="cuerpo.peso" data-num="1" value="${getp(d,"cuerpo.peso") ?? ""}" placeholder="en ayunas"></div>
        <div class="field"><label for="cintura">Cintura (cm)</label><input class="num" id="cintura" inputmode="decimal" data-bind="cuerpo.cintura" data-num="1" value="${getp(d,"cuerpo.cintura") ?? ""}" placeholder="ombligo"></div></div>
+     <div class="row" style="margin-bottom:6px;gap:16px">
+       <div class="field"><label for="tobI">Tobillo izq. (cm)</label><input class="num" id="tobI" inputmode="decimal" data-bind="cuerpo.tobIzq" data-num="1" value="${getp(d,"cuerpo.tobIzq") ?? ""}" placeholder="a la pared"></div>
+       <div class="field"><label for="tobD">Tobillo der. (cm)</label><input class="num" id="tobD" inputmode="decimal" data-bind="cuerpo.tobDer" data-num="1" value="${getp(d,"cuerpo.tobDer") ?? ""}" placeholder="a la pared"></div></div>
+     <p class="hint" style="margin-top:0">Cada dos semanas, con la cintura: distancia máxima del pie a la pared tocándola con la rodilla sin levantar el talón. Más de 10 cm es buena movilidad; vigila sobre todo la diferencia entre lados.</p>
      ${check("video", "Sesión grabada en vídeo", "De perfil, cámara a la altura de la cadera, clips cortos")}
      <div class="field" style="margin-top:8px"><label for="notas">Notas</label>
      <textarea id="notas" data-bind="notas" placeholder="Sensaciones, dónde apareció el ardor, qué cambió…">${esc(d.notas||"")}</textarea></div>`);
@@ -853,6 +857,9 @@ function renderHist(){
     { name:"RPM 5 min", pts: series("air.testRPM"), c:"var(--series-2)" }], "");
   h += chartCard("c6", "Cintura", "Cada dos semanas, en ayunas, a la altura del ombligo", [
     { name:"Cintura", pts: series("cuerpo.cintura"), c:"var(--series-1)" }], " cm");
+  h += chartCard("c11", "Tobillo (rodilla a la pared)", "Cada dos semanas · más de 10 cm es buena movilidad · la meta es que se igualen", [
+    { name:"Izquierdo", pts: series("cuerpo.tobIzq"), c:"var(--series-1)" },
+    { name:"Derecho", pts: series("cuerpo.tobDer"), c:"var(--series-2)" }], " cm");
   h += chartCard("c7", "Peso", "En ayunas; importa la tendencia, no el día", [
     { name:"Peso", pts: series("cuerpo.peso"), c:"var(--series-1)" }], " kg");
   h += chartCard("c8", "Despertares por noche", "Si baja, el plan de sueño funciona", [
@@ -1483,7 +1490,7 @@ $("#fileIn").addEventListener("change", async e => {
 function toCSV(){
   const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","cadera_bajo_campana","contralateral","isometria_3pos","plancha_pared_s","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
-    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","mov_nivel","mov_hechos","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
+    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","tobillo_izq","tobillo_der","mov_nivel","mov_hechos","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("p3.lateral") ? 1 : "", d.finDia, g("extra.flex.done") ? 1 : "", g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
@@ -1494,7 +1501,7 @@ function toCSV(){
     g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.carry.var"), g("a.carry.kg"), g("a.carry.paseos"), g("a.retest.done") ? 1 : "",
     hasB(d) ? bMode(d, x) : "", ...FZ.flatMap(e => getp(d, "b.f."+e.k+".done") ? [g("b.f."+e.k+".kg"), g("b.f."+e.k+".series"), g("b.f."+e.k+".reps")] : ["","",""]),
     airDone(d) ? (g("air.tipo") ?? "sí") : "", g("air.rondas"), g("air.min"), g("air.vatios"), g("air.rpm"), g("air.kcal"), g("air.testW"), g("air.testRPM"), g("sup.cre") ? 1 : "", g("sup.suero") ? 1 : "",
-    d.despertares, g("hab.luz") ? 1 : "", g("hab.cafe") ? 1 : "", g("hab.prot"), g("paseo.done") ? (g("paseo.min") ?? "sí") : "", g("cuerpo.peso"), g("cuerpo.cintura"),
+    d.despertares, g("hab.luz") ? 1 : "", g("hab.cafe") ? 1 : "", g("hab.prot"), g("paseo.done") ? (g("paseo.min") ?? "sí") : "", g("cuerpo.peso"), g("cuerpo.cintura"), g("cuerpo.tobIzq"), g("cuerpo.tobDer"),
     (() => { const m = movPlan(x); return m.lv && movDone(d) ? MOV_LV[m.lv] : ""; })(), movDone(d) || "", maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
   return [cols.join(","), ...rows].join("\n");
 }
