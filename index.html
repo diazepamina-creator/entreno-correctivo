@@ -282,7 +282,7 @@ nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
 
 <script>
 "use strict";
-const VERSION = "2.2.0";
+const VERSION = "2.2.1";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1054,8 +1054,8 @@ const DESP = [
   { cat:"Proteína", items:[["huevos","Huevos"],["bonito","Bonito o atún en cristal"],["caballa","Caballa en lata"],["sardinas","Sardinas en lata"],["mejillones","Mejillones en lata"],["merluza","Merluza o bacalao congelado"],["salmon","Salmón"],["tofu","Tofu"],["tempeh","Tempeh"],["edamame","Edamame congelado"],["lentejas","Lentejas"],["garbanzos","Garbanzos"],["alubias","Alubias"],["suero","Proteína de suero"]] },
   { cat:"Integrales", items:[["arroz","Arroz integral"],["pan","Pan integral"],["pasta","Pasta integral"],["patata","Patata o boniato"]] },
   { cat:"Verdura", items:[["brocoli","Brócoli"],["coliflor","Coliflor"],["ensalada","Ensalada o espinacas"],["zanahoria","Zanahoria"],["cebolla","Cebolla"],["puerro","Puerro"],["calabacin","Calabacín"],["pimiento","Pimiento"],["vcong","Verdura congelada"]] },
-  { cat:"Fruta", items:[["manzanas","Manzanas"],["pina","Piña"],["citricos","Kiwis o naranjas"],["frutosrojos","Frutos rojos congelados"]] },
-  { cat:"Despensa", items:[["miso","Miso"],["alga","Kombu o wakame"],["tamari","Tamari o salsa de soja"],["aove","Aceite de oliva virgen extra"],["fsecos","Frutos secos naturales"],["sesamo","Sésamo"],["kukicha","Té kukicha"],["malta","Malta de cebada"],["infus","Boldo, genciana, cardo mariano"],["creatina","Creatina"],["cafe","Café"]] },
+  { cat:"Fruta", items:[["manzanas","Manzanas"],["pina","Piña"],["citricos","Kiwis o naranjas"],["frutosrojos","Frutos rojos congelados"],["aguacate","Aguacate"]] },
+  { cat:"Despensa", items:[["miso","Miso"],["alga","Kombu o wakame"],["tamari","Tamari o salsa de soja"],["aove","Aceite de oliva virgen extra"],["nueces","Nueces"],["fsecos","Otros frutos secos naturales"],["sesamo","Sésamo"],["kukicha","Té kukicha"],["malta","Malta de cebada"],["infus","Boldo, genciana, cardo mariano"],["creatina","Creatina"],["cafe","Café"]] },
 ];
 const PESC = [
   { k:"bonito", t:"Bonito o atún", lvl:"medio", cap:3 },
