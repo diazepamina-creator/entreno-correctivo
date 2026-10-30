@@ -19,7 +19,7 @@
   --amber:#7a4f00; --amber-bg:#fff2d9; --danger:#a8241c; --danger-bg:#fbe5e3;
   --series-1:#2a78d6; --series-2:#eb6834;
   --radius:16px; --gap:14px;
-  --k-p3:#2E6B4F; --k-extras:#6a4c9c; --k-a:#1F3A5F; --k-b:#b5541c; --k-cierre:#6b6a64; --k-sleep:#3f5f8a; --k-air:#0f7d8c; --k-cocina:#5b7a1f;
+  --k-p3:#2E6B4F; --k-extras:#6a4c9c; --k-a:#1F3A5F; --k-b:#b5541c; --k-cierre:#6b6a64; --k-sleep:#3f5f8a; --k-air:#0f7d8c; --k-cocina:#5b7a1f; --k-mov:#a0396b;
   --shadow:0 1px 2px rgba(20,20,20,.04),0 4px 14px rgba(20,20,20,.05);
 }
 @media (prefers-color-scheme: dark){
@@ -29,7 +29,7 @@
     --line:#343a3f; --brand:#9cbde3; --brand-ink:#0e1a28; --accent:#6cc79a; --accent-soft:#1d3329;
     --amber:#f2c66e; --amber-bg:#3a2d12; --danger:#ff8a80; --danger-bg:#3d1c1a;
     --series-1:#3987e5; --series-2:#d95926;
-    --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a;
+    --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a; --k-mov:#e48fb8;
     --shadow:none;
   }
 }
@@ -39,7 +39,7 @@
   --line:#343a3f; --brand:#9cbde3; --brand-ink:#0e1a28; --accent:#6cc79a; --accent-soft:#1d3329;
   --amber:#f2c66e; --amber-bg:#3a2d12; --danger:#ff8a80; --danger-bg:#3d1c1a;
   --series-1:#3987e5; --series-2:#d95926;
-  --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a;
+  --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a; --k-mov:#e48fb8;
   --shadow:none;
 }
 *{box-sizing:border-box}
@@ -205,6 +205,8 @@ nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
 .t-btns .btn{min-height:64px;font-size:19px}
 .card.k-desp,.card.k-menu,.card.k-tanda,.card.k-pesc,.card.k-compra{--k:var(--k-cocina)}
 .pill.bad{background:var(--danger-bg);color:var(--danger)}
+.card.k-mov{--k:var(--k-mov)}
+.mov-lv{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;color:var(--surface);background:var(--k-mov)}
 .ck-cat{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:16px 0 2px}
 .dsp{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;border:0;border-top:1px solid var(--line);background:none;text-align:left;padding:6px 0;cursor:pointer;font-weight:600;font-size:15px}
 .dsp .st{margin-left:auto}
@@ -282,14 +284,14 @@ nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
 
 <script>
 "use strict";
-const VERSION = "2.2.1";
+const VERSION = "2.3.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 /* ---------------- Datos ---------------- */
 function fresh(){
-  return { version:1, settings:{ side:"izq", buKg:12, cxKg:24, leadIn:5,
+  return { version:1, settings:{ side:"izq", buKg:12, cxKg:24, leadIn:5, movStart:"2026-11-09", movCycle:"front",
     sched:{0:"r",1:"t",2:"r",3:"t",4:"r",5:"t",6:"o"} }, days:{} };
 }
 function load(){
@@ -325,7 +327,7 @@ const fmtDate = s => { const d = parseIso(s); return `${DOW[d.getDay()]} ${d.get
 const fmtSecs = s => s == null ? "—" : `${Math.floor(s/60)}:${pad(Math.floor(s%60))}`;
 
 /* ---------------- Estado de UI ---------------- */
-const ui = { tab:"hoy", date: todayIso(), open:{ p3:true, extras:false, air:false, a:true, b:true, cierre:true, opt:false, retest:false, compra:true, pesc:true, menu:true, tanda:false, desp:false }, tables:{}, forceTrain:{} };
+const ui = { tab:"hoy", date: todayIso(), open:{ p3:true, extras:false, air:false, a:true, b:true, cierre:true, opt:false, retest:false, compra:true, pesc:true, menu:true, tanda:false, desp:false, mov:true }, tables:{}, forceTrain:{} };
 const day = (d = ui.date) => DB.days[d] || {};
 const wday = (d = ui.date) => (DB.days[d] ||= {});
 const S = () => DB.settings;
@@ -382,7 +384,7 @@ function timerField(path, label, o = {}){
     <button class="timer-btn" data-action="timer-start" data-path="${path}" data-label="${esc(label)}" data-marks="${o.marks||""}" data-lead="${o.lead?1:0}" data-kind="hold">▶ Cronometrar</button>
     ${v != null ? `<button class="link" data-action="clear" data-path="${path}">borrar</button>` : ""}</div></div>`;
 }
-const CARD_ICO = { p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋", compra:"≡", pesc:"≈", menu:"M", tanda:"T", desp:"D" };
+const CARD_ICO = { p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋", compra:"≡", pesc:"≈", menu:"M", tanda:"T", desp:"D", mov:"↔" };
 function card(key, title, sub, badge, body){
   const closed = !ui.open[key];
   const ico = CARD_ICO[key];
@@ -430,7 +432,7 @@ function airSuggest(date){
 const airDone = d => !!getp(d, "air.done");
 const p3Full = d => P3.every(i => getp(d, "p3." + i.k + ".done"));
 const trainedDay = d => hasA(d) || hasB(d);
-const activeDay = d => p3Done(d) > 0 || trainedDay(d) || airDone(d) || !!getp(d, "paseo.done") || Object.keys(d.extra || {}).some(k => d.extra[k] && d.extra[k].done);
+const activeDay = d => p3Done(d) > 0 || trainedDay(d) || airDone(d) || !!getp(d, "paseo.done") || movDone(d) > 0 || Object.keys(d.extra || {}).some(k => d.extra[k] && d.extra[k].done);
 const fzDone = d => FZ.filter(e => getp(d, "b.f."+e.k+".done")).length;
 const hasB = d => (getp(d, "b.rounds") || []).length > 0 || fzDone(d) > 0;
 const bMode = (d, date) => getp(d, "b.mode") || ([1,5].includes(parseIso(date).getDay()) ? "fuerza" : "complejo");
@@ -543,6 +545,7 @@ function renderHoy(){
     h += renderA(d) + renderB(d);
   }
   h += renderAir(d);
+  h += renderMov(d);
 
   h += card("cierre", "Cierre", "Costilla, hábitos, paseo, cuerpo y notas", "",
     `<div class="field" style="margin-bottom:10px"><label>Costilla izquierda al final del día</label><div class="chips">${["Guardada","A medias","Perdida"].map(v =>
@@ -959,6 +962,11 @@ function renderGuia(){
   <li>Café solo hasta las 14:00; por la tarde, kukicha o malta.</li>
   <li>Unos 150 g de proteína al día en 3-4 tomas: pescado, huevos, legumbres, tofu, tempeh, suero. Plato: mitad verduras, un cuarto proteína, un cuarto integrales.</li>
   <li>Cintura cada dos semanas y peso 3 días por semana, en ayunas.</li></ul>
+  <h3>Movilidad</h3>
+  <ul><li>A diario, en el calentamiento: rotación torácica, extensión en banco, wall slides y postura del niño exhalando. Por encima de la cabeza, siempre con la costilla guardada.</li>
+  <li>Quicksilver, un objetivo por ciclo: primero front split (8 semanas), 1-2 semanas sin estirar, luego straddle cargado. El low windmill del straddle solo cuando esté autorizado; si no, más cossack.</li>
+  <li>Pesado y medio al final de los días de fuerza; ligero los días de descanso activo; fin de semana libre.</li>
+  <li>Isometrías a intensidad moderada-fuerte, no máxima: rinde casi igual y fatiga menos.</li></ul>
   <h3>Cocina</h3>
   <ul><li>Viernes: revisa la despensa y compra con la lista. Sábado o domingo: una hora de tanda (arroz, legumbre o caldo, verduras al horno, huevos).</li>
   <li>Menú con platos tipo que se repiten: elige primero la proteína.</li>
@@ -1012,6 +1020,12 @@ function renderAjustes(){
       <div class="field"><label for="sW">Vatios máx.</label><input class="num" id="sW" inputmode="numeric" data-sbind="airTests.maxW" data-num="1" value="${(s.airTests || {}).maxW ?? ""}"></div>
       <div class="field"><label for="sR">MAS (RPM)</label><input class="num" id="sR" inputmode="numeric" data-sbind="airTests.mas" data-num="1" value="${(s.airTests || {}).mas ?? ""}"></div>
       <div class="field"><label for="sD">Inicio del bloque 1</label><input class="num" style="width:160px" type="date" id="sD" data-sbind="airStart" value="${s.airStart || ""}"></div></div>
+  </div></div>
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">Movilidad (Quicksilver)</h2>
+    <p class="hint" style="margin:0 0 10px">Un ciclo de 8 semanas (4 fases de 2), luego 1-2 semanas sin estirar y se cambia al otro. Lunes a viernes: semana 1 pesado-ligero-medio-ligero-pesado, semana 2 medio-ligero-pesado-ligero-medio.</p>
+    <div class="field"><label>Ciclo actual</label><div class="chips">${[["front","Front split"],["straddle","Straddle cargado"]].map(([v,t]) => `<button class="chip sm" data-action="setting" data-k="movCycle" data-v="${v}" aria-pressed="${(s.movCycle || "front")===v}">${t}</button>`).join("")}</div></div>
+    <div class="field" style="margin-top:10px"><label for="sMov">Inicio del ciclo (un lunes)</label><input class="num" style="width:160px" type="date" id="sMov" data-sbind="movStart" value="${s.movStart || ""}"></div>
   </div></div>
   <div class="card"><div class="card-b" style="padding-top:12px">
     <h2 style="font-size:16px;margin:0 0 4px">Modo mantenimiento</h2>
@@ -1175,6 +1189,66 @@ function renderCocina(){
       <div class="row" style="margin-top:8px"><button class="btn" data-action="c-add-prod">Añadir</button></div>` : ""}
     <div class="row" style="margin-top:12px"><button class="btn" data-action="c-edit">${edit ? "Hecho" : "Editar productos"}</button></div>`);
   $("#p-cocina").innerHTML = h;
+}
+
+
+/* ---------------- Movilidad (Quicksilver) ---------------- */
+// Semana 1: L pesado, M ligero, X medio, J ligero, V pesado · Semana 2: L medio, M ligero, X pesado, J ligero, V medio
+const MOV_DAY = [{1:"H",2:"L",3:"M",4:"L",5:"H"}, {1:"M",2:"L",3:"H",4:"L",5:"M"}];
+const MOV_LV = { H:"Pesado", M:"Medio", L:"Ligero" };
+const MOV_TXT = {
+  frog:"Frog series", prying:"Isquio invertido + zancada de rodillas", sumo:"Sumo squat / good morning", isoFs:"Front split isométrico",
+  sw:"Split switches", fsPulse:"Front split con pulsos y pausas", isoSt:"Straddle cargado isométrico", ptero:"Pterodactyl",
+  cossack:"Cossack horizontal", tri:"Estiramiento triangle choke", windmill:"Low windmill",
+};
+const MOV_HOW = {
+  frog:"Serie de posiciones de rana, sin forzar: entrar, respirar, salir.",
+  prying:"Isquio: «post prying», balanceos cortos en varias direcciones y deslizar. Zancada: «hinge prying», apretar glúteo cada 2 s para llevar la pelvis adelante, costilla guardada. Por lado.",
+  sumo:"Con una kettlebell, bajar despacio llevando la cadera atrás: haz espacio, alarga la columna.",
+  isoFs:"Entra en el split, sube poco a poco la contracción hasta moderada-fuerte (no máxima) 30-45 s respirando tras el escudo, suelta con un suspiro y avanza. Alterna lados: el cambio de lado es el descanso.",
+  sw:"Cambios de split controlados, sin rebote.",
+  fsPulse:"10 pulsos (2 s contraer / 2 s soltar) → pausa 15 s → 10 pulsos → 20 s → 10 pulsos → 30 s. Por lado.",
+  isoSt:"Sentado en straddle (sin peso al principio): contracción moderada-fuerte 30-45 s, suspiro y avanza.",
+  ptero:"Según el vídeo de Quicksilver.",
+  cossack:"Pulsos + pausas en la posición baja del cossack, por lado.",
+  tri:"Para piriforme y glúteo; cierra la sesión de straddle.",
+  windmill:"Solo cuando el windmill esté autorizado en el plan; si no, sustitúyelo por otra serie de cossack.",
+};
+// [clave, prescripción por fase 1-4]
+const MOV_PLAN = {
+  front: {
+    L:[["frog",["1 serie","1 serie","1 serie","1 serie"]],["prying",["3 series","3 series","4 series","5 series"]]],
+    M:[["sw",["20 reps","20 reps","20 reps","20 reps"]],["fsPulse",["1 serie","2 series","3 series","3 series"]]],
+    H:[["sumo",["3×5","3×5","3×5","3×5"]],["isoFs",["3×3 por lado","3×4 por lado","3×5 por lado","5×5 por lado"]]],
+  },
+  straddle: {
+    L:[["frog",["2 series","2 series","2 series","3 series"]],["prying",["1 serie","1 serie","1 serie","1-2 series"]],["windmill",["2×3","2×5","2×5","3×5"]]],
+    M:[["sw",["20/lado ×1","20/lado ×2","20/lado ×2","20/lado ×3"]],["cossack",["1 serie/lado","2 series/lado","2 series/lado","3 series/lado"]],["tri",["1 serie","2 series","2 series","3 series"]]],
+    H:[["sumo",["3×3","3×5","3×5","5×5"]],["isoSt",["3×3","3×5","3-5×5","5×5"]],["ptero",["3×3","3 series","3-5×5","5×5"]]],
+  },
+};
+function movPlan(date){
+  const st = S().movStart; if (!st) return { phase:"off" };
+  const dd = daysBetween(st, date); if (dd < 0) return { phase:"pre", start:st };
+  const n = Math.floor(dd / 7);
+  if (n >= 8) return { phase:"done", start:st, weeks:n };
+  const dow = parseIso(date).getDay(), lv = MOV_DAY[n % 2][dow];
+  return { phase:"cycle", fase: Math.floor(n / 2) + 1, wk: (n % 2) + 1, lv };
+}
+const movDone = d => Object.keys(d.mov || {}).filter(k => d.mov[k] && d.mov[k].done).length;
+function renderMov(d){
+  const m = movPlan(ui.date), cyc = S().movCycle === "straddle" ? "straddle" : "front", cname = cyc === "front" ? "Front split" : "Straddle cargado";
+  if (m.phase === "off") return "";
+  if (m.phase === "pre") return card("mov", "Movilidad", `${cname} · empieza el ${fmtDate(m.start)}`, "", `<p class="hint" style="margin-top:0">El ciclo empieza el ${esc(fmtDate(m.start))}. Hasta entonces, solo la torácica y los hombros del calentamiento.</p>`);
+  if (m.phase === "done") return card("mov", "Movilidad", `${cname} · ciclo completado`, `<span class="pill ok">Hecho</span>`,
+    `<p class="hint" style="margin-top:0">Has completado las 8 semanas. Toca 1-2 semanas sin estirar (solo el calentamiento) y después empezar el otro ciclo: cámbialo en Ajustes y pon la nueva fecha de inicio.</p>`);
+  if (!m.lv) return card("mov", "Movilidad", `${cname} · fase ${m.fase}, semana ${m.wk}`, `<span class="pill">Libre</span>`, `<p class="hint" style="margin-top:0">Fin de semana: libre. Los días libres son para recuperar.</p>`);
+  const items = MOV_PLAN[cyc][m.lv], n = items.filter(([k]) => getp(d, "mov." + k + ".done")).length;
+  return card("mov", "Movilidad", `${cname} · fase ${m.fase}, semana ${m.wk} · ${m.lv === "L" ? "unos 8 minutos, cuando te venga bien" : "al final de la sesión"}`,
+    `<span class="mov-lv">${MOV_LV[m.lv]}</span>`,
+    items.map(([k, pr]) => check("mov." + k + ".done", `${MOV_TXT[k]} · ${pr[m.fase - 1]}`, MOV_HOW[k])).join("")
+    + `<p class="hint">${m.lv === "H" ? "Día pesado: va lo último de la sesión. Si vas justo de tiempo, quita una serie, no el ejercicio. Descanso largo entre series (paseando)." : m.lv === "M" ? "Día medio: firme pero sin sufrir." : "Día ligero: no fuerces nada; relaja, respira y quédate en el rango nuevo hasta que sea tuyo."} Si sigues con agujetas al llegar al siguiente día pesado, repite la fase antes de subir.</p>
+      <div class="row" style="margin-top:4px"><span class="pill ${n === items.length ? "ok" : ""}">${n}/${items.length}</span></div>`);
 }
 
 /* ---------------- Render general ---------------- */
@@ -1409,7 +1483,7 @@ $("#fileIn").addEventListener("change", async e => {
 function toCSV(){
   const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","cadera_bajo_campana","contralateral","isometria_3pos","plancha_pared_s","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
-    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
+    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","mov_nivel","mov_hechos","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("p3.lateral") ? 1 : "", d.finDia, g("extra.flex.done") ? 1 : "", g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
@@ -1421,7 +1495,7 @@ function toCSV(){
     hasB(d) ? bMode(d, x) : "", ...FZ.flatMap(e => getp(d, "b.f."+e.k+".done") ? [g("b.f."+e.k+".kg"), g("b.f."+e.k+".series"), g("b.f."+e.k+".reps")] : ["","",""]),
     airDone(d) ? (g("air.tipo") ?? "sí") : "", g("air.rondas"), g("air.min"), g("air.vatios"), g("air.rpm"), g("air.kcal"), g("air.testW"), g("air.testRPM"), g("sup.cre") ? 1 : "", g("sup.suero") ? 1 : "",
     d.despertares, g("hab.luz") ? 1 : "", g("hab.cafe") ? 1 : "", g("hab.prot"), g("paseo.done") ? (g("paseo.min") ?? "sí") : "", g("cuerpo.peso"), g("cuerpo.cintura"),
-    maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
+    (() => { const m = movPlan(x); return m.lv && movDone(d) ? MOV_LV[m.lv] : ""; })(), movDone(d) || "", maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
   return [cols.join(","), ...rows].join("\n");
 }
 
