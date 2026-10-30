@@ -256,7 +256,7 @@ nav.tabs button svg{padding:2px 10px;width:44px;box-sizing:content-box}
 
 <script>
 "use strict";
-const VERSION = "2.0.0";
+const VERSION = "2.1.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -374,7 +374,33 @@ const FZ = [
   { k:"row",   t:"Remo doble en bisagra", r:"5×6-8", kgs:[16,20,24,28], s:5, n:6, unit:"reps", pair:true },
   { k:"carry", t:"Suitcase carry · una campana", r:"3 paseos por lado, sin ladearte", kgs:[16,20,24,28,32], s:3, n:1, unit:"paseos/lado" },
 ];
-const AIR = ["15/45 s", "20/40 s", "30/60 s", "Continuo suave", "Otro"];
+const AIR = ["Adaptación", "A&A", "Alta estimulación", "Rodaje suave", "Test", "Otro"];
+// Plan de airbike (adaptado de las ideas de Building the Engine, con la fuerza como prioridad)
+const AIRPLAN = {
+  1: { aa:{ on:5, off:30, reps:[12,15,18,20] }, hs:{ on:15, off:15, reps:[8,10,12,14] }, easy:"20-25 min" },
+  2: { aa:{ on:7, off:35, reps:[12,15,18,18] }, hs:{ on:20, off:20, reps:[10,12,14,16] }, easy:"25-30 min" },
+};
+function airWeek(date){
+  const st = S().airStart; if (!st) return null;
+  const n = Math.floor(daysBetween(st, date) / 7);
+  if (n < 0) return { phase:"pre" };
+  const cyc = n % 9; // 8 semanas de bloques + 1 de retest/descarga
+  if (cyc === 8) return { phase:"retest", cycle: Math.floor(n / 9) + 1 };
+  return { phase:"block", block: cyc < 4 ? 1 : 2, week: (cyc % 4) + 1, cycle: Math.floor(n / 9) + 1 };
+}
+function airSuggest(date){
+  const w = airWeek(date), dow = parseIso(date).getDay(), t = S().airTests || {};
+  const W = t.maxW ? `${Math.round(t.maxW * 0.85)}-${Math.round(t.maxW * 0.87)} W` : "85-87 % de tu potencia máxima";
+  const HS = t.mas ? `${Math.round(t.mas * 1.2)} RPM` : "120 % de tu MAS";
+  const EZ = t.mas ? `unas ${Math.round(t.mas * 0.7)} RPM` : "ritmo de conversación (~70 % de tu MAS)";
+  if (!w || w.phase === "pre") return { tipo:"Adaptación", txt:"Adaptación: 10 × 15 s fuerte / 45 s muy suave. Al final de la segunda semana, haz los tests y pon la fecha de inicio del bloque 1 en Ajustes." };
+  if (w.phase === "retest") return { tipo:"Test", txt:"Semana de retest y descarga: sprint de 10 s (vatios máximos) y 5 min a tope (RPM medias). El resto de la semana, solo rodaje suave." };
+  const P = AIRPLAN[w.block], i = w.week - 1, lab = `Bloque ${w.block} · semana ${w.week}`;
+  if (dow === 1) return { tipo:"A&A", txt:`${lab} · A&A: ${P.aa.reps[i]} × ${P.aa.on} s / ${P.aa.off} s muy suave, a ${W}. Salida lanzada.` };
+  if (dow === 5) return { tipo:"Alta estimulación", txt:`${lab} · Alta estimulación: ${P.hs.reps[i]} × ${P.hs.on} s a ${HS} / ${P.hs.off} s suave.` };
+  if (dow === 0 || dow === 6) return { tipo:"Rodaje suave", txt:`${lab} · Rodaje suave opcional: ${P.easy} a ${EZ}.` };
+  return { tipo:null, txt:`${lab}. Hoy no toca airbike: lunes A&A, viernes alta estimulación, fin de semana rodaje suave.` };
+}
 const airDone = d => !!getp(d, "air.done");
 const p3Full = d => P3.every(i => getp(d, "p3." + i.k + ".done"));
 const trainedDay = d => hasA(d) || hasB(d);
@@ -623,15 +649,25 @@ function renderA(d){
 }
 
 function renderAir(d){
-  const v = getp(d, "air") || {};
-  let b = `<p class="ex-p" style="margin-top:0">Intervalos o rodaje suave. Máximo unas 3 sesiones por semana de hasta 20 minutos; nunca antes de la fuerza de piernas.</p>
-    ${check("air.done", "Sesión de airbike hecha", "Semanas 1-2: 10 × 15 s fuerte / 45 s suave")}
-    <div class="field" style="margin-top:6px"><label>Tipo</label><div class="chips">${AIR.map(t => `<button class="chip sm" data-action="set" data-path="air.tipo" data-v="${t}" aria-pressed="${v.tipo===t}">${t}</button>`).join("")}</div></div>
-    <div class="row" style="margin-top:10px">${stepper("air.rondas", { label:"Intervalos", def:10 })}${stepper("air.min", { label:"Minutos", def:10, step:1 })}</div>
+  const v = getp(d, "air") || {}; const sg = airSuggest(ui.date); const t = S().airTests || {};
+  const isTest = v.tipo === "Test";
+  let b = `<div class="note ok" style="margin-top:0">${esc(sg.txt)}</div>
+    <p class="ex-p">Siempre después de la fuerza, nunca antes. Calienta 3-5 minutos suave. En semanas de mal sueño, solo A&A o rodaje suave.</p>
+    ${check("air.done", "Sesión de airbike hecha", t.maxW || t.mas ? `Tus tests: ${t.maxW ? t.maxW + " W máx" : "—"} · MAS ${t.mas ? t.mas + " RPM" : "—"}` : "Sin tests todavía: hazlos al acabar la adaptación")}
+    <div class="field" style="margin-top:6px"><label>Tipo</label><div class="chips">${AIR.map(x => `<button class="chip sm" data-action="set" data-path="air.tipo" data-v="${x}" aria-pressed="${v.tipo===x}">${x}${sg.tipo === x ? " ·  hoy" : ""}</button>`).join("")}</div></div>`;
+  if (isTest){
+    b += `<div class="row" style="margin-top:10px;gap:16px">
+      <div class="field"><label for="airTW">Vatios máx. (sprint 10 s)</label><input class="num" id="airTW" inputmode="numeric" data-bind="air.testW" data-num="1" value="${v.testW ?? ""}"></div>
+      <div class="field"><label for="airTR">RPM medias (5 min)</label><input class="num" id="airTR" inputmode="numeric" data-bind="air.testRPM" data-num="1" value="${v.testRPM ?? ""}"></div></div>
+      <div style="margin-top:10px"><button class="btn primary" data-action="air-save-tests">Guardar como mis tests</button></div>`;
+  } else {
+    b += `<div class="row" style="margin-top:10px">${stepper("air.rondas", { label:"Intervalos", def:10 })}${stepper("air.min", { label:"Minutos", def:10, step:1 })}</div>
     <div class="row" style="margin-top:10px;gap:16px">
       <div class="field"><label for="airW">Vatios medios</label><input class="num" id="airW" inputmode="numeric" data-bind="air.vatios" data-num="1" value="${v.vatios ?? ""}"></div>
+      <div class="field"><label for="airR">RPM medias</label><input class="num" id="airR" inputmode="numeric" data-bind="air.rpm" data-num="1" value="${v.rpm ?? ""}"></div>
       <div class="field"><label for="airK">Calorías</label><input class="num" id="airK" inputmode="numeric" data-bind="air.kcal" data-num="1" value="${v.kcal ?? ""}"></div></div>`;
-  const badge = airDone(d) ? `<span class="pill ok">${esc(v.tipo || "hecho")}</span>` : "";
+  }
+  const badge = airDone(d) ? `<span class="pill ok">${esc(v.tipo || "hecho")}</span>` : (sg.tipo && sg.tipo !== "Test" && sg.tipo !== "Adaptación" ? `<span class="pill">toca ${esc(sg.tipo)}</span>` : "");
   return card("air", "Airbike", "Condición física sin impacto", badge, b);
 }
 function renderB(d){
@@ -783,6 +819,9 @@ function renderHist(){
     { name:"Reps", pts: series("b.f.fsq.reps"), c:"var(--series-2)" }], "");
   h += chartCard("c9", "Airbike", "Vatios medios por sesión: si suben con el mismo esfuerzo, mejora tu condición", [
     { name:"Vatios", pts: series("air.vatios"), c:"var(--series-1)" }], " W");
+  h += chartCard("c10", "Tests de airbike", "Vatios máximos (10 s) y RPM medias en 5 min: suben si mejora tu motor", [
+    { name:"Vatios máx.", pts: series("air.testW"), c:"var(--series-1)" },
+    { name:"RPM 5 min", pts: series("air.testRPM"), c:"var(--series-2)" }], "");
   h += chartCard("c6", "Cintura", "Cada dos semanas, en ayunas, a la altura del ombligo", [
     { name:"Cintura", pts: series("cuerpo.cintura"), c:"var(--series-1)" }], " cm");
   h += chartCard("c7", "Peso", "En ayunas; importa la tendencia, no el día", [
@@ -884,6 +923,11 @@ function renderGuia(){
   <li>Martes, jueves y domingo: P3 y paseo con los temas. Sábado por la mañana: comodín.</li>
   <li><b>Nunca dos días seguidos a cero:</b> un día malo, versión mínima de 10 minutos (P3, bottoms-up 2×2, press normal, un hold por lado).</li>
   <li>Sesión perdida: se recupera el sábado o se deja; nunca dos el mismo día.</li></ul>
+  <h3>Airbike</h3>
+  <ul><li>Semanas 1-2: adaptación (10 × 15 s / 45 s). Luego tests: sprint de 10 s (vatios máximos) y 5 min a tope (RPM medias = MAS).</li>
+  <li>Lunes tras la fuerza: A&A, sprints de 5-7 s al 85-87 % de los vatios máximos. Viernes tras la fuerza: alta estimulación, 15/15 o 20/20 al 120 % de tu MAS. Fin de semana: rodaje suave opcional.</li>
+  <li>Dos bloques de 4 semanas que suben repeticiones y, en la semana 9, retest y descarga.</li>
+  <li>Si la fuerza deja de progresar dos semanas, se quita primero la sesión del viernes.</li></ul>
   <h3>Sueño y comida</h3>
   <ul><li>Luz apagada a las 23:15, levantarse a las 6:50 todos los días. Entreno acabado antes de las 20:15, cena antes de las 21:00.</li>
   <li>Café solo hasta las 14:00; por la tarde, kukicha o malta.</li>
@@ -930,6 +974,14 @@ function renderAjustes(){
   <div class="card"><div class="card-b" style="padding-top:12px">
     <h2 style="font-size:16px;margin:0 0 4px">Semana</h2><p class="hint" style="margin:0 0 10px">Toca un día para cambiar entre entreno, opcional y descanso.</p>
     <div class="sched">${order.map(i => `<button class="${s.sched[i]}" data-action="sched" data-i="${i}" aria-label="${DOW[i]}: ${lbl[s.sched[i]]}">${DOWL[i]}<small>${lbl[s.sched[i]]}</small></button>`).join("")}</div>
+  </div></div>
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">Airbike</h2>
+    <p class="hint" style="margin:0 0 10px">Tus tests y el día en que empieza el bloque 1. Los ritmos de cada sesión se calculan con ellos: A&A al 85-87 % de los vatios máximos, alta estimulación al 120 % de tu MAS y rodaje suave al ~70 %. Cada 8 semanas toca retest.</p>
+    <div class="row" style="gap:16px">
+      <div class="field"><label for="sW">Vatios máx.</label><input class="num" id="sW" inputmode="numeric" data-sbind="airTests.maxW" data-num="1" value="${(s.airTests || {}).maxW ?? ""}"></div>
+      <div class="field"><label for="sR">MAS (RPM)</label><input class="num" id="sR" inputmode="numeric" data-sbind="airTests.mas" data-num="1" value="${(s.airTests || {}).mas ?? ""}"></div>
+      <div class="field"><label for="sD">Inicio del bloque 1</label><input class="num" style="width:160px" type="date" id="sD" data-sbind="airStart" value="${s.airStart || ""}"></div></div>
   </div></div>
   <div class="card"><div class="card-b" style="padding-top:12px">
     <h2 style="font-size:16px;margin:0 0 4px">Modo mantenimiento</h2>
@@ -1076,6 +1128,13 @@ const A = {
     ui.open[k] = true; render();
     const el = document.getElementById("card-" + k); if (el){ const y = el.getBoundingClientRect().top + window.scrollY - 76; window.scrollTo({ top: y, behavior: "smooth" }); }
   },
+  "air-save-tests": () => {
+    const v = getp(wday(), "air") || {};
+    if (!v.testW && !v.testRPM){ toast("Primero apunta los vatios máximos y las RPM medias"); return; }
+    const t = S().airTests || {}; if (v.testW) t.maxW = v.testW; if (v.testRPM) t.mas = v.testRPM; t.date = ui.date; S().airTests = t;
+    if (!S().airStart){ const dw = parseIso(ui.date).getDay(); S().airStart = addDays(ui.date, dw === 1 ? 7 : (8 - dw) % 7 || 7); }
+    commit(); toast("Tests guardados: los ritmos se calculan con ellos");
+  },
   "wk": b => { ui.wk = Math.min(0, (ui.wk || 0) + Number(b.dataset.d)); render(); },
   "set-bmode": b => { const d = wday(); d.b ||= {}; d.b.mode = b.dataset.v; commit(); },
   "round-add": () => {
@@ -1119,6 +1178,15 @@ document.addEventListener("click", e => {
   const f = A[b.dataset.action]; if (f){ f(b, e); requestPersist(); }
 });
 document.addEventListener("input", e => {
+  const t0 = e.target;
+  if (t0.dataset && t0.dataset.sbind){
+    let v = t0.value || undefined;
+    if (v !== undefined && t0.dataset.num){ const n = Number(String(v).replace(",", ".")); v = isFinite(n) ? n : undefined; }
+    const [k, sub] = t0.dataset.sbind.split(".");
+    if (sub){ S()[k] = Object.assign({}, S()[k]); if (v === undefined) delete S()[k][sub]; else S()[k][sub] = v; }
+    else { if (v === undefined) delete S()[k]; else S()[k] = v; }
+    clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); return;
+  }
   const t = e.target; if (!t.dataset || !t.dataset.bind) return;
   let v = t.value || undefined;
   if (v !== undefined && t.dataset.num){ const n = Number(String(v).replace(",", ".")); v = isFinite(n) ? n : undefined; }
@@ -1153,7 +1221,7 @@ $("#fileIn").addEventListener("change", async e => {
 function toCSV(){
   const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","cadera_bajo_campana","contralateral","isometria_3pos","plancha_pared_s","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
-    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_kcal","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
+    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("p3.lateral") ? 1 : "", d.finDia, g("extra.flex.done") ? 1 : "", g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
@@ -1163,7 +1231,7 @@ function toCSV(){
     g("a.hk.series"), g("a.hk.reps"), g("a.hk.ardor"), g("a.hk.sondaOk") ? 1 : "", g("a.pie.ardor"), g("a.pie.abre") ? 1 : "",
     g("a.oh.bu"), g("a.oh.lado"), g("a.oh.otro"), g("a.carry.var"), g("a.carry.kg"), g("a.carry.paseos"), g("a.retest.done") ? 1 : "",
     hasB(d) ? bMode(d, x) : "", ...FZ.flatMap(e => getp(d, "b.f."+e.k+".done") ? [g("b.f."+e.k+".kg"), g("b.f."+e.k+".series"), g("b.f."+e.k+".reps")] : ["","",""]),
-    airDone(d) ? (g("air.tipo") ?? "sí") : "", g("air.rondas"), g("air.min"), g("air.vatios"), g("air.kcal"), g("sup.cre") ? 1 : "", g("sup.suero") ? 1 : "",
+    airDone(d) ? (g("air.tipo") ?? "sí") : "", g("air.rondas"), g("air.min"), g("air.vatios"), g("air.rpm"), g("air.kcal"), g("air.testW"), g("air.testRPM"), g("sup.cre") ? 1 : "", g("sup.suero") ? 1 : "",
     d.despertares, g("hab.luz") ? 1 : "", g("hab.cafe") ? 1 : "", g("hab.prot"), g("paseo.done") ? (g("paseo.min") ?? "sí") : "", g("cuerpo.peso"), g("cuerpo.cintura"),
     maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
   return [cols.join(","), ...rows].join("\n");
