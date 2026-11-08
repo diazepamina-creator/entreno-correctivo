@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Correctivo</string>
+    <string name="title_activity_main">Correctivo</string>
+    <string name="package_name">com.diazepamina.correctivo</string>
+    <string name="custom_url_scheme">com.diazepamina.correctivo</string>
+</resources>

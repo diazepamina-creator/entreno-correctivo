@@ -19,7 +19,7 @@
   --amber:#7a4f00; --amber-bg:#fff2d9; --danger:#a8241c; --danger-bg:#fbe5e3;
   --series-1:#2a78d6; --series-2:#eb6834;
   --radius:16px; --gap:14px;
-  --k-p3:#2E6B4F; --k-extras:#6a4c9c; --k-a:#1F3A5F; --k-b:#b5541c; --k-cierre:#6b6a64; --k-sleep:#3f5f8a; --k-air:#0f7d8c; --k-cocina:#5b7a1f; --k-mov:#a0396b;
+  --k-p3:#2E6B4F; --k-extras:#6a4c9c; --k-a:#1F3A5F; --k-b:#b5541c; --k-cierre:#6b6a64; --k-sleep:#3f5f8a; --k-air:#0f7d8c; --k-cocina:#5b7a1f; --k-mov:#a0396b; --k-coach:#8a5a12;
   --shadow:0 1px 2px rgba(20,20,20,.04),0 4px 14px rgba(20,20,20,.05);
 }
 @media (prefers-color-scheme: dark){
@@ -29,7 +29,7 @@
     --line:#343a3f; --brand:#9cbde3; --brand-ink:#0e1a28; --accent:#6cc79a; --accent-soft:#1d3329;
     --amber:#f2c66e; --amber-bg:#3a2d12; --danger:#ff8a80; --danger-bg:#3d1c1a;
     --series-1:#3987e5; --series-2:#d95926;
-    --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a; --k-mov:#e48fb8;
+    --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a; --k-mov:#e48fb8; --k-coach:#e7b866;
     --shadow:none;
   }
 }
@@ -39,7 +39,7 @@
   --line:#343a3f; --brand:#9cbde3; --brand-ink:#0e1a28; --accent:#6cc79a; --accent-soft:#1d3329;
   --amber:#f2c66e; --amber-bg:#3a2d12; --danger:#ff8a80; --danger-bg:#3d1c1a;
   --series-1:#3987e5; --series-2:#d95926;
-  --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a; --k-mov:#e48fb8;
+  --k-p3:#6cc79a; --k-extras:#b49ae3; --k-a:#9cbde3; --k-b:#f0a070; --k-cierre:#bdbbb2; --k-sleep:#9ab6dd; --k-air:#5fc9d6; --k-cocina:#a9cf6a; --k-mov:#e48fb8; --k-coach:#e7b866;
   --shadow:none;
 }
 *{box-sizing:border-box}
@@ -188,11 +188,11 @@ table.t th{color:var(--ink-2);font-weight:600}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);
   display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
 nav.tabs div{display:flex;width:100%;max-width:640px}
-nav.tabs button{flex:1;min-height:62px;border:0;background:none;cursor:pointer;font-size:11.5px;font-weight:650;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+nav.tabs button{flex:1;min-width:0;min-height:62px;border:0;background:none;cursor:pointer;font-size:10.5px;font-weight:650;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 nav.tabs button svg{width:24px;height:24px}
 nav.tabs button[aria-current="page"]{color:var(--brand)}
-nav.tabs button[aria-current="page"] svg{background:color-mix(in srgb,var(--brand) 14%,transparent);border-radius:10px;padding:2px 8px;width:40px;box-sizing:content-box}
-nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
+nav.tabs button[aria-current="page"] svg{background:color-mix(in srgb,var(--brand) 14%,transparent);border-radius:10px}
+nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-box}
 .timer{position:fixed;inset:0;z-index:20;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
 .timer.on{display:flex}
 .t-label{font-size:18px;font-weight:650;max-width:420px}
@@ -206,6 +206,20 @@ nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
 .card.k-desp,.card.k-menu,.card.k-tanda,.card.k-pesc,.card.k-compra{--k:var(--k-cocina)}
 .pill.bad{background:var(--danger-bg);color:var(--danger)}
 .card.k-mov{--k:var(--k-mov)}
+.card.k-coach,.card.k-coachlog,.card.k-coachchat,.card.k-coachinf,.card.k-coachmat,.card.k-coachcocina,.card.k-review{--k:var(--k-coach)}
+.md{font-size:15px;line-height:1.5}.md h3{font-size:15px;margin:12px 0 4px}.md p{margin:6px 0}.md ul,.md ol{padding-left:20px;margin:6px 0}.md li{margin:2px 0}
+.coach-out{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--surface-2)}
+.coach-out>:first-child{margin-top:0}.coach-out>:last-child{margin-bottom:0}
+.chat{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;max-height:60vh;overflow:auto}
+.msg{padding:9px 12px;border-radius:14px;font-size:15px;max-width:92%}
+.msg.me{align-self:flex-end;background:var(--brand);color:var(--brand-ink);border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:var(--surface-2);border-bottom-left-radius:4px}
+.msg.ai .md>:first-child{margin-top:0}.msg.ai .md>:last-child{margin-bottom:0}
+.preview{margin-top:12px;padding:10px 12px;border:1px dashed var(--k-coach);border-radius:12px}
+.preview ul{padding-left:18px;margin:4px 0}.preview li{font-size:14.5px;margin:2px 0}
+.avrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.avrow small{grid-column:1/-1;font-size:12.5px;color:var(--ink-2)}
+.avrow input[type=time]{width:124px}
 .mov-lv{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;color:var(--surface);background:var(--k-mov)}
 .ck-cat{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:16px 0 2px}
 .dsp{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;border:0;border-top:1px solid var(--line);background:none;text-align:left;padding:6px 0;cursor:pointer;font-weight:600;font-size:15px}
@@ -248,6 +262,7 @@ nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
 <main>
   <section class="panel" id="p-hoy" aria-label="Hoy"></section>
   <section class="panel" id="p-semana" aria-label="Semana"></section>
+  <section class="panel" id="p-coach" aria-label="Coach"></section>
   <section class="panel" id="p-cocina" aria-label="Cocina"></section>
   <section class="panel" id="p-hist" aria-label="Historial"></section>
   <section class="panel" id="p-guia" aria-label="Guía"></section>
@@ -259,6 +274,8 @@ nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="14" r="6.5"/><path d="M8.5 8.5a3.5 3.5 0 0 1 7 0"/></svg>Hoy</button>
   <button data-action="tab" data-tab="semana">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Semana</button>
+  <button data-action="tab" data-tab="coach">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 9.5h7M8.5 12.5h4"/></svg>Coach</button>
   <button data-action="tab" data-tab="cocina">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M9 4c0 2 1.5 2 1.5 4M13.5 4c0 2 1.5 2 1.5 4"/></svg>Cocina</button>
   <button data-action="tab" data-tab="hist">
@@ -282,9 +299,10 @@ nav.tabs button svg{padding:2px 8px;width:40px;box-sizing:content-box}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="fileIn" accept="application/json,.json" class="sr" aria-label="Importar copia de seguridad">
 
+<script src="capacitor.js"></script>
 <script>
 "use strict";
-const VERSION = "2.4.0";
+const VERSION = "3.0.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -305,6 +323,7 @@ let DB = load();
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
   catch(e){ toast("No se ha podido guardar en el móvil"); }
+  avSchedule();
 }
 const getp = (o, path) => path.split(".").reduce((a, k) => (a == null ? undefined : a[k]), o);
 function setp(o, path, v){
@@ -327,7 +346,7 @@ const fmtDate = s => { const d = parseIso(s); return `${DOW[d.getDay()]} ${d.get
 const fmtSecs = s => s == null ? "—" : `${Math.floor(s/60)}:${pad(Math.floor(s%60))}`;
 
 /* ---------------- Estado de UI ---------------- */
-const ui = { tab:"hoy", date: todayIso(), open:{ p3:true, extras:false, air:false, a:true, b:true, cierre:true, opt:false, retest:false, compra:true, pesc:true, menu:true, tanda:false, desp:false, mov:true }, tables:{}, forceTrain:{} };
+const ui = { tab:"hoy", date: todayIso(), open:{ coach:true, coachlog:true, coachchat:true, coachinf:false, coachmat:false, coachcocina:true, review:true, p3:true, extras:false, air:false, a:true, b:true, cierre:true, opt:false, retest:false, compra:true, pesc:true, menu:true, tanda:false, desp:false, mov:true }, tables:{}, forceTrain:{} };
 const day = (d = ui.date) => DB.days[d] || {};
 const wday = (d = ui.date) => (DB.days[d] ||= {});
 const S = () => DB.settings;
@@ -384,7 +403,7 @@ function timerField(path, label, o = {}){
     <button class="timer-btn" data-action="timer-start" data-path="${path}" data-label="${esc(label)}" data-marks="${o.marks||""}" data-lead="${o.lead?1:0}" data-kind="hold">▶ Cronometrar</button>
     ${v != null ? `<button class="link" data-action="clear" data-path="${path}">borrar</button>` : ""}</div></div>`;
 }
-const CARD_ICO = { p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋", compra:"≡", pesc:"≈", menu:"M", tanda:"T", desp:"D", mov:"↔" };
+const CARD_ICO = { coach:"✦", coachlog:"✎", coachchat:"?", coachinf:"∑", coachmat:"⚙", coachcocina:"✦", review:"✦", p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋", compra:"≡", pesc:"≈", menu:"M", tanda:"T", desp:"D", mov:"↔" };
 function card(key, title, sub, badge, body){
   const closed = !ui.open[key];
   const ico = CARD_ICO[key];
@@ -510,6 +529,7 @@ function renderHoy(){
       ${seg("p3", "P3", p3Done(d) / P3.length)}${seg("extras", "Core", Math.min(1, xn / 2))}${seg("a", "Bloque A", an / aKeys.length, !train)}${seg("b", "Bloque B", bfrac, !train)}${seg("cierre", "Cierre", cn)}
     </div>`;
 
+  h += coachCardHoy();
   const sleep = d.sueno;
   h += `<div class="card k-sleep"><div class="card-h" style="cursor:default"><span class="ico" aria-hidden="true">☾</span><h2>Mañana<span class="sub">Sueño, energía y suplementos</span></h2></div><div class="card-b">
     <div class="row">
@@ -718,7 +738,7 @@ function renderFuerza(d, modeChips){
     const lastTxt = last && last.v ? `Última vez (${esc(fmtDate(last.date))}): ${last.v.kg ?? "?"} kg · ${last.v.series ?? "?"}×${last.v.reps ?? "?"}` : "";
     const kg = getp(d, base + ".kg") ?? (last && last.v ? last.v.kg : undefined);
     b += `<div class="ex"><div class="ex-t">${check(base + ".done", e.t, e.r)}</div>
-      ${lastTxt ? `<p class="hint" style="margin:0 0 6px">${lastTxt}</p>` : ""}
+      ${lastTxt ? `<p class="hint" style="margin:0 0 6px">${lastTxt}</p>` : ""}${(t => t ? `<div class="note ok" style="margin:4px 0 8px">${t}</div>` : "")(progTip(e, ui.date))}
       <div class="field"><label>Kg${e.pair ? " por campana" : ""}</label><div class="chips">${e.kgs.map(k =>
         `<button class="chip sm" data-action="set" data-path="${base}.kg" data-v="${k}" data-num="1" aria-pressed="${kg===k}">${k}</button>`).join("")}</div></div>
       <div class="row" style="margin-top:8px">${stepper(base + ".series", { label:"Series", def:e.s })}${stepper(base + ".reps", { label:e.unit === "reps" ? "Reps/serie" : "Paseos por lado", def:e.n })}</div></div>`;
@@ -817,6 +837,10 @@ function renderSemana(){
   </div>`;
   const notes = days.filter(x => get(x).notas).map(x => `<li><b>${esc(fmtDate(x))}:</b> ${esc(get(x).notas)}</li>`).join("");
   if (notes) h += `<div class="card"><div class="card-b" style="padding-top:14px"><h2 style="font-size:16px;margin:0 0 6px">Notas de la semana</h2><ul style="margin:0;padding-left:18px">${notes}</ul></div></div>`;
+  const rv = AI().reviews[mon];
+  h += card("review", "Revisión con Claude", rv ? `Hecha el ${esc(fmtDate(rv.at.slice(0, 10)))} a las ${hhmm(rv.at)}` : "Lectura de la semana y plan para la siguiente", rv ? `<span class="pill ok">hecha</span>` : "",
+    aiHasKey() ? `<div class="row">${aiBtn("ai-semana", rv ? "Rehacer la revisión" : "Revisar la semana", "btn accent", `data-mon="${mon}"`)}${rv ? `<button class="btn" data-action="ai-share-sem" data-mon="${mon}">Compartir</button>` : ""}</div>${aiErrHtml("ai-semana")}${rv ? `<div class="md coach-out">${md(rv.text)}</div>` : ""}`
+      : `<p class="hint" style="margin-top:0">Pon tu clave de la API de Claude en Ajustes para que te revise la semana.</p><button class="btn" data-action="goto-tab" data-tab="ajustes">Ir a Ajustes</button>`);
   h += `<p class="hint" style="text-align:center">Revisión del domingo: 5 minutos con esta pantalla.</p>`;
   $("#p-semana").innerHTML = h;
 }
@@ -944,9 +968,10 @@ function chartHover(el, ev){
 }
 
 /* ---------------- Render: guía ---------------- */
-function renderGuia(){
+function renderGuia(){ $("#p-guia").innerHTML = guiaHTML(); }
+function guiaHTML(){
   const S_ = sideL();
-  $("#p-guia").innerHTML = `<div class="card guide"><div class="card-b" style="padding-top:12px">
+  return `<div class="card guide"><div class="card-b" style="padding-top:12px">
   <h3>Plan 2026-2028</h3>
   <p>Doble 24 limpio en primavera de 2027, recomposición y rutina intacta durante las oposiciones; Inevitable Strength desde el mes 1 en octubre de 2027. <a href="https://claude.ai/artifact/6Zn1JEHhPf8W2R4AWimrDp" target="_blank" rel="noopener">Ver el plan completo</a>.</p>
   <ul><li><b>Correctivo</b> (oct 26 – ene 27) → puerta: 5/5 reps limpias sin bottoms-up delante, dos sesiones en vídeo.</li>
@@ -1004,14 +1029,60 @@ function renderGuia(){
   <li>Renegade row (anti-rotación en plancha sin testear).</li><li>Complejos completos con press.</li></ul>
   <h3>Cómo grabarte</h3>
   <p>De perfil, cámara a la altura de la cadera, clips cortos: bottoms-up, la serie normal de después, half kneeling con alguna sonda, de pie y overhead hold.</p>
+  <h3>Coach y avisos</h3>
+  <ul><li><b>Coach</b>: con tu clave de la API de Claude, prepara la sesión del día, interpreta lo que escribes o dictas, responde dudas, revisa la semana y hace el informe del mes. Solo envía datos cuando pulsas un botón.</li>
+  <li><b>Avisos</b> (app de Android): entreno, paseo, P3 si el día va en blanco, rutina de noche, revisión del domingo y compra. El del P3 se cancela solo en cuanto lo marcas.</li></ul>
   </div></div>`;
 }
 
 /* ---------------- Render: ajustes ---------------- */
+function ajustesCoach(){
+  const c = aiCfg(), u = AI().usage[todayIso().slice(0, 7)];
+  const fmtK = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace(".", ",") + " M" : n >= 1e3 ? Math.round(n / 1e3) + " k" : String(n);
+  return `<div class="card k-coach"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">Coach (Claude)</h2>
+    <p class="hint" style="margin:0 0 10px">Tu clave de la API (console.anthropic.com → API Keys). Se guarda solo en este móvil y no entra en las copias de seguridad. Cada consulta se paga en tu cuenta de la API, aparte de la suscripción; pon un límite de gasto mensual en la consola.</p>
+    <div class="row" style="flex-wrap:nowrap"><input class="txt" type="password" id="aiKey" data-aikey="1" value="${esc(c.key || "")}" placeholder="sk-ant-…" autocomplete="off" spellcheck="false">
+      ${c.key ? `<button class="link" data-action="ai-key-del">quitar</button>` : ""}</div>
+    <div class="field" style="margin-top:10px"><label>Modelo para el coach</label><div class="chips">${AIM.map(([k, t]) => `<button class="chip sm" data-action="ai-model" data-v="${k}" aria-pressed="${aiModel() === k}">${esc(t)}</button>`).join("")}</div></div>
+    <p class="hint" style="margin:6px 0 0">El registro en texto y la lista de la compra usan siempre Haiku, que es más barato.</p>
+    <div class="row" style="margin-top:10px">${aiBtn("ai-test", "Probar la clave", "btn")}</div>${aiErrHtml("ai-test")}
+    <p class="hint" style="margin:8px 0 0">Este mes: ${u ? `${u.calls} ${u.calls === 1 ? "consulta" : "consultas"} · ${fmtK(u.in + u.cache)} tokens de entrada (${fmtK(u.cache)} en caché) · ${fmtK(u.out)} de salida` : "ninguna consulta todavía"}.</p>
+  </div></div>`;
+}
+function ajustesAvisos(){
+  if (!isNative()) return `<div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">Avisos y app de Android</h2>
+    <p class="hint" style="margin:0 0 10px">Los avisos (entreno, P3 si el día va en blanco, rutina de noche, revisión y compra) funcionan en la app de Android, porque una web no puede programarlos con el móvil bloqueado. Es la misma app con tus mismas pantallas.</p>
+    <p class="hint" style="margin:0 0 10px">Para pasar tus datos: aquí, <b>Compartir copia</b> o <b>Descargar copia</b>; en la app de Android, <b>Importar copia</b>.</p>
+    <button class="btn accent" data-action="open-apk">Descargar la app de Android</button></div></div>`;
+  const on = !!S().avisosOn;
+  if (!ui.avChecked){ ui.avChecked = true;
+    const ln = LN(); Promise.all([ln.checkPermissions().catch(() => ({})), ln.checkExactNotificationSetting ? ln.checkExactNotificationSetting().catch(() => ({})) : Promise.resolve({})])
+      .then(([p, e]) => { ui.avPerm = p.display; ui.avExact = e.exact_alarm; if (ui.tab === "ajustes") render(); }); }
+  apkCheck();
+  const upd = apkLatest && vNum(apkLatest) > vNum(VERSION);
+  return `<div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">Avisos</h2>
+    <p class="hint" style="margin:0 0 10px">Se programan para las dos próximas semanas cada vez que usas la app. Los de entreno, paseo y P3 no suenan si ya lo has hecho ese día.</p>
+    ${on && ui.avPerm === "granted" ? "" : `<button class="btn accent" data-action="av-on">Activar avisos</button>`}
+    ${on && ui.avPerm && ui.avPerm !== "granted" ? `<div class="note">Android tiene las notificaciones de la app desactivadas. Pulsa «Activar avisos» o actívalas en los ajustes del móvil.</div>` : ""}
+    ${on && ui.avExact === "denied" ? `<div class="note">Los avisos pueden llegar con unos minutos de retraso. Para que sean puntuales: <button class="link" data-action="av-exact">permitir alarmas exactas</button>.</div>` : ""}
+    ${AV.map(a => `<div class="avrow"><button class="chip sm" data-action="av-toggle" data-k="${a.k}" aria-pressed="${avOn(a)}">${avOn(a) ? "✓ " : ""}${esc(a.t)}</button>
+      <input class="num" type="time" data-avk="${a.k}" value="${avTime(a)}" aria-label="Hora: ${esc(a.t)}"><small>${esc(a.s)}</small></div>`).join("")}
+    <div class="row" style="margin-top:10px">${on ? `<button class="btn" data-action="av-test">Probar un aviso</button><button class="link" data-action="av-off">desactivar todos</button>` : ""}</div>
+  </div></div>
+  <div class="card"><div class="card-b" style="padding-top:12px">
+    <h2 style="font-size:16px;margin:0 0 4px">App de Android</h2>
+    <p class="hint" style="margin:0 0 10px">Versión ${VERSION}. ${upd ? `<b>Hay una versión nueva: ${esc(apkLatest)}.</b> Descárgala e instálala encima; tus datos se mantienen.` : apkLatest ? "Tienes la última versión." : ""}</p>
+    <button class="btn ${upd ? "accent" : ""}" data-action="open-apk">${upd ? "Descargar la actualización" : "Ver versiones"}</button></div></div>`;
+}
 function renderAjustes(){
   const s = S(); const lbl = { t:"entreno", o:"opcional", r:"descanso" };
   const order = [1,2,3,4,5,6,0];
   $("#p-ajustes").innerHTML = `
+  ${ajustesCoach()}
+  ${ajustesAvisos()}
   <div class="card"><div class="card-b" style="padding-top:12px">
     <h2 style="font-size:16px;margin:0 0 8px">Lado que se corrige</h2>
     <div class="chips">${[["izq","Izquierdo"],["der","Derecho"]].map(([v,t]) => `<button class="chip" data-action="setting" data-k="side" data-v="${v}" aria-pressed="${s.side===v}">${t}</button>`).join("")}</div>
@@ -1049,17 +1120,17 @@ function renderAjustes(){
     <h2 style="font-size:16px;margin:0 0 4px">Copia de seguridad</h2>
     <p class="hint" style="margin:0 0 10px">Tus datos solo están en este móvil. Guarda una copia de vez en cuando (por ejemplo, en Drive).</p>
     <div class="row">
-      ${navigator.canShare ? `<button class="btn primary" data-action="share">Compartir copia</button>` : ""}
-      <button class="btn" data-action="export">Descargar copia</button>
+      ${navigator.canShare || isNative() ? `<button class="btn primary" data-action="share">Compartir copia</button>` : ""}
+      ${isNative() ? "" : `<button class="btn" data-action="export">Descargar copia</button>`}
       <button class="btn" data-action="import">Importar copia</button>
       <button class="btn" data-action="csv">Exportar CSV</button></div>
     <p class="hint" id="persistInfo"></p>
   </div></div>
-  <div class="card"><div class="card-b" style="padding-top:12px">
+  ${isNative() ? "" : `<div class="card"><div class="card-b" style="padding-top:12px">
     <h2 style="font-size:16px;margin:0 0 4px">Instalar</h2>
     <p class="hint" style="margin:0 0 10px">En Android: Chrome → menú ⋮ → <b>Instalar aplicación</b>. Funciona sin conexión.</p>
     ${deferredPrompt ? `<button class="btn accent" data-action="install">Instalar ahora</button>` : ""}
-  </div></div>
+  </div></div>`}
   <div class="card"><div class="card-b" style="padding-top:12px">
     <button class="btn danger" data-action="wipe">Borrar todos los datos</button>
     <p class="hint">Versión ${VERSION}</p>
@@ -1141,6 +1212,21 @@ function renderCocina(){
   let h = `<div class="wkhead"><button class="icon-btn" data-action="c-wk" data-d="-1" aria-label="Semana anterior">‹</button>
     <h2>${isNow ? "Esta semana" : (ui.cwk > 0 ? "Semana que viene" : "Semana")}<small>${fmtShort(wk)} – ${fmtShort(addDays(wk, 6))}</small></h2>
     <button class="icon-btn" data-action="c-wk" data-d="1" aria-label="Semana siguiente" ${(ui.cwk || 0) >= 1 ? "disabled" : ""}>›</button></div>`;
+
+  // Con Claude: menú y compra
+  if (aiHasKey()){
+    const pm = ui.aiMenu && ui.aiMenu.wk === wk ? ui.aiMenu : null, pc = ui.aiCompra;
+    const pn = k => (allPlatos().find(p => p.k === k) || {}).t || k;
+    let cb = `<p class="hint" style="margin-top:0">Claude propone el menú de esta semana con tus platos tipo (respetando el tope de bonito) y saca de él la lista de la compra.</p>
+      <div class="row">${aiBtn("ai-menu", "Proponer menú")}${aiBtn("ai-compra", "Lista desde el menú", "btn")}</div>${aiErrHtml("ai-menu")}${aiErrHtml("ai-compra")}`;
+    if (pm) cb += `<div class="preview"><div class="ck-cat">Menú propuesto</div><ul>${Array.from({ length: 7 }, (_, i) => `<li><b>${["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"][i]}:</b> ${esc(pn(pm.menu[i + "c"]) || "—")} · <span class="muted">cena:</span> ${esc(pn(pm.menu[i + "n"]) || "—")}</li>`).join("")}</ul>
+      ${pm.nota ? `<p class="muted" style="font-size:13px;margin:4px 0 0">${esc(pm.nota)}</p>` : ""}
+      <div class="row" style="margin-top:10px"><button class="btn accent" data-action="ai-menu-ok">Poner este menú</button><button class="btn" data-action="ai-menu-no">Descartar</button></div></div>`;
+    if (pc) cb += `<div class="preview"><div class="ck-cat">Para la lista de la compra</div><ul>${pc.productos.map(p => { const it = despItems().flatMap(g => g.items).find(i => i.k === p.clave); return `<li>${esc(it ? it.t : p.clave)} <span class="muted">· ${p.estado === "falta" ? "falta" : "queda poco"}</span></li>`; }).join("")}${pc.nuevos.map(n => `<li>${esc(n.nombre)} <span class="muted">· nuevo en ${esc(n.seccion)}</span></li>`).join("")}</ul>
+      ${!pc.productos.length && !pc.nuevos.length ? `<p class="muted">No hace falta comprar nada para este menú.</p>` : ""}${pc.nota ? `<p class="muted" style="font-size:13px;margin:4px 0 0">${esc(pc.nota)}</p>` : ""}
+      <div class="row" style="margin-top:10px">${pc.productos.length || pc.nuevos.length ? `<button class="btn accent" data-action="ai-compra-ok">Pasar a la lista</button>` : ""}<button class="btn" data-action="ai-compra-no">Descartar</button></div></div>`;
+    h += card("coachcocina", "Con Claude", "Menú y lista de la compra", "", cb);
+  }
 
   // Lista de la compra
   const groups = {}; list.forEach(i => (groups[i.cat] ||= []).push(i));
@@ -1258,11 +1344,496 @@ function renderMov(d){
       <div class="row" style="margin-top:4px"><span class="pill ${n === items.length ? "ok" : ""}">${n}/${items.length}</span></div>`);
 }
 
+/* ---------------- Coach (Claude) ---------------- */
+// La clave se guarda aparte, solo en este móvil: no entra en las copias ni en el CSV.
+const AIK = "correctivo.ai";
+const aiCfg = () => { try{ return JSON.parse(localStorage.getItem(AIK)) || {}; }catch(e){ return {}; } };
+const aiSetCfg = o => { try{ localStorage.setItem(AIK, JSON.stringify(Object.assign(aiCfg(), o))); }catch(e){} };
+const AIM = [["claude-sonnet-5","Sonnet 5 · equilibrado (recomendado)"],["claude-opus-5-5","Opus 5.5 · el más fino y el más caro"],["claude-haiku-4-5-20251001","Haiku 4.5 · rápido y barato"]];
+const AI_FAST = "claude-haiku-4-5-20251001";
+const aiModel = () => aiCfg().model || "claude-sonnet-5";
+const aiHasKey = () => !!aiCfg().key;
+const AI = () => { const a = (DB.ai ||= {}); a.chat ||= []; a.reviews ||= {}; a.monthly ||= {}; a.usage ||= {}; return a; };
+const aiBusy = {};
+
+const AI_ROL = `Eres el entrenador personal de Andrés dentro de su app «Correctivo». Hablas en español de España, de tú, cercano y directo, sin relleno ni frases de ánimo vacías. Respuestas breves y accionables: primero qué tiene que hacer y después el porqué en una línea. Listas cortas; negrita solo para lo clave; títulos con ## solo si la respuesta es larga. Nada de tablas.`;
+const AI_REGLAS = `Reglas que no se rompen:
+- Seguridad: ardor con la costilla en su sitio = sigue; la costilla cede = para esa repetición; dolor (no ardor) = para la sesión y que lo consulte. No eres médico: ante dolor, mareo o algo raro, que vaya a un profesional.
+- Nunca subir peso por sensación ni por calendario. En el correctivo, solo con dos sesiones seguidas limpias en vídeo. En la fuerza, de 5×5 a 5×8 y luego la siguiente pareja.
+- La fuerza manda: si se estanca dos semanas, lo primero que cae es la airbike del viernes. Airbike como mucho 3 veces por semana y siempre después de la fuerza.
+- Nunca dos días seguidos a cero: un día malo, versión mínima de 10 minutos (P3, bottoms-up 2×2, press normal, un hold por lado).
+- Tras un parón, vuelta suave: menos volumen y lejos del fallo, sin intentar recuperar lo perdido.
+- Nada de press fuera del Bloque A; nada de snatch, windmill, jerk ni swing a una mano hasta que el plan lo abra.
+- Adáptate al material disponible: con una sola campana, goblet squat, remo a una mano, suitcase carry, swing a dos manos.
+- Usa solo los datos que te paso. Si falta algo, dilo; no inventes cifras ni sesiones. Las fechas van en formato AAAA-MM-DD.`;
+const AI_PERFIL = `Andrés: 42 años, 1,87 m, unos 90 kg. Profesor interino de matemáticas en Castelló que prepara oposiciones para septiembre de 2027, así que el tiempo es justo. Entrena en casa, en el garaje: kettlebells y una airbike Maniak Torque. Nunca ha tenido dolor; el objetivo es corregir un rib flare (la costilla izquierda se abre en el press) para llegar a un doble press de 24 kg limpio en primavera de 2027 y, después, dobles de 32/36 kg y el doble clean & jerk. También busca recomposición corporal. Le encanta el entrenamiento explosivo. Su punto débil es la constancia: pierde la rutina con facilidad y encadena días fallados.
+Horario tipo: entreno lunes, miércoles y viernes a las 16:30 (unos 60 min); martes y jueves, paseo escuchando temas a las 16:30; oposiciones de 17:45 a 20:15; cena antes de las 21:00; rutina de noche a las 22:45; luz apagada a las 23:15 y en pie a las 6:50. Sueño ligero, con despertares; duerme con tapones.
+Comida: casi sin carne (pescado, huevos, legumbres, tofu, tempeh; pollo o pavo muy de vez en cuando), sin fritos ni alcohol, con tendencia macrobiótica; quiere tomar menos queso; café solo hasta las 14:00; compra los viernes y hace una tanda de cocina el fin de semana. Toma creatina y proteína de suero.`;
+function aiSesion(){
+  return `Estructura de la app:
+- P3, a diario: ${P3.map(i => i.t).join(", ")}.
+- Core y movilidad opcionales (2-3 al día): frog stretch, dead bug con pullover, oso, hollow hold, leg raises, hanging hollow, plancha con pies en la pared, rotación torácica, extensión en banco, rib grab.
+- Bloque A (correctivo, en fresco, 15-20 min, lado ${sideL()}): bottoms-up press 2-3×2-3, press normal de 5 (cuántas limpias), test contralateral, isometría en 3 posiciones (opcional), TGU hasta mano 2-3 por lado, half kneeling press 3×2-3 más sonda (reps antes del ardor), press de pie 1-2 de sonda, overhead hold de 15-20 s por lado, carry opcional. Retest de TGU cada 2 semanas.
+- Bloque B: fuerza (${FZ.map(e => `${e.t}: ${e.r}`).join("; ")}) los lunes y viernes; complejo (${CX.map(c => c.t + " " + c.r).join(", ")}) de 3-5 rondas, descansando hasta recuperar, los miércoles.
+- Airbike: tests de vatios máximos (sprint de 10 s) y MAS (RPM medias en 5 min); lunes A&A, viernes alta estimulación, fin de semana rodaje suave; dos bloques de 4 semanas y retest en la semana 9.
+- Movilidad Quicksilver: ciclos de 8 semanas (front split, luego straddle cargado), días pesado, medio y ligero de lunes a viernes.
+- Cierre: costilla al final del día, paseo, tomas de proteína, café, peso, cintura, tobillo, vídeo y notas.
+- Cocina: despensa, lista de la compra, pescado (bonito o atún, máximo 3 raciones a la semana), menú semanal con platos tipo y tanda de cocina.`;
+}
+function htmlText(h){
+  const el = document.createElement("div");
+  el.innerHTML = h.replace(/<h3>/g, "\n## ").replace(/<li>/g, "\n- ").replace(/<\/p>/g, "\n");
+  return el.textContent.replace(/\n{3,}/g, "\n\n").trim();
+}
+const aiStatic = () => [AI_ROL, AI_REGLAS, "Perfil:\n" + AI_PERFIL, "Plan (guía de la app):\n" + htmlText(guiaHTML()), aiSesion(), aiCamposTxt()].join("\n\n");
+
+/* Campos que el registro en texto libre puede rellenar */
+const AIF = {};
+(() => {
+  const b = (p, l) => AIF[p] = { t:"b", l }, i = (p, l, min, max) => AIF[p] = { t:"i", l, min, max }, n = (p, l, min, max) => AIF[p] = { t:"n", l, min, max }, e = (p, l, vs) => AIF[p] = { t:"e", l, vs };
+  P3.forEach(x => { b(`p3.${x.k}.done`, `P3 · ${x.t}`); i(`p3.${x.k}.reps`, `P3 · ${x.t}: reps`, 1, 60); });
+  e("p3.deadbug.var", "Dead bug: variante", ["Rodilla flexionada","Pierna recta"]); b("p3.lateral", "Supino: expansión lateral simétrica");
+  e("sueno", "Cómo ha dormido", ["bien","regular","mal"]); i("energia", "Energía (1-5)", 1, 5); i("despertares", "Despertares esta noche", 0, 20);
+  b("hab.luz", "Anoche, luz apagada antes de las 23:30"); b("hab.cafe", "Café solo antes de las 14:00"); i("hab.prot", "Tomas con proteína", 0, 8);
+  b("sup.cre", "Creatina"); b("sup.suero", "Suero");
+  [["frog","Frog stretch"],["pull","Dead bug con pullover"],["bear","Oso"],["hollow","Hollow hold"],["legr","Leg raises"],["hang","Hanging hollow"],["plank","Plancha con pies en la pared"],["rot","Rotación torácica"],["bench","Extensión torácica en banco"],["ribgrab","Rib grab"],["flex","Flexor de cadera en half kneeling"],["wall","Wall slides"]].forEach(([k, t]) => b(`extra.${k}.done`, t));
+  i("extra.frog.resp", "Frog: respiraciones", 1, 30); i("extra.pull.reps", "Pullover: reps totales", 1, 60); e("extra.pull.kg", "Pullover: kg", [4,6,8,12]);
+  i("extra.bear.secs", "Oso: segundos", 5, 600); e("extra.bear.var", "Oso: variante", ["Bear hold","Bear crawl"]);
+  i("extra.hollow.secs", "Hollow: segundos", 5, 600); e("extra.hollow.var", "Hollow: variante", ["Rodillas recogidas","Brazos arriba","Piernas estiradas"]);
+  i("extra.legr.reps", "Leg raises: reps", 1, 60); i("extra.hang.reps", "Hanging hollow: reps", 1, 60); i("extra.plank.secs", "Plancha: segundos", 5, 900);
+  e("extra.rot.izq", "Rotación izquierda (3 fácil, 2 media, 1 costosa)", [1,2,3]); e("extra.rot.der", "Rotación derecha (3 fácil, 2 media, 1 costosa)", [1,2,3]);
+  e("a.bu.kg", "Bottoms-up: kg", [8,12,16]); i("a.bu.series", "Bottoms-up: series", 1, 10); i("a.bu.reps", "Bottoms-up: reps por serie", 1, 10);
+  i("a.arr.reps", "Press normal: reps limpias", 0, 10); b("a.arr.sinBU", "Press normal sin bottoms-up previo"); b("a.arr.cadera", "Cadera desplazada bajo la campana");
+  b("a.contra.done", "Test de press contralateral"); e("a.contra.res", "Contralateral frente al press normal", ["Más limpio","Igual","Peor"]); b("a.iso.done", "Isometría en 3 posiciones");
+  e("a.tgu.kg", "TGU: kg", [8,12,16,20,24]); i("a.tgu.izq", "TGU: series izquierda", 0, 10); i("a.tgu.der", "TGU: series derecha", 0, 10);
+  i("a.hk.series", "Half kneeling: series", 1, 10); i("a.hk.reps", "Half kneeling: reps por serie", 1, 10); i("a.hk.ardor", "Half kneeling: reps antes del ardor", 0, 10); b("a.hk.sondaOk", "Half kneeling: la costilla aguantó la sonda");
+  i("a.pie.ardor", "Press de pie: reps antes del ardor", 0, 10); b("a.pie.abre", "Press de pie: la costilla se abrió");
+  i("a.oh.bu", "Overhead hold bottoms-up, lado corregido (s)", 0, 180); i("a.oh.lado", "Overhead hold normal, lado corregido (s)", 0, 180); i("a.oh.otro", "Overhead hold, otro lado (s)", 0, 180);
+  e("a.carry.var", "Carry del Bloque A: variante", ["Suitcase","BU rack","BU camarero","BU march"]); e("a.carry.kg", "Carry del Bloque A: kg", [8,12,16,20,24]); i("a.carry.paseos", "Carry del Bloque A: paseos", 1, 10);
+  b("a.retest.done", "Retest de TGU hecho");
+  e("b.mode", "Bloque B: modo", ["fuerza","complejo"]);
+  FZ.forEach(x => { b(`b.f.${x.k}.done`, x.t); e(`b.f.${x.k}.kg`, `${x.t}: kg${x.pair ? " por campana" : ""}`, x.kgs); i(`b.f.${x.k}.series`, `${x.t}: series`, 1, 10); i(`b.f.${x.k}.reps`, `${x.t}: ${x.unit === "reps" ? "reps por serie" : "paseos por lado"}`, 1, 30); });
+  b("b.limpia", "Técnica limpia confirmada en vídeo");
+  b("air.done", "Airbike hecha"); e("air.tipo", "Airbike: tipo", AIR); i("air.rondas", "Airbike: intervalos", 0, 100); i("air.min", "Airbike: minutos", 0, 240);
+  i("air.vatios", "Airbike: vatios medios", 0, 3000); i("air.rpm", "Airbike: RPM medias", 0, 250); i("air.kcal", "Airbike: calorías", 0, 3000);
+  i("air.testW", "Test de airbike: vatios máximos", 0, 3000); i("air.testRPM", "Test de airbike: RPM medias en 5 min", 0, 250);
+  b("paseo.done", "Paseo con los temas"); i("paseo.min", "Paseo: minutos", 1, 300); e("finDia", "Costilla izquierda al final del día", ["Guardada","A medias","Perdida"]);
+  n("cuerpo.peso", "Peso (kg)", 50, 160); n("cuerpo.cintura", "Cintura (cm)", 50, 160); n("cuerpo.tobIzq", "Tobillo izquierdo a la pared (cm)", 0, 30); n("cuerpo.tobDer", "Tobillo derecho a la pared (cm)", 0, 30);
+  b("video", "Sesión grabada en vídeo");
+  Object.keys(MOV_TXT).forEach(k => b(`mov.${k}.done`, `Movilidad: ${MOV_TXT[k]}`));
+})();
+function aiCamposTxt(){
+  const ty = f => f.t === "b" ? "sí/no" : f.t === "e" ? "uno de: " + f.vs.join(" | ") : (f.t === "i" ? "entero" : "número") + (f.min != null ? ` ${f.min}-${f.max}` : "");
+  return "Campos del registro diario (para la herramienta «registrar»; ruta → significado [tipo]):\n" + Object.entries(AIF).map(([p, f]) => `${p} → ${f.l} [${ty(f)}]`).join("\n");
+}
+function aiVal(f, v){
+  if (f.t === "b"){ if (v === true || v === "true" || v === 1 || v === "sí") return true; if (v === false || v === "false" || v === 0 || v === "no") return false; return null; }
+  if (f.t === "i" || f.t === "n"){ const x = Number(String(v).replace(",", ".")); if (!isFinite(x)) return null; const r = f.t === "i" ? Math.round(x) : Math.round(x * 10) / 10; return (f.min != null && (r < f.min || r > f.max)) ? null : r; }
+  if (f.t === "e"){ const hit = f.vs.find(x => String(x).toLowerCase() === String(v).trim().toLowerCase()); return hit === undefined ? null : hit; }
+  return null;
+}
+const fmtVal = (f, v) => f.t === "b" ? (v ? "sí" : "no") : f.t === "e" && f.l.startsWith("Rotación") ? ({3:"fácil",2:"media",1:"costosa"})[v] : String(v);
+
+/* Contexto con los datos */
+function aiDays(n, end = todayIso()){
+  const out = {}, lbl = { t:"entreno", o:"opcional", r:"descanso activo" };
+  for (let i = n - 1; i >= 0; i--){
+    const x = addDays(end, -i), d = DB.days[x];
+    const o = d ? JSON.parse(JSON.stringify(d)) : {}; delete o.ai;
+    out[x] = Object.keys(o).length ? { dia:`${DOW[parseIso(x).getDay()]} · ${lbl[dayType(x)]}`, ...o } : { dia:`${DOW[parseIso(x).getDay()]} · ${lbl[dayType(x)]}`, sinRegistro:true };
+  }
+  return out;
+}
+function aiCocina(wk = cWeek()){
+  const c = K(), m = c.menu[wk] || {}, pl = k => (allPlatos().find(p => p.k === k) || {}).t;
+  const fc = fishCount(wk);
+  return {
+    semana: wk,
+    menu: Object.fromEntries(Object.keys(m).sort().map(s => [`${["lun","mar","mié","jue","vie","sáb","dom"][s[0]]} ${s[1] === "c" ? "comida" : "cena"}`, pl(m[s])])),
+    pescado: Object.fromEntries(PESC.map(f => [f.t, fc[f.k].menu + fc[f.k].sueltas])),
+    despensa: Object.fromEntries(despItems().flatMap(g => g.items.filter(i => !c.oculto[i.k]).map(i => [i.t, ({ hay:"hay", poco:"queda poco", falta:"falta" })[c.desp[i.k] || "hay"]]))),
+    tanda: TANDA.filter(t => (c.tanda[wk] || {})[t.k]).map(t => t.t),
+  };
+}
+function aiContext(o = {}){
+  const t = todayIso(), s = S(), lbl = { t:"entreno", o:"opcional", r:"descanso" };
+  const ctx = {
+    ahora: `${t} (${fmtDate(t)}), ${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`,
+    material: s.material || "sin especificar",
+    ajustes: { ladoCorregido: s.side, semana: Object.fromEntries([1,2,3,4,5,6,0].map(i => [DOW[i], lbl[s.sched[i]]])), modoMantenimiento: !!s.mant,
+      kgBloqueA: s.buKg, kgComplejo: s.cxKg, testsAirbike: s.airTests || null, inicioBloque1Airbike: s.airStart || null, movilidad: { ciclo: s.movCycle, inicio: s.movStart } },
+    hoyToca: { tipoDeDia: lbl[dayType(t)], airbike: airSuggest(t).txt, movilidad: (m => m.phase === "cycle" ? (m.lv ? `${MOV_LV[m.lv]} · fase ${m.fase}, semana ${m.wk}` : "libre") : m.phase)(movPlan(t)) },
+    rachaP3Completo: p3Streak(),
+    ultimaFuerza: Object.fromEntries(FZ.map(e => [e.k, lastFz(e.k, addDays(t, 1))])),
+    retestTGU: retestDue(t),
+    dias: aiDays(o.days || 14, o.end || t),
+  };
+  if (o.cocina) ctx.cocina = aiCocina(o.wk);
+  return "Datos actuales de la app (JSON):\n" + JSON.stringify(ctx);
+}
+
+/* Llamada a la API */
+async function claude({ system = "", messages, max = 1200, model = aiModel(), tools, tool_choice }){
+  const key = aiCfg().key;
+  if (!key) throw new Error("Falta la clave de la API: ponla en Ajustes → Coach.");
+  if (navigator.onLine === false) throw new Error("Sin conexión: el coach necesita internet.");
+  const ctrl = new AbortController(), to = setTimeout(() => ctrl.abort(), 120000);
+  let r;
+  try{
+    r = await fetch("https://api.anthropic.com/v1/messages", { method:"POST", signal:ctrl.signal,
+      headers:{ "content-type":"application/json", "x-api-key":key, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
+      body: JSON.stringify({ model, max_tokens:max, messages, ...(tools ? { tools, tool_choice } : {}),
+        system:[{ type:"text", text:aiStatic(), cache_control:{ type:"ephemeral" } }, ...(system ? [{ type:"text", text:system }] : [])] }) });
+  }catch(e){ throw new Error(e.name === "AbortError" ? "La respuesta ha tardado demasiado. Prueba otra vez." : "No se ha podido conectar con la API. ¿Hay conexión?"); }
+  finally{ clearTimeout(to); }
+  let j = null; try{ j = await r.json(); }catch(e){}
+  if (!r.ok){
+    const m = (j && j.error && j.error.message) || "";
+    if (r.status === 401) throw new Error("La clave de la API no es válida. Revísala en Ajustes → Coach.");
+    if (r.status === 403) throw new Error("La clave no tiene permiso para esto. Revísala en la consola de Claude.");
+    if (r.status === 404) throw new Error("Ese modelo no está disponible con tu clave. Cambia de modelo en Ajustes → Coach.");
+    if (r.status === 429) throw new Error("Límite de peticiones o de gasto alcanzado. Espera un poco o revisa los límites en la consola.");
+    if (/credit|balance/i.test(m)) throw new Error("No queda saldo en la cuenta de la API. Recárgalo en la consola de Claude.");
+    if (r.status === 529 || r.status >= 500) throw new Error("La API está saturada ahora mismo. Prueba en un rato.");
+    throw new Error("Error de la API" + (m ? ": " + m : ` (${r.status})`));
+  }
+  aiTrack(j.usage);
+  return j;
+}
+const aiText = j => (j.content || []).filter(c => c.type === "text").map(c => c.text).join("\n").trim();
+const aiTool = j => { const c = (j.content || []).find(c => c.type === "tool_use"); return c ? c.input : null; };
+function aiTrack(u){
+  if (!u) return; const a = AI(), mk = todayIso().slice(0, 7);
+  const m = (a.usage[mk] ||= { calls:0, in:0, out:0, cache:0 });
+  m.calls++; m.in += u.input_tokens || 0; m.out += u.output_tokens || 0; m.cache += (u.cache_read_input_tokens || 0) + (u.cache_creation_input_tokens || 0);
+  save();
+}
+async function aiRun(key, fn){
+  if (aiBusy[key]) return;
+  aiBusy[key] = true; if (ui.aiErr && ui.aiErr.key === key) ui.aiErr = null; render();
+  try{ await fn(); }
+  catch(e){ ui.aiErr = { key, msg: e.message || "Algo ha fallado" }; }
+  finally{ delete aiBusy[key]; render(); }
+}
+const aiErrHtml = key => ui.aiErr && ui.aiErr.key === key ? `<div class="note bad">${esc(ui.aiErr.msg)}</div>` : "";
+const aiBtn = (key, label, cls = "btn accent", extra = "") => `<button class="${cls}" data-action="${key}" ${aiBusy[key] ? "disabled" : ""} ${extra}>${aiBusy[key] ? "Pensando…" : label}</button>`;
+function md(s){
+  const inl = t => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/(^|[^*\w])\*(?!\s)([^*]+?)\*(?!\w)/g, "$1<i>$2</i>");
+  let h = "", list = null; const close = () => { if (list){ h += `</${list}>`; list = null; } };
+  String(s || "").replace(/\r/g, "").split("\n").forEach(ln => {
+    let m;
+    if (!ln.trim()){ close(); return; }
+    if ((m = ln.match(/^#{1,4}\s+(.*)/))){ close(); h += `<h3>${inl(m[1])}</h3>`; return; }
+    if ((m = ln.match(/^\s*[-*•]\s+(.*)/))){ if (list !== "ul"){ close(); h += "<ul>"; list = "ul"; } h += `<li>${inl(m[1])}</li>`; return; }
+    if ((m = ln.match(/^\s*\d+[.)]\s+(.*)/))){ if (list !== "ol"){ close(); h += "<ol>"; list = "ol"; } h += `<li>${inl(m[1])}</li>`; return; }
+    close(); h += `<p>${inl(ln)}</p>`;
+  });
+  close(); return h;
+}
+const hhmm = iso_ => { const d = new Date(iso_); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+
+/* 1 · ¿Qué me toca hoy? */
+async function aiHoy(){
+  const min = ui.coachMin || 45, d = day(todayIso());
+  const extra = [d.sueno ? `He dormido ${d.sueno}` : "", d.energia ? `energía ${d.energia}/5` : "", ui.coachExtra || ""].filter(Boolean).join(", ");
+  const j = await claude({ system: aiContext(), max: 900, messages:[{ role:"user", content:
+    `¿Qué hago hoy? Tengo ${min} minutos.${extra ? " " + extra + "." : ""}
+Dame la sesión concreta y en orden (P3, Bloque A, Bloque B o airbike, movilidad y cierre si toca), con series, reps y kg a partir de mis últimas marcas y del material que tengo. Si vengo de días fallados, versión de vuelta. Si hoy es descanso activo: P3, paseo y movilidad ligera. Cierra con una línea «Si el día se tuerce:» con el mínimo imprescindible. Máximo 170 palabras.` }] });
+  const w = wday(todayIso()); w.ai = { ...(w.ai || {}), plan: aiText(j), at: new Date().toISOString(), min };
+  save();
+}
+/* 2 · Registro en texto libre */
+const AI_REG_TOOL = { name:"registrar", description:"Lo que hay que guardar en el registro de la app a partir de lo que cuenta Andrés.",
+  input_schema:{ type:"object", properties:{
+    cambios:{ type:"array", description:"Un elemento por campo. Usa solo rutas de la lista de campos.", items:{ type:"object", properties:{
+      fecha:{ type:"string", description:"AAAA-MM-DD; hoy si no dice otra cosa («ayer» = el día anterior)" }, campo:{ type:"string" }, valor:{ description:"sí/no como true/false, números como número, opciones tal cual" } }, required:["fecha","campo","valor"] } },
+    notas:{ type:"array", description:"Lo que no tiene campo propio (sustituciones de ejercicios, kg y reps de variantes con una campana, sensaciones, molestias). Frases cortas.", items:{ type:"object", properties:{ fecha:{ type:"string" }, texto:{ type:"string" } }, required:["fecha","texto"] } },
+    dudas:{ type:"string", description:"Pregunta breve si algo es ambiguo; vacío si no." } }, required:["cambios"] } };
+async function aiRegistrar(){
+  const txt = (ui.aiLog || "").trim(); if (!txt){ toast("Escribe primero qué has hecho"); return; }
+  const j = await claude({ model: AI_FAST, system: aiContext({ days: 3 }), max: 1500, tools:[AI_REG_TOOL], tool_choice:{ type:"tool", name:"registrar" },
+    messages:[{ role:"user", content:`Hoy es ${todayIso()}. Registra esto:\n«${txt}»\nSi un ejercicio con una sola campana sustituye a uno doble (goblet por front squat, remo a una mano por remo doble), márcalo en el campo del doble con los kg de la campana y explica la variante en notas.` }] });
+  const inp = aiTool(j) || {}, items = [], bad = [], t = todayIso();
+  (inp.cambios || []).forEach(c => {
+    const f = AIF[c.campo], fecha = /^\d{4}-\d{2}-\d{2}$/.test(c.fecha || "") ? c.fecha : t;
+    if (!f || fecha > t || daysBetween(fecha, t) > 31){ bad.push(c.campo); return; }
+    const v = aiVal(f, c.valor); if (v === null){ bad.push(c.campo); return; }
+    items.push({ fecha, campo:c.campo, valor:v, old: getp(DB.days[fecha] || {}, c.campo) });
+  });
+  const notas = (inp.notas || []).filter(n => n && n.texto).map(n => ({ fecha: /^\d{4}-\d{2}-\d{2}$/.test(n.fecha || "") && n.fecha <= t ? n.fecha : t, texto: String(n.texto).trim() }));
+  ui.aiReg = { items, notas, dudas: inp.dudas || "", bad };
+}
+function aiRegAplicar(){
+  const r = ui.aiReg; if (!r) return;
+  r.items.forEach(it => {
+    const d = wday(it.fecha), f = AIF[it.campo];
+    setp(d, it.campo, f.t === "b" && !it.valor ? undefined : it.valor);
+    const m = it.campo.match(/^b\.f\.(\w+)\.done$/);
+    if (m && it.valor){ const e = FZ.find(x => x.k === m[1]); if (getp(d, `b.f.${m[1]}.series`) == null) setp(d, `b.f.${m[1]}.series`, e.s); if (getp(d, `b.f.${m[1]}.reps`) == null) setp(d, `b.f.${m[1]}.reps`, e.n); }
+  });
+  r.notas.forEach(n => { const d = wday(n.fecha); d.notas = d.notas ? d.notas + "\n" + n.texto : n.texto; });
+  const n = r.items.length + r.notas.length; ui.aiReg = null; ui.aiLog = ""; commit(); toast(`Guardado: ${n} ${n === 1 ? "dato" : "datos"}`);
+}
+/* 3 · Chat */
+async function aiChat(){
+  const q = (ui.aiQ || "").trim(); if (!q) return;
+  const a = AI(); a.chat.push({ role:"user", content:q, t:new Date().toISOString() }); ui.aiQ = ""; save(); render();
+  const msgs = a.chat.slice(-16).map(m => ({ role:m.role, content:m.content }));
+  while (msgs.length && msgs[0].role !== "user") msgs.shift();
+  try{
+    const j = await claude({ system: aiContext(), max: 1000, messages: msgs });
+    a.chat.push({ role:"assistant", content: aiText(j), t:new Date().toISOString() });
+  }catch(e){ a.chat.pop(); ui.aiQ = q; throw e; }
+  if (a.chat.length > 60) a.chat = a.chat.slice(-60);
+  save();
+}
+/* 4 · Revisión semanal */
+async function aiSemana(mon){
+  const sun = addDays(mon, 6), end = sun < todayIso() ? sun : todayIso();
+  const j = await claude({ system: aiContext({ days: daysBetween(addDays(mon, -7), end) + 1, end, cocina:true, wk: mon }), max: 1100, messages:[{ role:"user", content:
+    `Haz la revisión de la semana del ${mon} al ${sun}${end < sun ? ` (va hasta hoy, ${end})` : ""}; la anterior te sirve para comparar. Estructura:
+## Cómo ha ido — 3-4 líneas con números: sesiones, P3, airbike, paseos, sueño y despertares, proteína, café, cintura o peso si hay.
+## Lo que funciona — 2 puntos.
+## Lo que falla — 2-3 puntos con la causa probable (constancia, sueño, horario…).
+## La semana que viene — 3 acciones concretas con día.
+## Progresiones — qué subir o mantener según el plan (o «nada todavía»).
+Máximo 300 palabras.` }] });
+  AI().reviews[mon] = { text: aiText(j), at: new Date().toISOString() }; save();
+}
+/* 5 · Informe mensual */
+async function aiMes(ym){
+  const first = ym + "-01", last = (() => { const d = parseIso(first); d.setMonth(d.getMonth() + 1); d.setDate(0); return iso(d); })();
+  const end = last < todayIso() ? last : todayIso();
+  const j = await claude({ system: aiContext({ days: daysBetween(first, end) + 1, end }), max: 1500, messages:[{ role:"user", content:
+    `Informe del mes ${ym} (del ${first} al ${end}). Estructura:
+## Resumen — 4-5 líneas con números (sesiones por semana, P3, airbike y vatios, sueño, cintura y peso al principio y al final).
+## Correctivo — cómo evolucionan las reps limpias, el ardor y la costilla al final del día.
+## Fuerza y condición — marcas y tendencia.
+## Hábitos — sueño, comida, constancia.
+## Hito y objetivo — lo mejor del mes y un objetivo medible para el siguiente.
+Máximo 400 palabras.` }] });
+  AI().monthly[ym] = { text: aiText(j), at: new Date().toISOString() }; save();
+}
+/* 6 · Cocina: menú y compra */
+const AI_MENU_TOOL = { name:"menu", description:"Menú de la semana con los platos tipo de la app.", input_schema:{ type:"object", properties:{
+  comidas:{ type:"array", items:{ type:"object", properties:{ hueco:{ type:"string", description:"Día 0-6 (0 = lunes) seguido de c (comida) o n (cena). Ej.: 0c, 3n" }, plato:{ type:"string", description:"Clave del plato de la lista" } }, required:["hueco","plato"] } },
+  nota:{ type:"string", description:"Una o dos frases explicando el criterio" } }, required:["comidas"] } };
+async function aiMenu(){
+  const wk = cWeek(), c = K(), cur = c.menu[wk] || {};
+  const platos = allPlatos().map(p => `${p.k} → ${p.t}${p.f ? ` (pescado: ${p.f})` : ""}`).join("\n");
+  const j = await claude({ system: aiContext({ days: 7, cocina:true, wk }), max: 1200, tools:[AI_MENU_TOOL], tool_choice:{ type:"tool", name:"menu" }, messages:[{ role:"user", content:
+    `Propón el menú de la semana del ${wk} (14 huecos: comida y cena de lunes a domingo) usando solo estas claves de plato:\n${platos}\n
+Criterios: proteína en cada comida (meta 3-4 tomas al día), 3-4 raciones de pescado alternando blanco y azul, bonito o atún como mucho 3 contando las raciones sueltas, variedad sin repetir el mismo plato más de 2 veces, cosas fáciles que salgan de la tanda del fin de semana, y algún «libre» si encaja (comidas fuera).${Object.keys(cur).length ? ` Respeta los huecos ya puestos: ${JSON.stringify(cur)}.` : ""}` }] });
+  const inp = aiTool(j) || {}, keys = new Set(allPlatos().map(p => p.k)), m = {};
+  (inp.comidas || []).forEach(x => { if (/^[0-6][cn]$/.test(x.hueco) && keys.has(x.plato)) m[x.hueco] = x.plato; });
+  if (!Object.keys(m).length) throw new Error("La propuesta no ha salido bien. Prueba otra vez.");
+  ui.aiMenu = { wk, menu: { ...m, ...cur }, nota: inp.nota || "" };
+}
+const AI_COMPRA_TOOL = { name:"compra", description:"Productos que hay que comprar para el menú.", input_schema:{ type:"object", properties:{
+  productos:{ type:"array", items:{ type:"object", properties:{ clave:{ type:"string" }, estado:{ type:"string", enum:["falta","poco"] } }, required:["clave","estado"] } },
+  nuevos:{ type:"array", description:"Productos necesarios que no están en la despensa", items:{ type:"object", properties:{ nombre:{ type:"string" }, seccion:{ type:"string", enum: DESP.map(g => g.cat) } }, required:["nombre","seccion"] } },
+  nota:{ type:"string" } }, required:["productos"] } };
+async function aiCompra(){
+  const wk = cWeek(), c = K();
+  if (!Object.keys(c.menu[wk] || {}).length) throw new Error("Primero pon el menú de la semana (o pídeselo a Claude).");
+  const lista = despItems().flatMap(g => g.items.filter(i => !c.oculto[i.k]).map(i => `${i.k} → ${i.t} [${g.cat}] (ahora: ${({ hay:"hay", poco:"queda poco", falta:"falta" })[c.desp[i.k] || "hay"]})`)).join("\n");
+  const j = await claude({ model: AI_FAST, system: aiContext({ days: 3, cocina:true, wk }), max: 1200, tools:[AI_COMPRA_TOOL], tool_choice:{ type:"tool", name:"compra" }, messages:[{ role:"user", content:
+    `A partir del menú de la semana y de la tanda de cocina, ¿qué hay que comprar? Despensa (clave → producto [sección] y estado):\n${lista}\n
+Marca «falta» lo que no hay y hace falta, y «poco» lo que se acabará esta semana. No marques lo que no se usa. Lo imprescindible que no está en la lista, en «nuevos».` }] });
+  const inp = aiTool(j) || {}, ks = new Set(despItems().flatMap(g => g.items.map(i => i.k)));
+  const productos = (inp.productos || []).filter(p => ks.has(p.clave) && ["falta","poco"].includes(p.estado));
+  const nuevos = (inp.nuevos || []).filter(n => n.nombre && DESP.some(g => g.cat === n.seccion)).slice(0, 12);
+  ui.aiCompra = { productos, nuevos, nota: inp.nota || "" };
+}
+/* 7 · Progresiones de la fuerza */
+function progTip(e, ref){
+  const top = { fsq:8, row:8 }[e.k]; if (!top) return "";
+  const ds = Object.keys(DB.days).filter(x => x <= ref && getp(DB.days[x], `b.f.${e.k}.done`)).sort().slice(-2);
+  if (ds.length < 2) return "";
+  const v = ds.map(x => getp(DB.days[x], `b.f.${e.k}`) || {});
+  if (!v.every(o => o.kg != null && o.kg === v[0].kg && (o.series || 0) >= e.s && (o.reps || 0) >= top)) return "";
+  const nx = e.kgs.find(k => k > v[0].kg); if (!nx) return "";
+  return `Dos sesiones seguidas con ${e.s}×${top} a ${v[0].kg} kg: toca ${nx} kg${e.pair ? " por campana" : ""} y volver a ${e.s}×${e.n}. Grábate la primera sesión.`;
+}
+
+/* Compartir: en la app de Android, con el sistema; en la web, con el navegador */
+const isNative = () => !!(window.Capacitor && typeof Capacitor.isNativePlatform === "function" && Capacitor.isNativePlatform());
+const capP = n => ((window._capP ||= {})[n] ||= Capacitor.registerPlugin(n));
+async function shareText(title, text){
+  try{
+    if (isNative()){ await capP("Share").share({ title, text, dialogTitle: title }); return; }
+    if (navigator.share){ await navigator.share({ title, text }); return; }
+  }catch(e){ if (e && (e.name === "AbortError" || /cancel/i.test(e.message || ""))) return; }
+  try{ await navigator.clipboard.writeText(text); toast("Copiado"); }catch(e){ toast("No se ha podido compartir"); }
+}
+async function shareFile(name, text, mime){
+  if (isNative()){
+    try{
+      const r = await capP("Filesystem").writeFile({ path:name, data:text, directory:"CACHE", encoding:"utf8" });
+      await capP("Share").share({ title:name, files:[r.uri], dialogTitle:"Guardar o enviar la copia" });
+    }catch(e){ if (!/cancel/i.test((e && e.message) || "")) toast("No se ha podido compartir el archivo"); }
+    return true;
+  }
+  return false;
+}
+
+/* ---------------- Avisos (app de Android) ---------------- */
+const AV = [
+  { k:"manana", t:"Registro de la mañana", s:"Cómo has dormido y despertares", def:"07:15", on:false, dias:"todos",
+    txt:() => ({ title:"Buenos días", body:"¿Cómo has dormido? Apúntalo en un toque, con los despertares." }) },
+  { k:"entreno", t:"Entreno", s:"Días de entreno, si aún no has entrenado", def:"16:30", on:true, dias:"entreno", skip: d => trainedDay(d),
+    txt: x => { const a = airSuggest(x).tipo; return { title:"Toca entrenar", body:`P3 → Bloque A → ${bMode({}, x) === "fuerza" ? "fuerza" : "complejo"}${a && a !== "Rodaje suave" ? ` → airbike (${a})` : ""}. Acaba antes de las 20:15.` }; } },
+  { k:"paseo", t:"Paseo con los temas", s:"Días de descanso activo", def:"16:30", on:true, dias:"descanso", skip: d => !!getp(d, "paseo.done"),
+    txt:() => ({ title:"Paseo con los temas", body:"45 minutos por la playa repasando temas. Y el P3, si aún no está." }) },
+  { k:"p3", t:"P3 si el día va en blanco", s:"Solo si hoy no has hecho el P3", def:"21:00", on:true, dias:"todos", skip: d => p3Done(d) > 0,
+    txt:(x, d) => activeDay(d) ? { title:"Te falta el P3", body:"Diez minutos y el día queda redondo." } : { title:"Hoy aún no hay nada", body:"Versión mínima para no romper la constancia: el P3 (10 min). Si te queda energía, un hold por lado." } },
+  { k:"noche", t:"Rutina de noche", s:"Pantallas fuera y luz a las 23:15", def:"22:45", on:true, dias:"todos",
+    txt:() => ({ title:"Rutina de noche", body:"Pantallas fuera, lo pendiente al papel y luz apagada a las 23:15." }) },
+  { k:"revision", t:"Revisión del domingo", s:"Domingos", def:"19:00", on:true, dias:[0], tab:"semana",
+    txt:() => ({ title:"Revisión del domingo", body:"Cinco minutos con la semana: abre Semana y pide la revisión a Claude." }) },
+  { k:"compra", t:"Compra", s:"Viernes", def:"17:00", on:true, dias:[5], tab:"cocina",
+    txt:(x, d, i) => { const n = shopList().length; return { title:"Hoy toca compra", body: i === 0 && n ? `${n} productos en la lista. Repasa la despensa antes de salir.` : "Repasa la despensa y la lista antes de salir." }; } },
+  { k:"tanda", t:"Tanda de cocina", s:"Sábados", def:"11:00", on:false, dias:[6], tab:"cocina",
+    txt:() => ({ title:"Tanda de cocina", body:"Una hora: arroz, legumbre o caldo, verduras al horno y huevos cocidos." }) },
+];
+const LN = () => isNative() ? capP("LocalNotifications") : null;
+const avCfg = () => (S().avisos ||= {});
+const avOn = a => { const c = avCfg()[a.k]; return c && c.on != null ? c.on : a.on; };
+const avTime = a => (avCfg()[a.k] && avCfg()[a.k].h) || a.def;
+let avTimer = null, avListen = false;
+function avSchedule(){ if (!isNative()) return; clearTimeout(avTimer); avTimer = setTimeout(avDo, 700); }
+async function avDo(){
+  const ln = LN(); if (!ln) return;
+  try{
+    if (!avListen){ avListen = true;
+      ln.addListener("localNotificationActionPerformed", ev => { const ex = (ev && ev.notification && ev.notification.extra) || {}; ui.tab = ex.tab || "hoy"; ui.date = todayIso(); render(); window.scrollTo(0, 0); }); }
+    const pend = await ln.getPending();
+    if (pend && pend.notifications && pend.notifications.length) await ln.cancel({ notifications: pend.notifications.map(n => ({ id: Number(n.id) })) });
+    if (!S().avisosOn) return;
+    const perm = await ln.checkPermissions(); if (perm.display !== "granted") return;
+    const now = Date.now(), t0 = todayIso(), list = [];
+    for (let i = 0; i < 14; i++){
+      const x = addDays(t0, i), dow = parseIso(x).getDay(), d = DB.days[x] || {};
+      AV.forEach((a, ai) => {
+        if (!avOn(a)) return;
+        if (a.dias === "entreno" && dayType(x) !== "t") return;
+        if (a.dias === "descanso" && dayType(x) !== "r") return;
+        if (Array.isArray(a.dias) && !a.dias.includes(dow)) return;
+        if (i === 0 && a.skip && a.skip(d)) return;
+        const [hh, mm] = avTime(a).split(":").map(Number), at = parseIso(x); at.setHours(hh, mm, 0, 0);
+        if (at.getTime() <= now + 30000) return;
+        const m = a.txt(x, d, i);
+        list.push({ id: daysBetween("2026-01-01", x) * 10 + ai, title:m.title, body:m.body, schedule:{ at, allowWhileIdle:true },
+          smallIcon:"ic_stat_correctivo", iconColor:"#2E6B4F", extra:{ tab: a.tab || "hoy" } });
+      });
+    }
+    if (list.length) await ln.schedule({ notifications: list });
+  }catch(e){ console.warn("avisos", e); }
+}
+async function avActivar(){
+  const ln = LN(); if (!ln) return;
+  try{
+    let p = await ln.checkPermissions();
+    if (p.display !== "granted") p = await ln.requestPermissions();
+    ui.avPerm = p.display;
+    if (p.display !== "granted"){ render(); toast("Sin permiso de notificaciones: actívalo en los ajustes de Android"); return; }
+    if (ln.checkExactNotificationSetting){ try{ ui.avExact = (await ln.checkExactNotificationSetting()).exact_alarm; }catch(e){} }
+    S().avisosOn = true; commit(); toast("Avisos activados");
+  }catch(e){ toast("No se han podido activar los avisos"); }
+}
+async function avExact(){
+  const ln = LN(); if (!ln) return;
+  try{ if (ln.changeExactNotificationSetting) await ln.changeExactNotificationSetting(); }catch(e){}
+  setTimeout(() => { ui.avChecked = false; render(); }, 1500);
+}
+async function avProbar(){
+  const ln = LN(); if (!ln){ toast("Los avisos funcionan en la app de Android"); return; }
+  try{ await ln.schedule({ notifications:[{ id: 999999, title:"Prueba de aviso", body:"Así te llegarán los avisos de la app.", schedule:{ at: new Date(Date.now() + 5000), allowWhileIdle:true }, smallIcon:"ic_stat_correctivo", iconColor:"#2E6B4F" }] }); toast("Llegará en 5 segundos"); }
+  catch(e){ toast("No se ha podido programar la prueba"); }
+}
+const APK_URL = "https://github.com/diazepamina-creator/entreno-correctivo/releases/latest";
+let apkLatest = null;
+async function apkCheck(){
+  if (apkLatest !== null) return; apkLatest = "";
+  try{
+    const r = await fetch("https://api.github.com/repos/diazepamina-creator/entreno-correctivo/releases/latest", { headers:{ accept:"application/vnd.github+json" } });
+    if (!r.ok) return; const j = await r.json(); const m = (j.tag_name || "").match(/(\d+\.\d+\.\d+)/); apkLatest = m ? m[1] : "";
+    if (ui.tab === "ajustes") render();
+  }catch(e){}
+}
+const vNum = v => v.split(".").reduce((a, x) => a * 1000 + Number(x), 0);
+async function openUrl(u){
+  try{ if (isNative()){ await capP("Browser").open({ url:u }); return; } }catch(e){}
+  window.open(u, "_blank", "noopener");
+}
+
+/* ---------------- Render: coach ---------------- */
+function coachCardHoy(){
+  const isToday = ui.date === todayIso(), w = day(), plan = w.ai && w.ai.plan;
+  if (!isToday && !plan) return "";
+  if (!aiHasKey() && isToday) return card("coach", "Coach", "Claude te dice qué toca hoy", "",
+    `<p class="hint" style="margin-top:0">Pon tu clave de la API de Claude en Ajustes y el coach preparará la sesión de cada día con tus datos.</p><button class="btn" data-action="goto-tab" data-tab="ajustes">Ir a Ajustes</button>`);
+  const mins = [15, 30, 45, 60], cur = ui.coachMin || (w.ai && w.ai.min) || 45;
+  let b = "";
+  if (isToday) b += `<div class="field"><label>Tiempo que tienes</label><div class="chips">${mins.map(m => `<button class="chip sm" data-action="coach-min" data-v="${m}" aria-pressed="${cur === m}">${m} min</button>`).join("")}</div></div>
+    <input class="txt" style="margin-top:8px;width:100%" data-ui="coachExtra" value="${esc(ui.coachExtra || "")}" placeholder="Algo más (opcional): «me duele la muñeca», «solo tengo la 24»…" autocomplete="off">
+    <div class="row" style="margin-top:10px">${aiBtn("ai-hoy", plan ? "Rehacer" : "¿Qué me toca hoy?")}<button class="btn" data-action="goto-tab" data-tab="coach">Registrar en texto</button></div>${aiErrHtml("ai-hoy")}`;
+  if (plan) b += `<div class="md coach-out">${md(plan)}</div><p class="muted" style="font-size:12.5px;margin:6px 0 0">Preparado a las ${hhmm(w.ai.at)}${w.ai.min ? ` para ${w.ai.min} min` : ""}.</p>`;
+  return card("coach", "Coach", isToday ? "Claude te dice qué toca hoy" : "Lo que propuso Claude ese día", plan ? `<span class="pill ok">listo</span>` : "", b);
+}
+function renderCoach(){
+  let h = "";
+  if (!aiHasKey()){
+    h += `<div class="card k-coach"><div class="card-b" style="padding-top:14px"><h2 style="font-size:17px;margin:0 0 6px">Conecta a Claude</h2>
+      <p class="hint" style="margin-top:0">El coach usa tu clave de la API de Claude (se consigue en console.anthropic.com, en «API Keys»). Se guarda solo en este móvil, no entra en las copias, y cada consulta se paga aparte de tu suscripción: con un uso normal, céntimos al mes.</p>
+      <button class="btn accent" data-action="goto-tab" data-tab="ajustes">Poner la clave en Ajustes</button></div></div>`;
+    $("#p-coach").innerHTML = h; return;
+  }
+  // Registro en texto libre
+  const r = ui.aiReg;
+  let rb = `<p class="hint" style="margin-top:0">Escribe o dicta con el micro del teclado lo que has hecho y Claude rellena los campos. Revisas los cambios antes de guardarlos.</p>
+    <textarea data-ui="aiLog" placeholder="Ej.: P3 entero con dead bug a 20. Goblet 24 3×5, swing a dos manos 24 3×10, bici 12 min a 200 W. Dormí regular, 2 despertares. Café a las 16:00.">${esc(ui.aiLog || "")}</textarea>
+    <div class="row" style="margin-top:10px">${aiBtn("ai-reg", "Interpretar")}</div>${aiErrHtml("ai-reg")}`;
+  if (r){
+    const byDate = {}; r.items.forEach(it => (byDate[it.fecha] ||= []).push(it)); r.notas.forEach(n => (byDate[n.fecha] ||= []).push({ nota: n.texto }));
+    rb += `<div class="preview">${Object.keys(byDate).sort().map(x => `<div class="ck-cat">${esc(fmtDate(x))}${x === todayIso() ? " · hoy" : ""}</div><ul>${byDate[x].map(it => it.nota
+      ? `<li><span class="muted">Notas:</span> ${esc(it.nota)}</li>`
+      : `<li>${esc(AIF[it.campo].l)}: <b>${esc(fmtVal(AIF[it.campo], it.valor))}</b>${it.old != null && it.old !== it.valor ? ` <span class="muted">(antes: ${esc(fmtVal(AIF[it.campo], it.old))})</span>` : ""}</li>`).join("")}</ul>`).join("") || `<p class="muted">No he encontrado nada que guardar.</p>`}
+      ${r.dudas ? `<div class="note">${esc(r.dudas)}</div>` : ""}${r.bad.length ? `<p class="muted" style="font-size:13px">Descartados por no encajar: ${esc(r.bad.join(", "))}</p>` : ""}
+      <div class="row" style="margin-top:10px">${r.items.length || r.notas.length ? `<button class="btn accent" data-action="ai-reg-ok">Guardar</button>` : ""}<button class="btn" data-action="ai-reg-no">Descartar</button></div></div>`;
+  }
+  h += card("coachlog", "Registrar en texto", "Cuéntalo y se rellena solo", "", rb);
+  // Chat
+  const a = AI();
+  let cb = `<div class="chat">${a.chat.length ? a.chat.slice(-20).map(m => `<div class="msg ${m.role === "user" ? "me" : "ai"}">${m.role === "user" ? esc(m.content).replace(/\n/g, "<br>") : `<div class="md">${md(m.content)}</div>`}</div>`).join("")
+    : `<p class="muted" style="margin:0">Pregúntale lo que quieras sobre tu plan: «¿hago el complejo si he dormido cinco horas?», «¿por qué me cuesta el lado izquierdo en la rotación?».</p>`}
+    ${aiBusy["ai-chat"] ? `<div class="msg ai muted">Pensando…</div>` : ""}</div>
+    <textarea data-ui="aiQ" style="min-height:64px" placeholder="Escribe tu pregunta">${esc(ui.aiQ || "")}</textarea>
+    <div class="row" style="margin-top:10px">${aiBtn("ai-chat", "Enviar")}${a.chat.length ? `<button class="link" data-action="ai-chat-clear">borrar la conversación</button>` : ""}</div>${aiErrHtml("ai-chat")}`;
+  h += card("coachchat", "Pregúntale", "Conoce tu plan y tus últimos 14 días", "", cb);
+  // Informes
+  const ym = todayIso().slice(0, 7), prevYm = (() => { const d = parseIso(ym + "-01"); d.setMonth(d.getMonth() - 1); return iso(d).slice(0, 7); })();
+  const selYm = ui.aiYm || ym, rep = a.monthly[selYm], MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  const ymL = x => `${MES[Number(x.slice(5)) - 1]} ${x.slice(0, 4)}`;
+  let ib = `<p class="hint" style="margin-top:0">La revisión de cada semana está en la pestaña Semana. Aquí, el informe del mes.</p>
+    <div class="chips">${[ym, prevYm].map(x => `<button class="chip sm" data-action="ai-ym" data-v="${x}" aria-pressed="${selYm === x}">${ymL(x)}</button>`).join("")}</div>
+    <div class="row" style="margin-top:10px">${aiBtn("ai-mes", rep ? "Rehacer el informe" : "Hacer el informe")}${rep ? `<button class="btn" data-action="ai-share-mes">Compartir</button>` : ""}</div>${aiErrHtml("ai-mes")}
+    ${rep ? `<div class="md coach-out">${md(rep.text)}</div><p class="muted" style="font-size:12.5px;margin:6px 0 0">Hecho el ${esc(fmtDate(rep.at.slice(0, 10)))}.</p>` : ""}`;
+  h += card("coachinf", "Informe mensual", ymL(selYm), rep ? `<span class="pill ok">hecho</span>` : "", ib);
+  // Material
+  h += card("coachmat", "Material disponible", S().material ? esc(S().material) : "Dile al coach con qué cuentas",  "",
+    `<p class="hint" style="margin-top:0">El coach adapta las sesiones a lo que tengas a mano.</p>
+    <input class="txt" style="width:100%" data-sbind="material" value="${esc(S().material || "")}" placeholder="Ej.: en casa solo la 12 y la 24 sueltas; airbike" autocomplete="off">`);
+  h += `<p class="hint" style="text-align:center">Modelo: ${esc((AIM.find(m => m[0] === aiModel()) || [0, aiModel()])[1])} · cámbialo en Ajustes.</p>`;
+  $("#p-coach").innerHTML = h;
+}
+
+
 /* ---------------- Render general ---------------- */
 function render(){
   renderTop();
   document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === "p-" + ui.tab));
-  ({ hoy:renderHoy, semana:renderSemana, cocina:renderCocina, hist:renderHist, guia:renderGuia, ajustes:renderAjustes })[ui.tab]();
+  ({ hoy:renderHoy, semana:renderSemana, coach:renderCoach, cocina:renderCocina, hist:renderHist, guia:renderGuia, ajustes:renderAjustes })[ui.tab]();
 }
 
 /* ---------------- Temporizador ---------------- */
@@ -1384,8 +1955,7 @@ const A = {
     const list = shopList(); if (!list.length) return;
     const groups = {}; list.forEach(i => (groups[i.cat] ||= []).push(i));
     const txt = "Compra\n" + Object.keys(groups).map(cat => `\n${cat}\n` + groups[cat].map(i => `- ${i.t}`).join("\n")).join("\n");
-    try{ if (navigator.share){ await navigator.share({ title:"Lista de la compra", text:txt }); return; } }catch(e){ if (e.name === "AbortError") return; }
-    try{ await navigator.clipboard.writeText(txt); toast("Lista copiada"); }catch(e){ toast("No se ha podido copiar"); }
+    shareText("Lista de la compra", txt);
   },
   "c-suelta": b => { const c = K(), p = cWeek() + "." + b.dataset.k; const v = Math.max(0, (getp(c.sueltas, p) || 0) + Number(b.dataset.d)); setp(c.sueltas, p, v || undefined); commit(); },
   "c-tanda": b => { const c = K(), wk = cWeek(); c.tanda[wk] ||= {}; if (c.tanda[wk][b.dataset.k]) delete c.tanda[wk][b.dataset.k]; else c.tanda[wk][b.dataset.k] = true; commit(); },
@@ -1404,6 +1974,38 @@ const A = {
     K().propios.push({ k:"u" + Date.now().toString(36), t, cat:$("#cProdCat").value }); commit(); },
   "c-del-prod": b => { const c = K(), k = b.dataset.k; c.propios = c.propios.filter(p => p.k !== k); delete c.desp[k]; delete c.carro[k]; commit(); },
   "wk": b => { ui.wk = Math.min(0, (ui.wk || 0) + Number(b.dataset.d)); render(); },
+  "goto-tab": b => { ui.tab = b.dataset.tab; render(); window.scrollTo(0, 0); },
+  "coach-min": b => { ui.coachMin = Number(b.dataset.v); render(); },
+  "ai-hoy": () => aiRun("ai-hoy", aiHoy),
+  "ai-reg": () => aiRun("ai-reg", aiRegistrar),
+  "ai-reg-ok": () => aiRegAplicar(),
+  "ai-reg-no": () => { ui.aiReg = null; render(); },
+  "ai-chat": () => aiRun("ai-chat", aiChat),
+  "ai-chat-clear": () => { if (confirm("¿Borrar la conversación con el coach?")){ AI().chat = []; commit(); } },
+  "ai-semana": b => aiRun("ai-semana", () => aiSemana(b.dataset.mon)),
+  "ai-share-sem": b => { const r = AI().reviews[b.dataset.mon]; if (r) shareText(`Revisión de la semana del ${b.dataset.mon}`, r.text); },
+  "ai-ym": b => { ui.aiYm = b.dataset.v; render(); },
+  "ai-mes": () => aiRun("ai-mes", () => aiMes(ui.aiYm || todayIso().slice(0, 7))),
+  "ai-share-mes": () => { const ym = ui.aiYm || todayIso().slice(0, 7), r = AI().monthly[ym]; if (r) shareText(`Informe de ${ym}`, r.text); },
+  "ai-menu": () => aiRun("ai-menu", aiMenu),
+  "ai-menu-ok": () => { const m = ui.aiMenu; if (!m) return; K().menu[m.wk] = { ...m.menu }; ui.aiMenu = null; commit(); toast("Menú puesto"); },
+  "ai-menu-no": () => { ui.aiMenu = null; render(); },
+  "ai-compra": () => aiRun("ai-compra", aiCompra),
+  "ai-compra-ok": () => { const pc = ui.aiCompra, c = K(); if (!pc) return;
+    pc.productos.forEach(p => { c.desp[p.clave] = p.estado; });
+    pc.nuevos.forEach(n => { const ex = c.propios.find(x => x.t.toLowerCase() === n.nombre.toLowerCase()); const k = ex ? ex.k : "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+      if (!ex) c.propios.push({ k, t:n.nombre, cat:n.seccion }); c.desp[k] = "falta"; });
+    const n = pc.productos.length + pc.nuevos.length; ui.aiCompra = null; ui.open.compra = true; commit(); toast(`${n} productos en la lista`); },
+  "ai-compra-no": () => { ui.aiCompra = null; render(); },
+  "ai-model": b => { aiSetCfg({ model: b.dataset.v }); render(); },
+  "ai-key-del": () => { if (confirm("¿Quitar la clave de este móvil?")){ aiSetCfg({ key: "" }); render(); } },
+  "ai-test": () => aiRun("ai-test", async () => { await claude({ max: 5, messages:[{ role:"user", content:"Responde solo: ok" }] }); toast("Clave y modelo funcionan"); }),
+  "av-on": () => avActivar(),
+  "av-off": () => { S().avisosOn = false; commit(); toast("Avisos desactivados"); },
+  "av-exact": () => avExact(),
+  "av-test": () => avProbar(),
+  "av-toggle": b => { const c = avCfg(), a = AV.find(x => x.k === b.dataset.k); c[a.k] = { ...(c[a.k] || {}), on: !avOn(a) }; commit(); },
+  "open-apk": () => openUrl(APK_URL),
   "set-bmode": b => { const d = wday(); d.b ||= {}; d.b.mode = b.dataset.v; commit(); },
   "round-add": () => {
     const d = wday(); d.b ||= {}; d.b.rounds ||= [];
@@ -1430,12 +2032,13 @@ const A = {
   "sched": b => { const i = b.dataset.i; const nx = { t:"o", o:"r", r:"t" }; S().sched[i] = nx[S().sched[i] || "r"]; commit(); },
   "export": () => downloadBlob(backupBlob(), backupName()),
   "share": async () => {
+    if (await shareFile(backupName(), backupText(), "application/json")) return;
     const f = new File([backupBlob()], backupName(), { type:"application/json" });
     try{ if (navigator.canShare({ files:[f] })) await navigator.share({ files:[f], title:"Copia · Correctivo" }); else downloadBlob(f, f.name); }
     catch(e){ if (e.name !== "AbortError") downloadBlob(f, f.name); }
   },
   "import": () => $("#fileIn").click(),
-  "csv": () => downloadBlob(new Blob(["﻿" + toCSV()], { type:"text/csv;charset=utf-8" }), `correctivo-${todayIso()}.csv`),
+  "csv": async () => { if (await shareFile(`correctivo-${todayIso()}.csv`, "\ufeff" + toCSV(), "text/csv")) return; downloadBlob(new Blob(["﻿" + toCSV()], { type:"text/csv;charset=utf-8" }), `correctivo-${todayIso()}.csv`); },
   "install": async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; render(); },
   "wipe": () => { if (confirm("¿Borrar todos los registros de este móvil? No se puede deshacer.") && confirm("Última confirmación: se borra todo.")) { DB = fresh(); commit(); toast("Datos borrados"); } },
 };
@@ -1447,6 +2050,9 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("input", e => {
   const t0 = e.target;
+  if (t0.dataset && t0.dataset.ui){ ui[t0.dataset.ui] = t0.value; return; }
+  if (t0.dataset && t0.dataset.aikey){ aiSetCfg({ key: t0.value.trim() }); return; }
+  if (t0.dataset && t0.dataset.avk){ if (!/^\d{2}:\d{2}$/.test(t0.value)) return; const c = avCfg(); c[t0.dataset.avk] = { ...(c[t0.dataset.avk] || {}), h: t0.value }; clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); return; }
   if (t0.dataset && t0.dataset.cbind){ setp(K(), t0.dataset.cbind, t0.value || undefined); commit(); return; }
   if (t0.dataset && t0.dataset.sbind){
     let v = t0.value || undefined;
@@ -1471,7 +2077,8 @@ document.addEventListener("pointerout", e => {
 
 /* ---------------- Copias ---------------- */
 const backupName = () => `correctivo-copia-${todayIso()}.json`;
-const backupBlob = () => new Blob([JSON.stringify({ app:"correctivo", exported:new Date().toISOString(), ...DB }, null, 1)], { type:"application/json" });
+const backupText = () => JSON.stringify({ app:"correctivo", exported:new Date().toISOString(), ...DB }, null, 1);
+const backupBlob = () => new Blob([backupText()], { type:"application/json" });
 function downloadBlob(blob, name){
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
@@ -1484,6 +2091,7 @@ $("#fileIn").addEventListener("change", async e => {
     const n = Object.keys(d.days).length;
     if (!confirm(`La copia tiene ${n} días. Se combinará con lo que hay: si un día existe en los dos, gana el de la copia. ¿Seguir?`)) return;
     Object.assign(DB.days, d.days); if (d.settings) DB.settings = Object.assign(DB.settings, d.settings); if (d.cocina) DB.cocina = d.cocina;
+    if (d.ai){ const a = AI(); Object.assign(a.reviews, d.ai.reviews || {}); Object.assign(a.monthly, d.ai.monthly || {}); if (!a.chat.length && d.ai.chat) a.chat = d.ai.chat; }
     commit(); toast(`Importados ${n} días`);
   }catch(err){ toast("Ese archivo no es una copia válida de esta app"); }
 });
@@ -1519,11 +2127,14 @@ let lastToday = todayIso();
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") return;
   const t = todayIso(); if (t !== lastToday){ if (ui.date === lastToday) ui.date = t; lastToday = t; render(); }
+  if (isNative() && ui.tab === "ajustes"){ ui.avChecked = false; render(); }
+  avSchedule();
 });
-if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
+if (!isNative() && "serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
 render();
+avSchedule();
 </script>
 </body>
 </html>
