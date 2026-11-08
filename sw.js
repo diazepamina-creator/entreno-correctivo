@@ -1,5 +1,5 @@
 // Service worker: la app funciona sin conexión y se actualiza sola en segundo plano.
-const CACHE = "correctivo-v3.0.0";
+const CACHE = "correctivo-v3.0.2";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png", "./capacitor.js"];
 
 self.addEventListener("install", e => {

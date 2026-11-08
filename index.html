@@ -302,7 +302,7 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 <script src="capacitor.js"></script>
 <script>
 "use strict";
-const VERSION = "3.0.1";
+const VERSION = "3.0.2";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1473,7 +1473,16 @@ function aiContext(o = {}){
 }
 
 /* Llamada a la API */
-async function claude({ system = "", messages, max = 1200, model = aiModel(), tools, tool_choice }){
+/* 3.0.2. Los modelos nuevos (Sonnet 5, Opus 5.5) piensan antes de responder y ese pensamiento
+   cuenta dentro de max_tokens: con 900-1500 se gastaba pensando y la respuesta llegaba SIN TEXTO
+   (en el chat se guardaba una burbuja vacía y la conversación se quedaba atascada). Ahora:
+   margen de sobra para pensar (las respuestas siguen cortas: lo marcan las instrucciones),
+   intensidad media, y una respuesta sin texto es un error, nunca un mensaje guardado.
+   Opus 5.5 (y Sonnet 5.5) no aceptan obligar a usar una herramienta: con ellos se pide en
+   el mensaje y tool_choice va en «auto». */
+const AI_PIENSA = m => !/haiku-4-5/.test(m);                      // Haiku 4.5 no piensa si no se le pide
+const AI_SIN_FORZAR = m => /opus-5-5|sonnet-5-5|fable-5-1/.test(m);
+async function claude({ system = "", messages, max = 1200, model = aiModel(), tools, tool_choice, vacio }){
   const key = aiCfg().key;
   if (!key) throw new Error("Falta la clave de la API: ponla en Ajustes → Coach.");
   if (navigator.onLine === false) throw new Error("Sin conexión: el coach necesita internet.");
@@ -1482,8 +1491,11 @@ async function claude({ system = "", messages, max = 1200, model = aiModel(), to
   try{
     r = await fetch("https://api.anthropic.com/v1/messages", { method:"POST", signal:ctrl.signal,
       headers:{ "content-type":"application/json", "x-api-key":key, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
-      body: JSON.stringify({ model, max_tokens:max, messages, ...(tools ? { tools, tool_choice } : {}),
-        system:[{ type:"text", text:aiStatic(), cache_control:{ type:"ephemeral" } }, ...(system ? [{ type:"text", text:system }] : [])] }) });
+      body: JSON.stringify({ model, max_tokens: AI_PIENSA(model) ? max + 8000 : max, messages,
+        ...(AI_PIENSA(model) ? { output_config:{ effort:"medium" } } : {}),
+        ...(tools ? { tools, tool_choice: AI_SIN_FORZAR(model) && tool_choice && tool_choice.type === "tool" ? { type:"auto" } : tool_choice } : {}),
+        system:[{ type:"text", text:aiStatic(), cache_control:{ type:"ephemeral" } }, ...(system ? [{ type:"text", text:system }] : []),
+          ...(tools && AI_SIN_FORZAR(model) && tool_choice && tool_choice.type === "tool" ? [{ type:"text", text:`Responde usando la herramienta «${tool_choice.name}».` }] : [])] }) });
   }catch(e){ throw new Error(e.name === "AbortError" ? "La respuesta ha tardado demasiado. Prueba otra vez." : "No se ha podido conectar con la API. ¿Hay conexión?"); }
   finally{ clearTimeout(to); }
   let j = null; try{ j = await r.json(); }catch(e){}
@@ -1498,6 +1510,8 @@ async function claude({ system = "", messages, max = 1200, model = aiModel(), to
     throw new Error("Error de la API" + (m ? ": " + m : ` (${r.status})`));
   }
   aiTrack(j.usage);
+  if (j.stop_reason === "refusal") throw new Error("Claude no ha querido responder a esto. Prueba a decirlo de otra forma.");
+  if (!vacio && !aiText(j) && !aiTool(j)) throw new Error(j.stop_reason === "max_tokens" ? "La respuesta se ha quedado sin espacio. Prueba otra vez." : "Claude ha respondido en blanco. Prueba otra vez.");
   return j;
 }
 const aiText = j => (j.content || []).filter(c => c.type === "text").map(c => c.text).join("\n").trim();
@@ -1577,7 +1591,8 @@ function aiRegAplicar(){
 /* 3 · Chat */
 async function aiChat(){
   const q = (ui.aiQ || "").trim(); if (!q) return;
-  const a = AI(); a.chat.push({ role:"user", content:q, t:new Date().toISOString() }); ui.aiQ = ""; save(); render();
+  const a = AI(); a.chat = a.chat.filter(m => m && String(m.content || "").trim());   // las burbujas vacías de antes de 3.0.2, fuera
+  a.chat.push({ role:"user", content:q, t:new Date().toISOString() }); ui.aiQ = ""; save(); render();
   const msgs = a.chat.slice(-16).map(m => ({ role:m.role, content:m.content }));
   while (msgs.length && msgs[0].role !== "user") msgs.shift();
   try{
@@ -1805,7 +1820,7 @@ function renderCoach(){
   h += card("coachlog", "Registrar en texto", "Cuéntalo y se rellena solo", "", rb);
   // Chat
   const a = AI();
-  let cb = `<div class="chat">${a.chat.length ? a.chat.slice(-20).map(m => `<div class="msg ${m.role === "user" ? "me" : "ai"}">${m.role === "user" ? esc(m.content).replace(/\n/g, "<br>") : `<div class="md">${md(m.content)}</div>`}</div>`).join("")
+  let cb = `<div class="chat">${a.chat.length ? a.chat.filter(m => String(m.content || "").trim()).slice(-20).map(m => `<div class="msg ${m.role === "user" ? "me" : "ai"}">${m.role === "user" ? esc(m.content).replace(/\n/g, "<br>") : `<div class="md">${md(m.content)}</div>`}</div>`).join("")
     : `<p class="muted" style="margin:0">Pregúntale lo que quieras sobre tu plan: «¿hago el complejo si he dormido cinco horas?», «¿por qué me cuesta el lado izquierdo en la rotación?».</p>`}
     ${aiBusy["ai-chat"] ? `<div class="msg ai muted">Pensando…</div>` : ""}</div>
     <textarea data-ui="aiQ" style="min-height:64px" placeholder="Escribe tu pregunta">${esc(ui.aiQ || "")}</textarea>
@@ -1999,7 +2014,7 @@ const A = {
   "ai-compra-no": () => { ui.aiCompra = null; render(); },
   "ai-model": b => { aiSetCfg({ model: b.dataset.v }); render(); },
   "ai-key-del": () => { if (confirm("¿Quitar la clave de este móvil?")){ aiSetCfg({ key: "" }); render(); } },
-  "ai-test": () => aiRun("ai-test", async () => { await claude({ max: 5, messages:[{ role:"user", content:"Responde solo: ok" }] }); toast("Clave y modelo funcionan"); }),
+  "ai-test": () => aiRun("ai-test", async () => { await claude({ max: 5, vacio: true, messages:[{ role:"user", content:"Responde solo: ok" }] }); toast("Clave y modelo funcionan"); }),
   "av-on": () => avActivar(),
   "av-off": () => { S().avisosOn = false; commit(); toast("Avisos desactivados"); },
   "av-exact": () => avExact(),
