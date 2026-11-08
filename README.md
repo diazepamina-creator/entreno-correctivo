@@ -23,6 +23,13 @@ Solo se envían datos a la API al pulsar un botón.
 ## Instalar en Android
 **App de Android (APK)**, con avisos: descargar el `.apk` de la [última versión](https://github.com/diazepamina-creator/entreno-correctivo/releases/latest) e instalarlo. Las actualizaciones se instalan encima y conservan los datos. Avisos: entreno, paseo, P3 si el día va en blanco (se cancela al marcarlo), rutina de noche, revisión del domingo, compra y tanda de cocina.
 
+### Cambio de firma (3.0.1)
+Hasta la 3.0.0 la firma de la APK estaba en este repositorio, a la vista. Desde la 3.0.1 hay una firma nueva que no está aquí: GitHub Actions la recibe por dos secretos (`APK_FIRMA` y `APK_CLAVE`). Android no deja instalar una APK con otra firma encima de la anterior, así que, una sola vez:
+1. En la app vieja: **copia de seguridad** (y apunta la clave de la API si no la tienes a mano: no va en la copia).
+2. Desinstalar la app.
+3. Instalar la 3.0.1 o posterior.
+4. Importar la copia y volver a poner la clave. Activar de nuevo los avisos.
+
 **Web instalable (PWA)**, sin avisos:
 1. Abrir la dirección de GitHub Pages en **Chrome**.
 2. Menú ⋮ → **Instalar aplicación**.
@@ -38,4 +45,4 @@ Los datos de la web y de la APK son independientes: para pasarlos, copia de segu
 | `sw.js` | Funcionamiento sin conexión |
 | `icon-*.png`, `apple-touch-icon.png` | Iconos |
 | `capacitor.js` | Puente con Android (en la web no hace nada) |
-| `apk/` | Proyecto de Capacitor para la APK; la compila GitHub Actions (`.github/workflows/apk.yml`) y la publica en Releases. La firma (`correctivo.keystore`) es fija para que las actualizaciones se instalen encima |
+| `apk/` | Proyecto de Capacitor para la APK; la compila GitHub Actions (`.github/workflows/apk.yml`) y la publica en Releases. La firma no está en el repositorio: llega por los secretos `APK_FIRMA` y `APK_CLAVE`, y es fija para que las actualizaciones se instalen encima |

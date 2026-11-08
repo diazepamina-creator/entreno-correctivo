@@ -57,6 +57,18 @@ jobs:
         id: v
         run: echo "version=$(grep -oP 'const VERSION = "\K[0-9.]+' index.html)" >> "$GITHUB_OUTPUT"
 
+      - name: Firma (secretos APK_FIRMA y APK_CLAVE)
+        env:
+          APK_FIRMA: ${{ secrets.APK_FIRMA }}
+          APK_CLAVE: ${{ secrets.APK_CLAVE }}
+        run: |
+          if [ -z "$APK_FIRMA" ] || [ -z "$APK_CLAVE" ]; then
+            echo "::error title=Falta la firma::Pon los secretos APK_FIRMA y APK_CLAVE en Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          echo "$APK_FIRMA" | tr -d ' \r\n' | base64 -d > apk/firma.p12
+          keytool -list -storetype pkcs12 -keystore apk/firma.p12 -storepass "$APK_CLAVE" > /dev/null || { echo "::error title=Firma::La firma o la contraseña no son correctas"; exit 1; }
+
       - name: Preparar el proyecto
         working-directory: apk
         run: |
@@ -68,6 +80,7 @@ jobs:
         working-directory: apk/android
         env:
           VERSION_CODE: ${{ github.run_number }}
+          APK_CLAVE: ${{ secrets.APK_CLAVE }}
           VERSION_NAME: ${{ steps.v.outputs.version }}
         run: |
           chmod +x gradlew
@@ -93,3 +106,4 @@ jobs:
           body: |
             Descarga el archivo `.apk` desde el móvil e instálalo encima de la versión anterior: los datos se mantienen.
             La primera vez, Android pedirá permiso para instalar apps de esta fuente.
+            Si viene de la 3.0.0 o anterior, la firma ha cambiado: copia de seguridad → desinstalar → instalar esta → importar la copia (README, «Cambio de firma»).

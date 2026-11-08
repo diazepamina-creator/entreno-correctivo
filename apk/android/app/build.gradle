@@ -17,12 +17,15 @@ android {
         }
     }
     // Firma fija para que cada APK nueva se instale encima de la anterior sin borrar datos.
+    // No está en el repositorio (desde 3.0.1): el workflow la saca del secreto APK_FIRMA a
+    // apk/firma.p12 y pasa la contraseña (secreto APK_CLAVE) por la variable APK_CLAVE.
     signingConfigs {
         correctivo {
-            storeFile file("../../correctivo.keystore")
-            storePassword "correctivo"
+            storeFile file("../../firma.p12")
+            storeType "pkcs12"
+            storePassword System.getenv("APK_CLAVE") ?: ""
             keyAlias "correctivo"
-            keyPassword "correctivo"
+            keyPassword System.getenv("APK_CLAVE") ?: ""
         }
     }
     buildTypes {
