@@ -34,11 +34,12 @@ ol{padding-left:20px;margin:6px 0}li{margin:3px 0}
   <ol>
     <li>Abre esta página en <b>Chrome</b> del móvil, con el Bluetooth activado. Si Kinomap está abierto, ciérralo.</li>
     <li>Pedalea un poco para que la consola se encienda.</li>
-    <li>Pulsa <b>Conectar</b> y elige la bici en la lista (suele salir con un nombre tipo «Maniak», «Torque» o un código).</li>
+    <li>Pulsa <b>Buscar solo máquinas de fitness</b>. Si sale algo, es la bici: elígelo. Si la lista sale vacía, prueba <b>Ver todos los dispositivos</b> con el móvil pegado a la consola y elige el «desconocido» con la señal más fuerte (el icono de barras más relleno).</li>
     <li>Pedalea <b>1-2 minutos</b> variando el ritmo, con algún sprint corto. Luego pulsa <b>Terminar</b> y <b>Copiar informe</b>, y pégamelo.</li>
   </ol>
   <div class="row" style="margin-top:10px">
-    <button class="pri" id="bConn">Conectar</button>
+    <button class="pri" id="bFtms">Buscar solo máquinas de fitness</button>
+    <button id="bConn">Ver todos los dispositivos</button>
     <button id="bStop" disabled>Terminar</button>
     <button id="bCopy" disabled>Copiar informe</button>
     <button id="bShare" disabled>Compartir</button>
@@ -116,12 +117,15 @@ function show(o){
   if (o.kcal != null) $("vK").textContent = o.kcal; if (o.hr) $("vH").textContent = o.hr;
 }
 
-$("bConn").onclick = async () => {
+async function connect(mode){
   if (!navigator.bluetooth){ st("Este navegador no tiene Bluetooth web. Abre la página en Chrome para Android.", "bad"); return; }
   try{
     st("Buscando…");
-    dev = await navigator.bluetooth.requestDevice({ acceptAllDevices:true, optionalServices: OPT });
-    lines = []; counts = {}; samples = {}; stopped = false; t0 = performance.now();
+    dev = await navigator.bluetooth.requestDevice(mode === "ftms"
+      ? { filters:[{ services:[S16(0x1826)] }, { services:[S16(0x1818)] }, { services:[S16(0x1816)] }, { namePrefix:"Maniak" }, { namePrefix:"MANIAK" }, { namePrefix:"Torque" }, { namePrefix:"PM" }, { namePrefix:"FS-" }], optionalServices: OPT }
+      : { acceptAllDevices:true, optionalServices: OPT });
+    lines = []; log(`MODO: ${mode === "ftms" ? "solo máquinas de fitness" : "todos"}`);
+    counts = {}; samples = {}; stopped = false; t0 = performance.now();
     log(`DISPOSITIVO: ${dev.name || "(sin nombre)"}  id=${dev.id}`);
     log(`Navegador: ${navigator.userAgent}`);
     dev.addEventListener("gattserverdisconnected", () => { log(`[${((performance.now() - t0) / 1000).toFixed(1)} s] DESCONECTADO`); if (!stopped) st("Se ha desconectado. Vuelve a conectar o copia el informe.", "bad"); });
@@ -160,13 +164,15 @@ $("bConn").onclick = async () => {
       }
     }
     st("Conectado. Pedalea 1-2 minutos variando el ritmo y luego pulsa Terminar.", "ok");
-    $("bStop").disabled = false; $("bConn").disabled = true;
+    $("bStop").disabled = false; $("bConn").disabled = true; $("bFtms").disabled = true;
   }catch(e){
-    if (e.name === "NotFoundError") st("No has elegido ningún dispositivo.", "bad");
+    if (e.name === "NotFoundError") st(mode === "ftms" ? "No se ha elegido ninguna máquina. Si la lista salía vacía, la consola no se anuncia como máquina de fitness: prueba «Ver todos los dispositivos»." : "No has elegido ningún dispositivo.", "bad");
     else st("Error: " + e.message, "bad");
     if (lines.length){ $("bCopy").disabled = false; $("bShare").disabled = !navigator.share; }
   }
-};
+}
+$("bFtms").onclick = () => connect("ftms");
+$("bConn").onclick = () => connect("all");
 function report(){
   const out = lines.slice();
   out.push(`\nMENSAJES RECIBIDOS en ${((performance.now() - t0) / 1000).toFixed(0)} s:`);
@@ -180,7 +186,7 @@ $("bStop").onclick = () => {
   try{ if (dev && dev.gatt.connected) dev.gatt.disconnect(); }catch(e){}
   $("log").textContent = report();
   st("Terminado. Copia el informe y pégamelo.", "ok");
-  $("bStop").disabled = true; $("bConn").disabled = false; $("bCopy").disabled = false; $("bShare").disabled = !navigator.share;
+  $("bStop").disabled = true; $("bConn").disabled = false; $("bFtms").disabled = false; $("bCopy").disabled = false; $("bShare").disabled = !navigator.share;
 };
 $("bCopy").onclick = async () => { try{ await navigator.clipboard.writeText(report()); st("Informe copiado.", "ok"); }catch(e){ st("No se ha podido copiar: selecciona el texto del informe y cópialo a mano.", "bad"); } };
 $("bShare").onclick = async () => { try{ await navigator.share({ title:"Diagnóstico Bluetooth", text: report() }); }catch(e){} };
