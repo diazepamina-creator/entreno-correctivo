@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnóstico Bluetooth</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d1d1b;--ink2:#5d5c57;--brand:#1F3A5F;--ok:#2E6B4F;--bad:#a33;--line:#dddcd5;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#141413;--card:#1e1e1c;--ink:#ecebe6;--ink2:#a3a29b;--brand:#8fb4e3;--ok:#7cc4a0;--bad:#f08a8a;--line:#33332f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px;max-width:720px;margin-inline:auto}
+h1{font-size:20px;margin:4px 0 2px}
+p{margin:6px 0}.mut{color:var(--ink2);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+button{font:inherit;font-weight:600;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:12px 16px;min-height:48px;cursor:pointer}
+button.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+@media (prefers-color-scheme:dark){button.pri{color:#111}}
+button:disabled{opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.live{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.live div{background:var(--bg);border-radius:10px;padding:8px;text-align:center}
+.live b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.live small{color:var(--ink2);font-size:12px}
+pre{font:12px/1.4 var(--mono);white-space:pre-wrap;word-break:break-all;background:var(--bg);border-radius:10px;padding:10px;max-height:50vh;overflow:auto;margin:8px 0 0}
+.st{font-weight:600}.st.ok{color:var(--ok)}.st.bad{color:var(--bad)}
+ol{padding-left:20px;margin:6px 0}li{margin:3px 0}
+</style>
+</head>
+<body>
+<h1>Diagnóstico Bluetooth de la airbike</h1>
+<p class="mut">Averigua qué datos transmite la consola. No guarda nada: solo genera un texto para copiar.</p>
+
+<div class="card">
+  <ol>
+    <li>Abre esta página en <b>Chrome</b> del móvil, con el Bluetooth activado. Si Kinomap está abierto, ciérralo.</li>
+    <li>Pedalea un poco para que la consola se encienda.</li>
+    <li>Pulsa <b>Conectar</b> y elige la bici en la lista (suele salir con un nombre tipo «Maniak», «Torque» o un código).</li>
+    <li>Pedalea <b>1-2 minutos</b> variando el ritmo, con algún sprint corto. Luego pulsa <b>Terminar</b> y <b>Copiar informe</b>, y pégamelo.</li>
+  </ol>
+  <div class="row" style="margin-top:10px">
+    <button class="pri" id="bConn">Conectar</button>
+    <button id="bStop" disabled>Terminar</button>
+    <button id="bCopy" disabled>Copiar informe</button>
+    <button id="bShare" disabled>Compartir</button>
+  </div>
+  <p id="st" class="st" style="margin-top:10px"></p>
+</div>
+
+<div class="card">
+  <b>En directo</b> <span class="mut">(si la consola usa el estándar FTMS)</span>
+  <div class="live">
+    <div><b id="vW">–</b><small>vatios</small></div>
+    <div><b id="vR">–</b><small>RPM</small></div>
+    <div><b id="vS">–</b><small>km/h</small></div>
+    <div><b id="vD">–</b><small>metros</small></div>
+    <div><b id="vK">–</b><small>kcal</small></div>
+    <div><b id="vH">–</b><small>pulso</small></div>
+  </div>
+  <p class="mut" id="rate" style="margin-top:8px"></p>
+</div>
+
+<div class="card">
+  <b>Informe</b>
+  <pre id="log"></pre>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const S16 = n => "0000" + n.toString(16).padStart(4, "0") + "-0000-1000-8000-00805f9b34fb";
+const NAMES = {
+  "1826":"Fitness Machine (FTMS)", "180d":"Heart Rate", "1818":"Cycling Power", "1816":"Cycling Speed & Cadence",
+  "180a":"Device Information", "180f":"Battery", "1800":"Generic Access", "1801":"Generic Attribute", "1814":"Running Speed & Cadence",
+  "2acc":"FTMS Feature", "2ad2":"Indoor Bike Data", "2ad1":"Rower Data", "2ace":"Cross Trainer Data", "2acd":"Treadmill Data",
+  "2ad3":"Training Status", "2ad9":"FTMS Control Point", "2ada":"FTMS Status", "2ad6":"Supported Resistance Range", "2ad8":"Supported Power Range",
+  "2a37":"Heart Rate Measurement", "2a63":"Cycling Power Measurement", "2a5b":"CSC Measurement", "2a19":"Battery Level",
+  "2a29":"Manufacturer Name", "2a24":"Model Number", "2a25":"Serial Number", "2a26":"Firmware Revision", "2a27":"Hardware Revision", "2a28":"Software Revision"
+};
+// Servicios que pedimos permiso para ver: estándar + propietarios habituales en consolas
+const OPT = ["1826","180d","1818","1816","180a","180f","1814","fff0","ffe0","ffe5","fee7","ff00","ffb0","fe00","1910"].map(x => S16(parseInt(x, 16)))
+  .concat([
+    "6e400001-b5a3-f393-e0a9-e50e24dcca9e", // Nordic UART
+    "ce060000-43e5-11e4-916c-0800200c9a66", "ce060010-43e5-11e4-916c-0800200c9a66", "ce060020-43e5-11e4-916c-0800200c9a66",
+    "ce060030-43e5-11e4-916c-0800200c9a66", "ce060040-43e5-11e4-916c-0800200c9a66", "ce060080-43e5-11e4-916c-0800200c9a66", // Concept2 PM5
+    "49535343-fe7d-4ae5-8fa9-9fafd205e455", // Microchip transparent UART
+    "0000fff0-0000-1000-8000-00805f9b34fb"
+  ]);
+const short = u => /^0000([0-9a-f]{4})-0000-1000-8000-00805f9b34fb$/.test(u) ? u.slice(4, 8) : u;
+const nm = u => { const s = short(u); return NAMES[s] ? `${s} · ${NAMES[s]}` : s; };
+const hex = dv => Array.from(new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength)).map(b => b.toString(16).padStart(2, "0")).join(" ");
+const txt = dv => { try{ return new TextDecoder().decode(dv); }catch(e){ return ""; } };
+let dev = null, t0 = 0, lines = [], counts = {}, samples = {}, stopped = false;
+const log = s => { lines.push(s); $("log").textContent = lines.slice(-400).join("\n"); $("log").scrollTop = 1e9; };
+const st = (s, c = "") => { $("st").textContent = s; $("st").className = "st " + c; };
+
+function ftmsBike(dv){
+  let i = 0; const f = dv.getUint16(i, true); i += 2; const o = {};
+  if (!(f & 1)){ o.kmh = dv.getUint16(i, true) / 100; i += 2; }
+  if (f & 2) i += 2;
+  if (f & 4){ o.rpm = dv.getUint16(i, true) / 2; i += 2; }
+  if (f & 8) i += 2;
+  if (f & 16){ o.m = dv.getUint16(i, true) | (dv.getUint8(i + 2) << 16); i += 3; }
+  if (f & 32) i += 2;
+  if (f & 64){ o.w = dv.getInt16(i, true); i += 2; }
+  if (f & 128) i += 2;
+  if (f & 256){ o.kcal = dv.getUint16(i, true); i += 5; }
+  if (f & 512){ o.hr = dv.getUint8(i); i += 1; }
+  if (f & 1024) i += 1;
+  if (f & 2048){ o.t = dv.getUint16(i, true); i += 2; }
+  return o;
+}
+function hrm(dv){ const f = dv.getUint8(0); return { hr: f & 1 ? dv.getUint16(1, true) : dv.getUint8(1) }; }
+function show(o){
+  if (o.w != null) $("vW").textContent = o.w; if (o.rpm != null) $("vR").textContent = o.rpm;
+  if (o.kmh != null) $("vS").textContent = o.kmh.toFixed(1); if (o.m != null) $("vD").textContent = o.m;
+  if (o.kcal != null) $("vK").textContent = o.kcal; if (o.hr) $("vH").textContent = o.hr;
+}
+
+$("bConn").onclick = async () => {
+  if (!navigator.bluetooth){ st("Este navegador no tiene Bluetooth web. Abre la página en Chrome para Android.", "bad"); return; }
+  try{
+    st("Buscando…");
+    dev = await navigator.bluetooth.requestDevice({ acceptAllDevices:true, optionalServices: OPT });
+    lines = []; counts = {}; samples = {}; stopped = false; t0 = performance.now();
+    log(`DISPOSITIVO: ${dev.name || "(sin nombre)"}  id=${dev.id}`);
+    log(`Navegador: ${navigator.userAgent}`);
+    dev.addEventListener("gattserverdisconnected", () => { log(`[${((performance.now() - t0) / 1000).toFixed(1)} s] DESCONECTADO`); if (!stopped) st("Se ha desconectado. Vuelve a conectar o copia el informe.", "bad"); });
+    st("Conectando…");
+    const gatt = await dev.gatt.connect();
+    const svcs = await gatt.getPrimaryServices();
+    log(`\nSERVICIOS VISIBLES: ${svcs.length}`);
+    for (const s of svcs){
+      log(`\n■ ${nm(s.uuid)}${short(s.uuid).length > 4 ? "" : ""}  [${s.uuid}]`);
+      let chars = [];
+      try{ chars = await s.getCharacteristics(); }catch(e){ log(`   (no se pueden leer las características: ${e.message})`); continue; }
+      for (const c of chars){
+        const p = c.properties, props = ["read","write","writeWithoutResponse","notify","indicate"].filter(k => p[k]).join(",");
+        log(`   • ${nm(c.uuid)}  (${props})`);
+        if (p.read){
+          try{ const v = await c.readValue(); const t = txt(v); log(`       leído: ${hex(v)}${/^[\x20-\x7e]{2,}$/.test(t) ? `  «${t}»` : ""}`); }
+          catch(e){ log(`       (lectura falló: ${e.message})`); }
+        }
+        if (p.notify || p.indicate){
+          const key = short(c.uuid);
+          try{
+            c.addEventListener("characteristicvaluechanged", ev => {
+              const v = ev.target.value; counts[key] = (counts[key] || 0) + 1;
+              const n = counts[key]; const ts = ((performance.now() - t0) / 1000).toFixed(2);
+              (samples[key] ||= []);
+              if (n <= 25 || n % 10 === 0){ samples[key].push(`${ts}s ${hex(v)}`); }
+              let parsed = null;
+              try{ if (key === "2ad2") parsed = ftmsBike(v); else if (key === "2a37") parsed = hrm(v); }catch(e){}
+              if (parsed){ show(parsed); if (n <= 25 || n % 10 === 0) samples[key][samples[key].length - 1] += "  → " + JSON.stringify(parsed); }
+              $("rate").textContent = Object.entries(counts).map(([k, n]) => `${nm(k)}: ${n} mensajes`).join(" · ");
+            });
+            await c.startNotifications();
+            log(`       ✓ suscrito a notificaciones`);
+          }catch(e){ log(`       (no se pudo suscribir: ${e.message})`); }
+        }
+      }
+    }
+    st("Conectado. Pedalea 1-2 minutos variando el ritmo y luego pulsa Terminar.", "ok");
+    $("bStop").disabled = false; $("bConn").disabled = true;
+  }catch(e){
+    if (e.name === "NotFoundError") st("No has elegido ningún dispositivo.", "bad");
+    else st("Error: " + e.message, "bad");
+    if (lines.length){ $("bCopy").disabled = false; $("bShare").disabled = !navigator.share; }
+  }
+};
+function report(){
+  const out = lines.slice();
+  out.push(`\nMENSAJES RECIBIDOS en ${((performance.now() - t0) / 1000).toFixed(0)} s:`);
+  Object.entries(counts).forEach(([k, n]) => out.push(`  ${nm(k)}: ${n}`));
+  Object.entries(samples).forEach(([k, arr]) => { out.push(`\nMUESTRAS ${nm(k)}:`); arr.slice(0, 60).forEach(s => out.push("  " + s)); });
+  if (!Object.keys(counts).length) out.push("  (ninguno)");
+  return out.join("\n");
+}
+$("bStop").onclick = () => {
+  stopped = true;
+  try{ if (dev && dev.gatt.connected) dev.gatt.disconnect(); }catch(e){}
+  $("log").textContent = report();
+  st("Terminado. Copia el informe y pégamelo.", "ok");
+  $("bStop").disabled = true; $("bConn").disabled = false; $("bCopy").disabled = false; $("bShare").disabled = !navigator.share;
+};
+$("bCopy").onclick = async () => { try{ await navigator.clipboard.writeText(report()); st("Informe copiado.", "ok"); }catch(e){ st("No se ha podido copiar: selecciona el texto del informe y cópialo a mano.", "bad"); } };
+$("bShare").onclick = async () => { try{ await navigator.share({ title:"Diagnóstico Bluetooth", text: report() }); }catch(e){} };
+</script>
+</body>
+</html>
