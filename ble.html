@@ -57,7 +57,8 @@ ol{padding-left:20px;margin:6px 0}li{margin:3px 0}
     <div><b id="vK">–</b><small>kcal</small></div>
     <div><b id="vH">–</b><small>pulso</small></div>
   </div>
-  <p class="mut" id="rate" style="margin-top:8px"></p>
+  <p class="st ok" id="peak" style="margin-top:8px"></p>
+  <p class="mut" id="rate" style="margin-top:4px"></p>
 </div>
 
 <div class="card">
@@ -90,7 +91,7 @@ const short = u => /^0000([0-9a-f]{4})-0000-1000-8000-00805f9b34fb$/.test(u) ? u
 const nm = u => { const s = short(u); return NAMES[s] ? `${s} · ${NAMES[s]}` : s; };
 const hex = dv => Array.from(new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength)).map(b => b.toString(16).padStart(2, "0")).join(" ");
 const txt = dv => { try{ return new TextDecoder().decode(dv); }catch(e){ return ""; } };
-let dev = null, t0 = 0, lines = [], counts = {}, samples = {}, stopped = false;
+let dev = null, t0 = 0, lines = [], counts = {}, samples = {}, stopped = false, peak = { w:0, rpm:0, wAt:0, rpmAt:0 };
 const log = s => { lines.push(s); $("log").textContent = lines.slice(-400).join("\n"); $("log").scrollTop = 1e9; };
 const st = (s, c = "") => { $("st").textContent = s; $("st").className = "st " + c; };
 
@@ -125,7 +126,7 @@ async function connect(mode){
       ? { filters:[{ services:[S16(0x1826)] }, { services:[S16(0x1818)] }, { services:[S16(0x1816)] }, { namePrefix:"Maniak" }, { namePrefix:"MANIAK" }, { namePrefix:"Torque" }, { namePrefix:"PM" }, { namePrefix:"FS-" }], optionalServices: OPT }
       : { acceptAllDevices:true, optionalServices: OPT });
     lines = []; log(`MODO: ${mode === "ftms" ? "solo máquinas de fitness" : "todos"}`);
-    counts = {}; samples = {}; stopped = false; t0 = performance.now();
+    counts = {}; samples = {}; stopped = false; peak = { w:0, rpm:0, wAt:0, rpmAt:0 }; t0 = performance.now();
     log(`DISPOSITIVO: ${dev.name || "(sin nombre)"}  id=${dev.id}`);
     log(`Navegador: ${navigator.userAgent}`);
     dev.addEventListener("gattserverdisconnected", () => { log(`[${((performance.now() - t0) / 1000).toFixed(1)} s] DESCONECTADO`); if (!stopped) st("Se ha desconectado. Vuelve a conectar o copia el informe.", "bad"); });
@@ -151,10 +152,13 @@ async function connect(mode){
               const v = ev.target.value; counts[key] = (counts[key] || 0) + 1;
               const n = counts[key]; const ts = ((performance.now() - t0) / 1000).toFixed(2);
               (samples[key] ||= []);
-              if (n <= 25 || n % 10 === 0){ samples[key].push(`${ts}s ${hex(v)}`); }
+              samples[key].push(`${ts}s ${hex(v)}`);
               let parsed = null;
               try{ if (key === "2ad2") parsed = ftmsBike(v); else if (key === "2a37") parsed = hrm(v); }catch(e){}
-              if (parsed){ show(parsed); if (n <= 25 || n % 10 === 0) samples[key][samples[key].length - 1] += "  → " + JSON.stringify(parsed); }
+              if (parsed){ show(parsed); samples[key][samples[key].length - 1] += "  → " + JSON.stringify(parsed);
+                if (parsed.w != null && parsed.w > peak.w){ peak.w = parsed.w; peak.wAt = ts; }
+                if (parsed.rpm != null && parsed.rpm > peak.rpm){ peak.rpm = parsed.rpm; peak.rpmAt = ts; }
+                $("peak").textContent = `Pico registrado: ${peak.w} W (a los ${peak.wAt} s) · ${peak.rpm} RPM`; }
               $("rate").textContent = Object.entries(counts).map(([k, n]) => `${nm(k)}: ${n} mensajes`).join(" · ");
             });
             await c.startNotifications();
@@ -177,7 +181,8 @@ function report(){
   const out = lines.slice();
   out.push(`\nMENSAJES RECIBIDOS en ${((performance.now() - t0) / 1000).toFixed(0)} s:`);
   Object.entries(counts).forEach(([k, n]) => out.push(`  ${nm(k)}: ${n}`));
-  Object.entries(samples).forEach(([k, arr]) => { out.push(`\nMUESTRAS ${nm(k)}:`); arr.slice(0, 60).forEach(s => out.push("  " + s)); });
+  out.push(`PICO: ${peak.w} W a los ${peak.wAt} s · ${peak.rpm} RPM a los ${peak.rpmAt} s`);
+  Object.entries(samples).forEach(([k, arr]) => { out.push(`\nMUESTRAS ${nm(k)}:`); arr.slice(-400).forEach(s => out.push("  " + s)); });
   if (!Object.keys(counts).length) out.push("  (ninguno)");
   return out.join("\n");
 }
