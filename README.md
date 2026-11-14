@@ -20,6 +20,9 @@ Con una clave de la API de Claude (se pone en Ajustes y se guarda solo en el mó
 
 Solo se envían datos a la API al pulsar un botón.
 
+## Sesión de airbike por Bluetooth
+La consola de la Maniak Torque emite datos por Bluetooth con el estándar FTMS (vatios, RPM, distancia; un dato por segundo). Desde la tarjeta Airbike, «Sesión con la bici · Bluetooth» abre una pantalla con los vatios y las RPM en directo y entrenos guiados: A&A con la franja de vatios objetivo, alta estimulación con las RPM objetivo, rodaje suave con aviso si te pasas, y los dos tests (sprint de 10 s y 5 minutos), con pitidos y cuenta atrás. Al terminar, resumen por series con la caída del rendimiento y comparación con la sesión anterior, y se guarda en el día. Funciona en la app de Android y en Chrome. `ble.html` es la página de diagnóstico que se usó para averiguar el protocolo.
+
 ## Instalar en Android
 **App de Android (APK)**, con avisos: descargar el `.apk` de la [última versión](https://github.com/diazepamina-creator/entreno-correctivo/releases/latest) e instalarlo. Las actualizaciones se instalan encima y conservan los datos. Avisos: entreno, paseo, P3 si el día va en blanco (se cancela al marcarlo), rutina de noche, revisión del domingo, compra y tanda de cocina.
 

@@ -220,6 +220,29 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 .avrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 .avrow small{grid-column:1/-1;font-size:12.5px;color:var(--ink-2)}
 .avrow input[type=time]{width:124px}
+.airses{position:fixed;inset:0;z-index:30;background:var(--bg);display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.airses.on{display:block}
+.as-wrap{max-width:640px;margin:0 auto;padding:12px 16px calc(24px + env(safe-area-inset-bottom))}
+.as-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.as-conn{font-size:14px;font-weight:650;color:var(--ink-2)}.as-conn.on{color:var(--accent)}.as-conn.lost{color:var(--danger)}
+.as-h{font-size:20px;margin:6px 0 4px}
+.as-wide{width:100%;margin-top:10px;min-height:52px;font-size:17px}
+.as-live{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.as-live div,.as-big div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.as-live b{display:block;font-size:22px;font-variant-numeric:tabular-nums}.as-live small,.as-big small{color:var(--ink-2);font-size:12px}
+.as-cfg{gap:14px;margin-top:8px}.stepper.sm output{min-width:40px}
+.as-phase{text-align:center;font-size:20px;font-weight:750;margin-top:6px}.as-phase.on{color:var(--k-air)}
+.as-clock{text-align:center;font-size:64px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.05}
+.as-big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.as-big b{display:block;font-size:48px;line-height:1.1;font-variant-numeric:tabular-nums}
+.as-big.in div:first-child,.as-big.in div{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.as-big.under div{box-shadow:inset 0 0 0 2px #d9a400}.as-big.over div{box-shadow:inset 0 0 0 2px var(--danger)}
+.as-tg{text-align:center;margin:4px 0;color:var(--ink-2)}
+.as-chart{width:100%;height:150px;display:block;margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.as-runbtns{margin-top:14px;gap:10px}.as-runbtns .btn{flex:1;min-height:52px}
+.as-tab{width:100%;border-collapse:collapse;margin-top:10px;font-variant-numeric:tabular-nums}
+.as-tab th,.as-tab td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}.as-tab th:first-child,.as-tab td:first-child{text-align:left}
+.as-tab tr.ok td{color:var(--accent)}.as-tab tr.bad td{color:var(--danger)}
 .mov-lv{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;color:var(--surface);background:var(--k-mov)}
 .ck-cat{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:16px 0 2px}
 .dsp{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;border:0;border-top:1px solid var(--line);background:none;text-align:left;padding:6px 0;cursor:pointer;font-weight:600;font-size:15px}
@@ -296,13 +319,14 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
     <button class="btn" data-action="timer-cancel">Cancelar</button>
   </div>
 </div>
+<div class="airses" id="airses" role="dialog" aria-modal="true" aria-label="Sesión de airbike"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="fileIn" accept="application/json,.json" class="sr" aria-label="Importar copia de seguridad">
 
 <script src="capacitor.js"></script>
 <script>
 "use strict";
-const VERSION = "3.0.2";
+const VERSION = "3.1.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -704,7 +728,10 @@ function renderA(d){
 function renderAir(d){
   const v = getp(d, "air") || {}; const sg = airSuggest(ui.date); const t = S().airTests || {};
   const isTest = v.tipo === "Test";
+  const ses = v.ses;
   let b = `<div class="note ok" style="margin-top:0">${esc(sg.txt)}</div>
+    ${ui.date === todayIso() ? `<button class="btn accent" style="width:100%;margin:2px 0 10px" data-action="as-open">Sesión con la bici · Bluetooth</button>` : ""}
+    ${ses ? `<div class="note" style="margin-top:0">Registrada por Bluetooth: ${asFmt(ses.dur)} · ${ses.w ?? "–"} W medios · pico ${ses.pw ?? "–"} W · ${ses.r ?? "–"} RPM${ses.iv && ses.iv.length ? ` · ${ses.iv.length} series` : ""}${ses.drop != null && ses.drop > 0 ? ` · caída ${ses.drop} %` : ""}</div>` : ""}
     <p class="ex-p">Siempre después de la fuerza, nunca antes. Calienta 3-5 minutos suave. En semanas de mal sueño, solo A&A o rodaje suave.</p>
     ${check("air.done", "Sesión de airbike hecha", t.maxW || t.mas ? `Tus tests: ${t.maxW ? t.maxW + " W máx" : "—"} · MAS ${t.mas ? t.mas + " RPM" : "—"}` : "Sin tests todavía: hazlos al acabar la adaptación")}
     <div class="field" style="margin-top:6px"><label>Tipo</label><div class="chips">${AIR.map(x => `<button class="chip sm" data-action="set" data-path="air.tipo" data-v="${x}" aria-pressed="${v.tipo===x}">${x}${sg.tipo === x ? " ·  hoy" : ""}</button>`).join("")}</div></div>`;
@@ -1439,7 +1466,7 @@ function aiDays(n, end = todayIso()){
   const out = {}, lbl = { t:"entreno", o:"opcional", r:"descanso activo" };
   for (let i = n - 1; i >= 0; i--){
     const x = addDays(end, -i), d = DB.days[x];
-    const o = d ? JSON.parse(JSON.stringify(d)) : {}; delete o.ai;
+    const o = d ? JSON.parse(JSON.stringify(d)) : {}; delete o.ai; if (o.air && o.air.ses) delete o.air.ses.series;
     out[x] = Object.keys(o).length ? { dia:`${DOW[parseIso(x).getDay()]} · ${lbl[dayType(x)]}`, ...o } : { dia:`${DOW[parseIso(x).getDay()]} · ${lbl[dayType(x)]}`, sinRegistro:true };
   }
   return out;
@@ -1844,6 +1871,334 @@ function renderCoach(){
 }
 
 
+/* ---------------- Sesión de airbike por Bluetooth (FTMS) ---------------- */
+const U16 = n => "0000" + n.toString(16).padStart(4, "0") + "-0000-1000-8000-00805f9b34fb";
+const FTMS_SVC = U16(0x1826), FTMS_IBD = U16(0x2ad2);
+function hexToDV(h){
+  const b = []; String(h || "").replace(/[^0-9a-f]/gi, "").replace(/../g, x => { b.push(parseInt(x, 16)); return ""; });
+  return new DataView(new Uint8Array(b).buffer);
+}
+// Indoor Bike Data (FTMS 0x2AD2). De la consola de la Torque solo usamos potencia, cadencia, distancia y pulso:
+// la velocidad y la energía que envía no son fiables.
+function parseIBD(dv){
+  let i = 0; const f = dv.getUint16(i, true); i += 2; const o = {};
+  if (!(f & 1)) i += 2;
+  if (f & 2) i += 2;
+  if (f & 4){ o.rpm = dv.getUint16(i, true) / 2; i += 2; }
+  if (f & 8) i += 2;
+  if (f & 16){ o.m = dv.getUint16(i, true) | (dv.getUint8(i + 2) << 16); i += 3; }
+  if (f & 32) i += 2;
+  if (f & 64){ o.w = dv.getInt16(i, true); i += 2; }
+  if (f & 128) i += 2;
+  if (f & 256) i += 5;
+  if (f & 512){ o.hr = dv.getUint8(i); i += 1; }
+  return o;
+}
+const BLE = {
+  link: null,
+  async connect(onData, onLost){
+    if (isNative()){
+      const P = capP("BluetoothLe");
+      await P.initialize({});
+      try{ const e = await P.isEnabled(); if (!e.value){ try{ await P.requestEnable(); }catch(_){ throw new Error("Activa el Bluetooth del móvil y vuelve a intentarlo."); } } }catch(e){ if (/Activa/.test(e.message)) throw e; }
+      let dev = null, saved = S().bleBike;
+      if (saved){ try{ await P.connect({ deviceId: saved.id, timeout: 8000 }); dev = { deviceId: saved.id, name: saved.name }; }catch(_){ dev = null; } }
+      if (!dev){
+        dev = await P.requestDevice({ services:[FTMS_SVC] });
+        await P.connect({ deviceId: dev.deviceId, timeout: 12000 });
+        S().bleBike = { id: dev.deviceId, name: dev.name || "Airbike" }; save();
+      }
+      const dl = await P.addListener(`disconnected|${dev.deviceId}`, () => onLost());
+      const nl = await P.addListener(`notification|${dev.deviceId}|${FTMS_SVC}|${FTMS_IBD}`, ev => { try{ onData(parseIBD(hexToDV(ev && ev.value))); }catch(_){} });
+      await P.startNotifications({ deviceId: dev.deviceId, service: FTMS_SVC, characteristic: FTMS_IBD });
+      this.link = { name: dev.name || (saved && saved.name) || "Airbike", stop: async () => {
+        try{ dl.remove(); }catch(_){} try{ nl.remove(); }catch(_){}
+        try{ await P.stopNotifications({ deviceId: dev.deviceId, service: FTMS_SVC, characteristic: FTMS_IBD }); }catch(_){}
+        try{ await P.disconnect({ deviceId: dev.deviceId }); }catch(_){} } };
+      return this.link;
+    }
+    if (!navigator.bluetooth) throw new Error("Este navegador no tiene Bluetooth. Usa la app de Android, o Chrome en el móvil.");
+    const d = await navigator.bluetooth.requestDevice({ filters:[{ services:[FTMS_SVC] }] });
+    d.addEventListener("gattserverdisconnected", () => onLost());
+    const g = await d.gatt.connect(), sv = await g.getPrimaryService(FTMS_SVC), c = await sv.getCharacteristic(FTMS_IBD);
+    c.addEventListener("characteristicvaluechanged", e => { try{ onData(parseIBD(e.target.value)); }catch(_){} });
+    await c.startNotifications();
+    this.link = { name: d.name || "Airbike", stop: async () => { try{ await c.stopNotifications(); }catch(_){} try{ d.gatt.disconnect(); }catch(_){} } };
+    return this.link;
+  },
+  async close(){ const l = this.link; this.link = null; if (l) await l.stop(); },
+};
+
+const AS_MODES = [
+  { k:"aa",   t:"A&A",               tipo:"A&A",               metric:"w",   iv:true },
+  { k:"hs",   t:"Alta estimulación", tipo:"Alta estimulación", metric:"rpm", iv:true },
+  { k:"easy", t:"Rodaje suave",      tipo:"Rodaje suave",      metric:"rpm" },
+  { k:"tw",   t:"Test · vatios",     tipo:"Test",              metric:"w" },
+  { k:"tm",   t:"Test · 5 min",      tipo:"Test",              metric:"rpm" },
+  { k:"free", t:"Libre",             tipo:"Otro",              metric:"w" },
+];
+const AS = { open:false, phase:"setup", conn:"off", err:"", mode:null, cfg:{}, live:{}, samples:[], segs:[], segIdx:0, t0:0, iv:null, ivs:[], warn:"", sum:null, lostAt:0 };
+const asMode = () => AS_MODES.find(m => m.k === AS.mode) || AS_MODES[5];
+function asDefaults(k){
+  const t = S().airTests || {}, w = airWeek(todayIso()), P = w && w.phase === "block" ? AIRPLAN[w.block] : null, i = w && w.phase === "block" ? w.week - 1 : 0;
+  if (k === "aa") return { warm:180, on: P ? P.aa.on : 5, off: P ? P.aa.off : 30, reps: P ? P.aa.reps[i] : 12 };
+  if (k === "hs") return P ? { warm:180, on: P.hs.on, off: P.hs.off, reps: P.hs.reps[i] } : (w && w.phase === "block" ? { warm:180, on:15, off:15, reps:8 } : { warm:180, on:15, off:45, reps:10 });
+  if (k === "easy") return { warm:0, min: P && w.block === 2 ? 25 : 20 };
+  if (k === "tw") return { warm:180 };
+  if (k === "tm") return { warm:180 };
+  return { warm:0 };
+}
+function asTarget(k){
+  const t = S().airTests || {};
+  if (k === "aa" && t.maxW) return { lo: Math.round(t.maxW * 0.85), hi: Math.round(t.maxW * 0.87), u:"W" };
+  if (k === "hs" && t.mas) return { lo: Math.round(t.mas * 1.2), hi: Math.round(t.mas * 1.2) + 5, u:"RPM" };
+  if (k === "easy" && t.mas) return { lo: Math.round(t.mas * 0.6), hi: Math.round(t.mas * 0.72), u:"RPM" };
+  return null;
+}
+function asSuggestMode(){ const tp = airSuggest(todayIso()).tipo; return ({ "A&A":"aa", "Alta estimulación":"hs", "Adaptación":"hs", "Rodaje suave":"easy", "Test":"tw" })[tp] || "free"; }
+function asBuildSegs(){
+  const k = AS.mode, c = AS.cfg, s = [];
+  if (c.warm) s.push({ kind:"warm", dur:c.warm, label:"Calentamiento suave" });
+  if (k === "aa" || k === "hs") for (let r = 1; r <= c.reps; r++){ s.push({ kind:"on", dur:c.on, n:r, label: k === "aa" ? `Sprint ${r} de ${c.reps}` : `Fuerte ${r} de ${c.reps}` }); if (r < c.reps) s.push({ kind:"off", dur:c.off, label:"Muy suave" }); }
+  if (k === "easy") s.push({ kind:"steady", dur:c.min * 60, label:"Rodaje suave" });
+  if (k === "tw"){ s.push({ kind:"off", dur:15, label:"Prepárate: salida lanzada" }); s.push({ kind:"on", dur:10, n:1, label:"¡A tope 10 segundos!" }); }
+  if (k === "tm"){ s.push({ kind:"off", dur:15, label:"Prepárate" }); s.push({ kind:"on", dur:300, n:1, label:"5 minutos a tope y constante" }); }
+  if (k === "free") s.push({ kind:"steady", dur:0, label:"Sesión libre" });
+  s.push({ kind:"cool", dur: k === "free" || k === "easy" ? 0 : 120, label:"Vuelta a la calma" });
+  let t = 0; s.forEach(x => { x.at = t; t += x.dur; });
+  return s;
+}
+function asOpen(){
+  Object.assign(AS, { open:true, phase:"setup", err:"", warn:"", sum:null, samples:[], ivs:[] });
+  if (!AS.mode) AS.mode = asSuggestMode();
+  AS.cfg = asDefaults(AS.mode);
+  $("#airses").classList.add("on"); document.body.style.overflow = "hidden"; asRender();
+}
+async function asClose(){
+  if (AS.phase === "run" && !confirm("¿Salir sin guardar la sesión?")) return;
+  clearInterval(AS.iv); AS.iv = null; unlockScreen(); await BLE.close(); AS.conn = "off";
+  AS.open = false; $("#airses").classList.remove("on"); document.body.style.overflow = ""; render();
+}
+async function asConnect(){
+  AS.conn = "connecting"; AS.err = ""; asRender();
+  try{
+    await BLE.connect(asOnData, () => { AS.conn = "lost"; AS.lostAt = Date.now(); asRender(); if (AS.phase === "run"){ beep(330, 400); vib([300, 100, 300]); } });
+    AS.conn = "on";
+  }catch(e){
+    AS.conn = "off";
+    AS.err = /cancel|NotFound|No device|User cancelled/i.test((e && (e.name + " " + e.message)) || "") ? "No se ha elegido la bici." : ((e && e.message) || "No se ha podido conectar.");
+  }
+  asRender();
+}
+function asOnData(o){
+  AS.live = { ...AS.live, ...o, at: Date.now() };
+  if (AS.phase === "run"){
+    const t = (performance.now() - AS.t0) / 1000;
+    AS.samples.push({ t: Math.round(t * 10) / 10, w: o.w ?? null, rpm: o.rpm ?? null, m: o.m ?? null, hr: o.hr || null });
+  }
+  if (AS.phase !== "run") asRenderLive();
+}
+function asStart(){
+  AS.segs = asBuildSegs(); AS.segIdx = -1; AS.samples = []; AS.ivs = []; AS.warn = ""; AS.beeped = {};
+  AS.phase = "run"; AS.t0 = performance.now();
+  if (actx && actx.state === "suspended") actx.resume(); beep(1, 1);
+  lockScreen(); asRender(); asTick(); AS.iv = setInterval(asTick, 200);
+}
+function asSegAt(t){
+  const s = AS.segs; for (let i = 0; i < s.length; i++){ const x = s[i]; if (!x.dur || t < x.at + x.dur) return i; }
+  return s.length - 1;
+}
+function asIvStats(seg){
+  const lag = 1.2, xs = AS.samples.filter(p => p.t >= seg.at && p.t <= seg.at + seg.dur + lag);
+  const W = xs.map(p => p.w).filter(v => v != null), R = xs.map(p => p.rpm).filter(v => v != null);
+  const avg = a => a.length ? Math.round(a.reduce((s, v) => s + v, 0) / a.length) : null;
+  return { n: seg.n, w: avg(W), pw: W.length ? Math.max(...W) : null, r: avg(R), pr: R.length ? Math.max(...R) : null };
+}
+function asTick(){
+  if (AS.phase !== "run") return;
+  const t = (performance.now() - AS.t0) / 1000, i = asSegAt(t), seg = AS.segs[i], k = AS.mode;
+  if (i !== AS.segIdx){
+    const prev = AS.segs[AS.segIdx];
+    if (prev && prev.kind === "on"){
+      const st = asIvStats(prev); AS.ivs.push(st);
+      const tg = asTarget(k);
+      if (tg && k === "aa"){
+        const shortOf = v => v != null && v < tg.lo * 0.95;
+        const last2 = AS.ivs.slice(-2);
+        AS.warn = last2.length === 2 && last2.every(x => shortOf(x.pw)) ? "Dos sprints seguidos por debajo del objetivo: termina aquí la parte dura." : (shortOf(st.pw) ? "Te has quedado corto: alarga un poco el descanso." : "");
+      }
+      if (k === "tw" || k === "tm"){ setTimeout(() => asFinish(), 800); }
+    }
+    AS.segIdx = i;
+    if (seg.kind === "on"){ beep(990, 300); vib(200); }
+    else if (prev && prev.kind === "on"){ beep(523, 200); setTimeout(() => beep(523, 200), 260); vib([120, 80, 120]); }
+    else if (seg.kind === "cool" && prev){ beep(784, 300); }
+  }
+  // cuenta atrás antes de cada parte fuerte
+  const nx = AS.segs[i + 1];
+  if (nx && nx.kind === "on" && seg.dur){
+    const left = Math.ceil(seg.at + seg.dur - t);
+    if (left <= 3 && left >= 1 && !AS.beeped[i + "_" + left]){ AS.beeped[i + "_" + left] = 1; beep(660, 90); }
+  }
+  // rodaje suave: aviso si te pasas
+  if (k === "easy"){
+    const tg = asTarget("easy"), r = AS.live.rpm;
+    if (tg && r != null && r > tg.hi + 3){ AS.overSince ||= t; if (t - AS.overSince > 15 && !AS.beeped.over){ AS.beeped.over = 1; beep(440, 300); AS.warn = "Vas por encima del rodaje suave: baja el ritmo."; } }
+    else { AS.overSince = 0; if (AS.beeped.over && r != null && r <= tg.hi){ AS.beeped.over = 0; AS.warn = ""; } }
+  }
+  if (seg.kind === "cool" && seg.dur && t >= seg.at + seg.dur){ asFinish(); return; }
+  asRenderRun(t, seg);
+}
+function asFinish(){
+  if (AS.phase !== "run") return;
+  clearInterval(AS.iv); AS.iv = null; unlockScreen();
+  const t = (performance.now() - AS.t0) / 1000, cur = AS.segs[AS.segIdx];
+  if (cur && cur.kind === "on" && !AS.ivs.some(x => x.n === cur.n) && t - cur.at >= cur.dur * 0.6) AS.ivs.push(asIvStats(cur));
+  const xs = AS.samples, W = xs.map(p => p.w).filter(v => v != null), R = xs.map(p => p.rpm).filter(v => v != null);
+  let dist = 0; for (let j = 1; j < xs.length; j++){ const a = xs[j - 1].m, b = xs[j].m; if (a != null && b != null && b >= a && b - a < 100) dist += b - a; }
+  const avg = a => a.length ? Math.round(a.reduce((s, v) => s + v, 0) / a.length) : null;
+  const k = AS.mode, sum = { mode:k, dur: Math.round(t), dist, w: avg(W), pw: W.length ? Math.max(...W) : null, r: avg(R), pr: R.length ? Math.max(...R) : null, iv: AS.ivs.slice() };
+  if (k === "tw"){ const s = AS.ivs[0]; sum.testW = s && s.pw; }
+  if (k === "tm"){ const s = AS.ivs[0]; sum.testRPM = s && s.r; sum.testAvgW = s && s.w; }
+  const ivs = sum.iv.filter(x => x.pw != null || x.r != null);
+  if (ivs.length >= 3){ const key = AS_MODES.find(m => m.k === k).metric === "w" ? "pw" : "r"; const f = ivs.slice(0, 2), l = ivs.slice(-2); const fa = f.reduce((s, x) => s + (x[key] || 0), 0) / f.length, la = l.reduce((s, x) => s + (x[key] || 0), 0) / l.length; if (fa) sum.drop = Math.round((1 - la / fa) * 100); }
+  // comparación con la última sesión del mismo tipo
+  const prevDay = Object.keys(DB.days).filter(x => x < todayIso() && getp(DB.days[x], "air.ses.mode") === k).sort().pop();
+  if (prevDay) sum.prev = { date: prevDay, ...getp(DB.days[prevDay], "air.ses") };
+  sum.series = { w: xs.map(p => p.w), r: xs.map(p => p.rpm), t: xs.map(p => p.t) };
+  AS.sum = sum; AS.phase = "done"; beep(784, 200); setTimeout(() => beep(1046, 300), 240); vib([150, 80, 300]);
+  asRender();
+}
+function asSave(asTests){
+  const s = AS.sum; if (!s) return;
+  const d = wday(todayIso()), m = AS_MODES.find(x => x.k === s.mode);
+  setp(d, "air.done", true); setp(d, "air.tipo", m.tipo);
+  if (m.iv) setp(d, "air.rondas", s.iv.length);
+  setp(d, "air.min", Math.max(1, Math.round(s.dur / 60)));
+  if (s.w != null) setp(d, "air.vatios", s.w); if (s.r != null) setp(d, "air.rpm", s.r);
+  if (s.testW) setp(d, "air.testW", s.testW); if (s.testRPM) setp(d, "air.testRPM", Math.round(s.testRPM));
+  const keep = { ...s }; delete keep.prev;
+  keep.series = { w: s.series.w.slice(0, 3600), r: s.series.r.slice(0, 3600) };
+  setp(d, "air.ses", keep);
+  if (asTests && (s.testW || s.testRPM)){
+    const t = S().airTests || {}; if (s.testW) t.maxW = s.testW; if (s.testRPM) t.mas = Math.round(s.testRPM); t.date = todayIso(); S().airTests = t;
+    if (!S().airStart){ const dw = parseIso(todayIso()).getDay(); S().airStart = addDays(todayIso(), dw === 1 ? 7 : (8 - dw) % 7 || 7); }
+  }
+  ui.date = todayIso(); ui.open.air = true; commit();
+  toast(asTests ? "Sesión y tests guardados" : "Sesión guardada en el día");
+  AS.phase = "setup"; AS.sum = null; asClose();
+}
+
+/* Render de la pantalla */
+const asFmt = s => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${pad(s % 60)}`; };
+function asRender(){
+  const el = $("#airses"); if (!el) return;
+  const m = asMode(), tg = asTarget(AS.mode), t = S().airTests || {};
+  let h = `<div class="as-top"><button class="btn" data-action="as-close">${AS.phase === "run" ? "Salir" : "Cerrar"}</button>
+    <span class="as-conn ${AS.conn}">${({ off:"Sin conectar", connecting:"Conectando…", on:"● " + esc((BLE.link && BLE.link.name) || "Bici conectada"), lost:"Conexión perdida" })[AS.conn]}</span></div>`;
+  if (AS.phase === "setup"){
+    const c = AS.cfg;
+    h += `<h2 class="as-h">Sesión de airbike</h2>
+      <p class="hint" style="margin-top:0">${esc(airSuggest(todayIso()).txt)}</p>
+      ${AS.conn === "on" ? "" : `<button class="btn accent as-wide" data-action="as-connect" ${AS.conn === "connecting" ? "disabled" : ""}>${AS.conn === "connecting" ? "Conectando…" : S().bleBike && isNative() ? "Conectar con la bici" : "Buscar la bici"}</button>
+        <p class="hint">Pedalea un poco para que la consola se encienda.${isNative() ? "" : " En el navegador, elige «Vmax…» en la lista."}</p>`}
+      ${AS.err ? `<div class="note bad">${esc(AS.err)}</div>` : ""}
+      <div class="as-live" id="asLive">${asLiveHtml()}</div>
+      <div class="field"><label>Tipo de sesión</label><div class="chips">${AS_MODES.map(x => `<button class="chip sm" data-action="as-mode" data-v="${x.k}" aria-pressed="${AS.mode === x.k}">${x.t}${asSuggestMode() === x.k ? " · hoy" : ""}</button>`).join("")}</div></div>`;
+    if (m.iv) h += `<div class="row as-cfg">${asStep("reps", "Series", 1, 40)}${asStep("on", "Fuerte (s)", 3, 120)}${asStep("off", "Suave (s)", 5, 300)}</div>`;
+    if (AS.mode === "easy") h += `<div class="row as-cfg">${asStep("min", "Minutos", 5, 90)}</div>`;
+    if (AS.mode !== "free" && AS.mode !== "easy") h += `<div class="field" style="margin-top:8px"><label>Calentamiento</label><div class="chips">${[0, 120, 180, 300].map(v => `<button class="chip sm" data-action="as-warm" data-v="${v}" aria-pressed="${c.warm === v}">${v ? v / 60 + " min" : "sin"}</button>`).join("")}</div></div>`;
+    h += `<div class="note" style="margin-top:12px">${asModeHelp(tg, t)}</div>
+      <button class="btn primary as-wide" data-action="as-start">${AS.conn === "on" ? "Empezar" : "Empezar sin conexión (solo tiempos)"}</button>`;
+  }
+  if (AS.phase === "run") h += `<div id="asRun"></div><div class="row as-runbtns"><button class="btn" data-action="as-skip">Saltar fase</button><button class="btn accent" data-action="as-finish">Terminar</button></div>`;
+  if (AS.phase === "done") h += asSummaryHtml();
+  el.innerHTML = `<div class="as-wrap">${h}</div>`;
+  if (AS.phase === "run") asRenderRun((performance.now() - AS.t0) / 1000, AS.segs[AS.segIdx] || AS.segs[0]);
+  if (AS.phase === "done") asDrawChart($("#asChartSum"), AS.sum.series, AS_MODES.find(x => x.k === AS.sum.mode).metric, asTarget(AS.sum.mode), null);
+}
+function asStep(key, label, min, max){
+  return `<div class="field"><label>${label}</label><div class="stepper sm"><button class="btn" data-action="as-cfg" data-k="${key}" data-d="-1" data-min="${min}" data-max="${max}" aria-label="Menos">−</button><output>${AS.cfg[key]}</output><button class="btn" data-action="as-cfg" data-k="${key}" data-d="1" data-min="${min}" data-max="${max}" aria-label="Más">+</button></div></div>`;
+}
+function asModeHelp(tg, t){
+  const k = AS.mode;
+  if (k === "aa") return tg ? `Sprints con salida lanzada a <b>${tg.lo}-${tg.hi} W</b> (85-87 % de tus ${t.maxW} W). Si dos seguidos se quedan cortos, se acabó la parte dura.` : "Sin test de vatios máximos todavía: haz primero el «Test · vatios».";
+  if (k === "hs") return tg ? `Partes fuertes a <b>${tg.lo} RPM</b> (120 % de tu MAS de ${t.mas} RPM) y suave entre medias.` : "Sin test de 5 minutos todavía: haz primero el «Test · 5 min» para tener tu MAS.";
+  if (k === "easy") return tg ? `Mantente entre <b>${tg.lo} y ${tg.hi} RPM</b>: tienes que poder hablar. Te aviso si te pasas.` : "Ritmo de conversación. Con el «Test · 5 min» te marcaré las RPM.";
+  if (k === "tw") return "Calienta, y al pitido sprint de 10 segundos a tope con salida lanzada. Se guarda el pico de vatios.";
+  if (k === "tm") return "Calienta, y al pitido 5 minutos lo más fuerte que puedas mantener, constante. Se guarda la media de RPM (tu MAS).";
+  return "Registra lo que hagas: tiempo, vatios, RPM y distancia.";
+}
+function asLiveHtml(){
+  const L = AS.live, fresh = L.at && Date.now() - L.at < 4000;
+  return `<div><b>${fresh && L.w != null ? L.w : "–"}</b><small>vatios</small></div><div><b>${fresh && L.rpm != null ? Math.round(L.rpm) : "–"}</b><small>RPM</small></div><div><b>${fresh && L.hr ? L.hr : "–"}</b><small>pulso</small></div>`;
+}
+function asRenderLive(){ const el = $("#asLive"); if (el) el.innerHTML = asLiveHtml(); }
+function asRenderRun(t, seg){
+  const el = $("#asRun"); if (!el) return;
+  const k = AS.mode, m = asMode(), tg = asTarget(k), L = AS.live, fresh = L.at && Date.now() - L.at < 4000;
+  const left = seg.dur ? seg.at + seg.dur - t : t - seg.at;
+  const val = m.metric === "w" ? L.w : (L.rpm != null ? Math.round(L.rpm) : null);
+  let cls = "";
+  if (tg && fresh && val != null && (seg.kind === "on" || seg.kind === "steady")) cls = val >= tg.lo * (k === "aa" ? 0.97 : 0.97) ? (k === "easy" && val > tg.hi + 3 ? "over" : "in") : "under";
+  const done = AS.ivs.length, tot = m.iv ? AS.cfg.reps : (k === "tw" || k === "tm" ? 1 : 0);
+  let extra = "";
+  if (k === "tm" && seg.kind === "on"){ const xs = AS.samples.filter(p => p.t >= seg.at && p.rpm != null); if (xs.length) extra = `Media: ${Math.round(xs.reduce((s, p) => s + p.rpm, 0) / xs.length)} RPM`; }
+  if (k === "tw" && seg.kind === "on"){ const xs = AS.samples.filter(p => p.t >= seg.at && p.w != null); if (xs.length) extra = `Pico: ${Math.max(...xs.map(p => p.w))} W`; }
+  const lastIv = AS.ivs[AS.ivs.length - 1];
+  el.innerHTML = `<div class="as-phase ${seg.kind}">${esc(seg.label)}</div>
+    <div class="as-clock">${asFmt(left)}</div>
+    <div class="as-big ${cls}"><div><b>${fresh && L.w != null ? L.w : "–"}</b><small>vatios</small></div><div><b>${fresh && L.rpm != null ? Math.round(L.rpm) : "–"}</b><small>RPM</small></div></div>
+    ${tg ? `<p class="as-tg">Objetivo: <b>${tg.lo}${tg.hi > tg.lo + 5 ? "-" + tg.hi : ""} ${tg.u}</b></p>` : ""}
+    ${extra ? `<p class="as-tg"><b>${extra}</b></p>` : ""}
+    ${tot ? `<p class="as-tg">${done} de ${tot} hechas${lastIv && lastIv.pw != null ? ` · última: pico ${lastIv.pw} W · ${lastIv.r ?? "–"} RPM` : ""}</p>` : ""}
+    ${AS.warn ? `<div class="note bad">${esc(AS.warn)}</div>` : ""}
+    ${AS.conn === "lost" ? `<div class="note bad">Se ha perdido la conexión con la bici. El tiempo sigue contando. <button class="link" data-action="as-connect">reconectar</button></div>` : ""}
+    <canvas id="asChart" class="as-chart" height="150"></canvas>`;
+  asDrawChart($("#asChart"), { w: AS.samples.map(p => p.w), r: AS.samples.map(p => p.rpm), t: AS.samples.map(p => p.t) }, m.metric, tg, 150);
+}
+function asDrawChart(cv, ser, metric, tg, win){
+  if (!cv) return;
+  const dpr = window.devicePixelRatio || 1, W = cv.clientWidth || 320, H = cv.clientHeight || 150;
+  cv.width = W * dpr; cv.height = H * dpr; const g = cv.getContext("2d"); g.scale(dpr, dpr); g.clearRect(0, 0, W, H);
+  let ys = metric === "w" ? ser.w : ser.r, ts = ser.t || ys.map((_, i) => i);
+  if (win && ts.length){ const tmax = ts[ts.length - 1]; const i0 = ts.findIndex(v => v >= tmax - win); ys = ys.slice(Math.max(0, i0)); ts = ts.slice(Math.max(0, i0)); }
+  const vals = ys.filter(v => v != null); const css = getComputedStyle(document.documentElement);
+  const ink3 = css.getPropertyValue("--ink-3") || "#999", acc = css.getPropertyValue("--k-air") || "#0a7", line = css.getPropertyValue("--line") || "#ddd";
+  const top = Math.max(tg ? tg.hi * 1.15 : 0, vals.length ? Math.max(...vals) * 1.1 : 0, metric === "w" ? 300 : 80);
+  const t0 = ts.length ? ts[0] : 0, t1 = ts.length ? Math.max(ts[ts.length - 1], t0 + (win || 1)) : 1;
+  const X = t => 4 + (W - 8) * (t - t0) / (t1 - t0 || 1), Y = v => H - 18 - (H - 26) * v / top;
+  g.strokeStyle = line; g.lineWidth = 1; g.beginPath(); g.moveTo(0, H - 18); g.lineTo(W, H - 18); g.stroke();
+  if (tg){ g.fillStyle = "rgba(46,107,79,0.16)"; const y1 = Y(tg.hi), y0 = Y(tg.lo); g.fillRect(0, y1, W, Math.max(2, y0 - y1)); }
+  g.strokeStyle = acc.trim() || "#0a7"; g.lineWidth = 2; g.beginPath(); let started = false;
+  ys.forEach((v, i) => { if (v == null){ started = false; return; } const x = X(ts[i]), y = Y(v); if (!started){ g.moveTo(x, y); started = true; } else g.lineTo(x, y); });
+  g.stroke();
+  g.fillStyle = ink3.trim() || "#999"; g.font = "11px system-ui"; g.fillText(`${Math.round(top)} ${metric === "w" ? "W" : "RPM"}`, 4, 11);
+  if (!win && ts.length) g.fillText(asFmt(t1 - t0), W - 34, H - 4);
+}
+function asSummaryHtml(){
+  const s = AS.sum, m = AS_MODES.find(x => x.k === s.mode), tg = asTarget(s.mode);
+  const cell = (v, l) => `<div><b>${v ?? "–"}</b><small>${l}</small></div>`;
+  let h = `<h2 class="as-h">${esc(m.t)} · resumen</h2>
+    <div class="as-live">${cell(asFmt(s.dur), "tiempo")}${cell(s.dist ? (s.dist / 1000).toFixed(2).replace(".", ",") + " km" : null, "distancia")}${cell(s.w, "W medios")}${cell(s.pw, "W pico")}${cell(s.r, "RPM medias")}${cell(s.pr, "RPM pico")}</div>`;
+  if (s.mode === "tw") h += `<div class="note ok">Vatios máximos: <b>${s.testW ?? "–"} W</b>${(S().airTests || {}).maxW ? ` (antes: ${S().airTests.maxW} W)` : ""}.</div>`;
+  if (s.mode === "tm") h += `<div class="note ok">MAS: <b>${s.testRPM != null ? Math.round(s.testRPM) : "–"} RPM</b> de media en 5 minutos (${s.testAvgW ?? "–"} W)${(S().airTests || {}).mas ? ` · antes: ${S().airTests.mas} RPM` : ""}.</div>`;
+  if (s.iv.length && m.iv){
+    h += `<table class="as-tab"><thead><tr><th>#</th><th>W pico</th><th>W medios</th><th>RPM</th></tr></thead><tbody>${s.iv.map(x => {
+      const ok = tg ? (m.metric === "w" ? (x.pw ?? 0) >= tg.lo * 0.97 : (x.r ?? 0) >= tg.lo * 0.97) : null;
+      return `<tr class="${ok === null ? "" : ok ? "ok" : "bad"}"><td>${x.n}</td><td>${x.pw ?? "–"}</td><td>${x.w ?? "–"}</td><td>${x.r ?? "–"}</td></tr>`; }).join("")}</tbody></table>`;
+    if (tg) h += `<p class="hint">En verde, las que llegaron al objetivo (${tg.lo} ${tg.u}).</p>`;
+  }
+  if (s.drop != null) h += `<p class="hint">Caída entre las primeras y las últimas series: <b>${s.drop > 0 ? s.drop + " %" : "ninguna"}</b>${s.drop > 15 ? " — mucha: la próxima vez alarga el descanso o haz menos series" : ""}.</p>`;
+  if (s.prev) h += `<p class="hint">Última vez (${esc(fmtDate(s.prev.date))}): ${s.prev.w ?? "–"} W medios · pico ${s.prev.pw ?? "–"} W · ${s.prev.r ?? "–"} RPM${s.prev.iv && s.prev.iv.length ? ` · ${s.prev.iv.length} series` : ""}.</p>`;
+  h += `<canvas id="asChartSum" class="as-chart" height="150"></canvas>
+    <div class="row as-runbtns">${s.testW || s.testRPM ? `<button class="btn primary" data-action="as-save" data-tests="1">Guardar y usar como mis tests</button>` : ""}
+    <button class="btn ${s.testW || s.testRPM ? "" : "primary"}" data-action="as-save">Guardar en el día</button>
+    <button class="btn" data-action="as-discard">Descartar</button></div>`;
+  return h;
+}
+
+
 /* ---------------- Render general ---------------- */
 function render(){
   renderTop();
@@ -1954,6 +2309,17 @@ const A = {
     ui.open[k] = true; render();
     const el = document.getElementById("card-" + k); if (el){ const y = el.getBoundingClientRect().top + window.scrollY - 76; window.scrollTo({ top: y, behavior: "smooth" }); }
   },
+  "as-open": () => asOpen(),
+  "as-close": () => asClose(),
+  "as-connect": () => asConnect(),
+  "as-mode": b => { AS.mode = b.dataset.v; AS.cfg = asDefaults(AS.mode); asRender(); },
+  "as-cfg": b => { const k = b.dataset.k, v = (AS.cfg[k] || 0) + Number(b.dataset.d); AS.cfg[k] = Math.max(Number(b.dataset.min), Math.min(Number(b.dataset.max), v)); asRender(); },
+  "as-warm": b => { AS.cfg.warm = Number(b.dataset.v); asRender(); },
+  "as-start": () => asStart(),
+  "as-skip": () => { const t = (performance.now() - AS.t0) / 1000, seg = AS.segs[AS.segIdx]; if (seg && seg.dur){ AS.t0 -= Math.max(0, seg.at + seg.dur - t) * 1000; asTick(); } },
+  "as-finish": () => asFinish(),
+  "as-save": b => asSave(b.dataset.tests === "1"),
+  "as-discard": () => { if (confirm("¿Descartar esta sesión?")){ AS.sum = null; AS.phase = "setup"; asRender(); } },
   "air-save-tests": () => {
     const v = getp(wday(), "air") || {};
     if (!v.testW && !v.testRPM){ toast("Primero apunta los vatios máximos y las RPM medias"); return; }
