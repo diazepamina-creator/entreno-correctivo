@@ -326,7 +326,7 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 <script src="capacitor.js"></script>
 <script>
 "use strict";
-const VERSION = "3.1.0";
+const VERSION = "3.1.1";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -730,7 +730,7 @@ function renderAir(d){
   const isTest = v.tipo === "Test";
   const ses = v.ses;
   let b = `<div class="note ok" style="margin-top:0">${esc(sg.txt)}</div>
-    ${ui.date === todayIso() ? `<button class="btn accent" style="width:100%;margin:2px 0 10px" data-action="as-open">Sesión con la bici · Bluetooth</button>` : ""}
+    ${ui.date === todayIso() ? `<button class="btn accent" style="width:100%;margin:2px 0 10px" data-action="as-open">${(d => d && d.date === todayIso() ? "Recuperar la sesión sin guardar" : "Sesión con la bici · Bluetooth")(asDraftGet())}</button>` : ""}
     ${ses ? `<div class="note" style="margin-top:0">Registrada por Bluetooth: ${asFmt(ses.dur)} · ${ses.w ?? "–"} W medios · pico ${ses.pw ?? "–"} W · ${ses.r ?? "–"} RPM${ses.iv && ses.iv.length ? ` · ${ses.iv.length} series` : ""}${ses.drop != null && ses.drop > 0 ? ` · caída ${ses.drop} %` : ""}</div>` : ""}
     <p class="ex-p">Siempre después de la fuerza, nunca antes. Calienta 3-5 minutos suave. En semanas de mal sueño, solo A&A o rodaje suave.</p>
     ${check("air.done", "Sesión de airbike hecha", t.maxW || t.mas ? `Tus tests: ${t.maxW ? t.maxW + " W máx" : "—"} · MAS ${t.mas ? t.mas + " RPM" : "—"}` : "Sin tests todavía: hazlos al acabar la adaptación")}
@@ -1968,14 +1968,35 @@ function asBuildSegs(){
   let t = 0; s.forEach(x => { x.at = t; t += x.dur; });
   return s;
 }
+const AS_DRAFT = "correctivo.airses";
+function asDraftSave(){
+  try{
+    if (AS.phase === "run") localStorage.setItem(AS_DRAFT, JSON.stringify({ v:1, at:Date.now(), date:todayIso(), mode:AS.mode, cfg:AS.cfg, segs:AS.segs, samples:AS.samples, ivs:AS.ivs, el:(performance.now() - AS.t0) / 1000 }));
+    else if (AS.phase === "done" && AS.sum) localStorage.setItem(AS_DRAFT, JSON.stringify({ v:1, at:Date.now(), date:todayIso(), sum:AS.sum }));
+  }catch(e){}
+}
+const asDraftGet = () => { try{ return JSON.parse(localStorage.getItem(AS_DRAFT)); }catch(e){ return null; } };
+const asDraftClear = () => { try{ localStorage.removeItem(AS_DRAFT); }catch(e){} };
+function asRecover(){
+  const d = asDraftGet(); if (!d) return false;
+  if (d.date !== todayIso() || Date.now() - d.at > 12 * 3600e3){ asDraftClear(); return false; }
+  if (d.sum){ AS.sum = d.sum; AS.mode = d.sum.mode; AS.phase = "done"; return true; }
+  if (d.samples && d.samples.length > 5){
+    Object.assign(AS, { mode:d.mode, cfg:d.cfg, segs:d.segs, samples:d.samples, ivs:d.ivs || [], phase:"run", t0: performance.now() - d.el * 1000 });
+    AS.segIdx = asSegAt(d.el); asFinish(true); return true;
+  }
+  asDraftClear(); return false;
+}
 function asOpen(){
   Object.assign(AS, { open:true, phase:"setup", err:"", warn:"", sum:null, samples:[], ivs:[] });
+  if (asRecover()){ $("#airses").classList.add("on"); document.body.style.overflow = "hidden"; asRender(); toast("Recuperada la última sesión sin guardar"); return; }
   if (!AS.mode) AS.mode = asSuggestMode();
   AS.cfg = asDefaults(AS.mode);
   $("#airses").classList.add("on"); document.body.style.overflow = "hidden"; asRender();
 }
 async function asClose(){
-  if (AS.phase === "run" && !confirm("¿Salir sin guardar la sesión?")) return;
+  if (AS.phase === "run" && !confirm("¿Salir? La sesión se queda guardada como borrador y la recuperas al volver a abrir esta pantalla.")) return;
+  if (AS.phase === "run") asDraftSave();
   clearInterval(AS.iv); AS.iv = null; unlockScreen(); await BLE.close(); AS.conn = "off";
   AS.open = false; $("#airses").classList.remove("on"); document.body.style.overflow = ""; render();
 }
@@ -2047,9 +2068,10 @@ function asTick(){
     else { AS.overSince = 0; if (AS.beeped.over && r != null && r <= tg.hi){ AS.beeped.over = 0; AS.warn = ""; } }
   }
   if (seg.kind === "cool" && seg.dur && t >= seg.at + seg.dur){ asFinish(); return; }
+  if (!AS.lastDraft || t - AS.lastDraft > 5){ AS.lastDraft = t; asDraftSave(); }
   asRenderRun(t, seg);
 }
-function asFinish(){
+function asFinish(recovered){
   if (AS.phase !== "run") return;
   clearInterval(AS.iv); AS.iv = null; unlockScreen();
   const t = (performance.now() - AS.t0) / 1000, cur = AS.segs[AS.segIdx];
@@ -2066,7 +2088,8 @@ function asFinish(){
   const prevDay = Object.keys(DB.days).filter(x => x < todayIso() && getp(DB.days[x], "air.ses.mode") === k).sort().pop();
   if (prevDay) sum.prev = { date: prevDay, ...getp(DB.days[prevDay], "air.ses") };
   sum.series = { w: xs.map(p => p.w), r: xs.map(p => p.rpm), t: xs.map(p => p.t) };
-  AS.sum = sum; AS.phase = "done"; beep(784, 200); setTimeout(() => beep(1046, 300), 240); vib([150, 80, 300]);
+  AS.sum = sum; AS.phase = "done"; asDraftSave();
+  if (!recovered){ beep(784, 200); setTimeout(() => beep(1046, 300), 240); vib([150, 80, 300]); }
   asRender();
 }
 function asSave(asTests){
@@ -2086,7 +2109,7 @@ function asSave(asTests){
   }
   ui.date = todayIso(); ui.open.air = true; commit();
   toast(asTests ? "Sesión y tests guardados" : "Sesión guardada en el día");
-  AS.phase = "setup"; AS.sum = null; asClose();
+  asDraftClear(); AS.phase = "setup"; AS.sum = null; asClose();
 }
 
 /* Render de la pantalla */
@@ -2191,7 +2214,8 @@ function asSummaryHtml(){
   }
   if (s.drop != null) h += `<p class="hint">Caída entre las primeras y las últimas series: <b>${s.drop > 0 ? s.drop + " %" : "ninguna"}</b>${s.drop > 15 ? " — mucha: la próxima vez alarga el descanso o haz menos series" : ""}.</p>`;
   if (s.prev) h += `<p class="hint">Última vez (${esc(fmtDate(s.prev.date))}): ${s.prev.w ?? "–"} W medios · pico ${s.prev.pw ?? "–"} W · ${s.prev.r ?? "–"} RPM${s.prev.iv && s.prev.iv.length ? ` · ${s.prev.iv.length} series` : ""}.</p>`;
-  h += `<canvas id="asChartSum" class="as-chart" height="150"></canvas>
+  h += `<p class="hint">Queda como borrador hasta que pulses Guardar; si cierras, la recuperas al volver a abrir la sesión.</p>
+    <canvas id="asChartSum" class="as-chart" height="150"></canvas>
     <div class="row as-runbtns">${s.testW || s.testRPM ? `<button class="btn primary" data-action="as-save" data-tests="1">Guardar y usar como mis tests</button>` : ""}
     <button class="btn ${s.testW || s.testRPM ? "" : "primary"}" data-action="as-save">Guardar en el día</button>
     <button class="btn" data-action="as-discard">Descartar</button></div>`;
@@ -2220,8 +2244,14 @@ function beep(freq = 880, ms = 160){
   }catch(e){}
 }
 const vib = p => { try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} };
-async function lockScreen(){ try{ if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen"); }catch(e){} }
-function unlockScreen(){ try{ wakeLock && wakeLock.release(); }catch(e){} wakeLock = null; }
+async function lockScreen(){
+  try{ if (isNative()){ await capP("KeepAwake").keepAwake(); return; } }catch(e){}
+  try{ if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen"); }catch(e){}
+}
+function unlockScreen(){
+  try{ if (isNative()) capP("KeepAwake").allowSleep().catch(() => {}); }catch(e){}
+  try{ wakeLock && wakeLock.release(); }catch(e){} wakeLock = null;
+}
 function timerStart(o){
   Object.assign(T, { on:true, path:o.path, label:o.label, kind:o.kind, marks:o.marks, idx:o.idx,
     lead: o.lead ? S().leadIn : 0, t0: performance.now(), hit: new Set(), lastLeadSec: null });
@@ -2261,7 +2291,7 @@ function timerEnd(keep){
   }
   render();
 }
-document.addEventListener("visibilitychange", () => { if (T.on && document.visibilityState === "visible") lockScreen(); });
+document.addEventListener("visibilitychange", () => { if ((T.on || AS.phase === "run") && document.visibilityState === "visible") lockScreen(); });
 
 /* ---------------- Acciones ---------------- */
 let saveTimer = null;
@@ -2319,7 +2349,7 @@ const A = {
   "as-skip": () => { const t = (performance.now() - AS.t0) / 1000, seg = AS.segs[AS.segIdx]; if (seg && seg.dur){ AS.t0 -= Math.max(0, seg.at + seg.dur - t) * 1000; asTick(); } },
   "as-finish": () => asFinish(),
   "as-save": b => asSave(b.dataset.tests === "1"),
-  "as-discard": () => { if (confirm("¿Descartar esta sesión?")){ AS.sum = null; AS.phase = "setup"; asRender(); } },
+  "as-discard": () => { if (confirm("¿Descartar esta sesión?")){ asDraftClear(); AS.sum = null; AS.phase = "setup"; asRender(); } },
   "air-save-tests": () => {
     const v = getp(wday(), "air") || {};
     if (!v.testW && !v.testRPM){ toast("Primero apunta los vatios máximos y las RPM medias"); return; }
@@ -2509,6 +2539,7 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") return;
   const t = todayIso(); if (t !== lastToday){ if (ui.date === lastToday) ui.date = t; lastToday = t; render(); }
   if (isNative() && ui.tab === "ajustes"){ ui.avChecked = false; render(); }
+  if (document.visibilityState === "hidden" && AS.open) asDraftSave();
   avSchedule();
 });
 if (!isNative() && "serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
