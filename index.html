@@ -326,7 +326,7 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 <script src="capacitor.js"></script>
 <script>
 "use strict";
-const VERSION = "3.1.1";
+const VERSION = "3.2.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -603,6 +603,10 @@ function renderHoy(){
      <div class="row" style="margin-bottom:6px;gap:16px">
        <div class="field"><label for="tobI">Tobillo izq. (cm)</label><input class="num" id="tobI" inputmode="decimal" data-bind="cuerpo.tobIzq" data-num="1" value="${getp(d,"cuerpo.tobIzq") ?? ""}" placeholder="a la pared"></div>
        <div class="field"><label for="tobD">Tobillo der. (cm)</label><input class="num" id="tobD" inputmode="decimal" data-bind="cuerpo.tobDer" data-num="1" value="${getp(d,"cuerpo.tobDer") ?? ""}" placeholder="a la pared"></div></div>
+     <div class="row" style="margin-bottom:6px;gap:14px">
+       <div class="field"><label>Hombro · izq. arriba</label><div class="chips">${[3,2,1].map(n => `<button class="chip sm" data-action="set" data-path="cuerpo.hIzq" data-v="${n}" data-num="1" aria-pressed="${getp(d,"cuerpo.hIzq")===n}">${n}</button>`).join("")}</div></div>
+       <div class="field"><label>Hombro · der. arriba</label><div class="chips">${[3,2,1].map(n => `<button class="chip sm" data-action="set" data-path="cuerpo.hDer" data-v="${n}" data-num="1" aria-pressed="${getp(d,"cuerpo.hDer")===n}">${n}</button>`).join("")}</div></div></div>
+     <p class="hint" style="margin-top:0">Hombro (test FMS): de pie, puños cerrados, uno por encima de la cabeza y otro por la espalda a la vez; mide entre nudillos. 3 = menos de un palmo (muñeca a punta del dedo), 2 = entre 1 y 1,5, 1 = más. Bien si es 3/3 o 2/2; la diferencia entre lados es lo que más importa.</p>
      <p class="hint" style="margin-top:0">Cada dos semanas, con la cintura: distancia máxima del pie a la pared tocándola con la rodilla sin levantar el talón. Más de 10 cm es buena movilidad; vigila sobre todo la diferencia entre lados.</p>
      ${check("video", "Sesión grabada en vídeo", "De perfil, cámara a la altura de la cadera, clips cortos")}
      <div class="field" style="margin-top:8px"><label for="notas">Notas</label>
@@ -616,10 +620,15 @@ function rotChips(path){
   return `<div class="chips">${ROT.map(([n,t]) => `<button class="chip sm" data-action="set" data-path="${path}" data-v="${n}" data-num="1" aria-pressed="${v===n}">${t}</button>`).join("")}</div>`;
 }
 function renderExtras(d){
-  const keys = ["frog","pull","bear","hollow","legr","hang","plank","rot","bench","ribgrab"];
+  const keys = ["n90","frog","pull","bear","hollow","legr","hang","plank","rot","bench","ribgrab"];
   const n = keys.filter(k => getp(d, "extra."+k+".done")).length;
   const sep = t => `<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:14px 0 4px">${t}</h3>`;
   let b = `<p class="hint" style="margin-top:0">Elige 2-3 cada día, no todos. Regla común: si la lumbar se despega o la costilla se abre, termina la serie.</p>`;
+  b += sep("Cadera") + `<div class="p3-item"><div style="flex:1">${check("extra.n90.done", "90/90 de cadera", "Una pierna a 90° delante y otra a 90° detrás, pelvis de frente. Exhala largo dejando que la cadera ceda; los dos lados, más tiempo en el que cueste")}</div>
+      ${stepper("extra.n90.resp", { label:"Resp./lado", def:5 })}</div>
+    <div class="field" style="margin:-2px 0 6px"><label>Lado que cuesta más</label><div class="chips">${["Izquierdo","Derecho","Igual"].map(v =>
+      `<button class="chip sm" data-action="set" data-path="extra.n90.dif" data-v="${v}" aria-pressed="${getp(d,"extra.n90.dif")===v}">${v}</button>`).join("")}</div></div>
+`;
   b += sep("Respiración y suelo") + `      <div class="p3-item" ><div style="flex:1">${check("extra.frog.done", "Frog stretch", "Exhala largo, llena la espalda · primer antes del bottoms-up")}</div>
       ${stepper("extra.frog.resp", { label:"Respiraciones", def:5 })}</div>
       <div class="p3-item"><div style="flex:1">${check("extra.pull.done", "Dead bug con pullover", "Campana ligera con las dos manos; costillas y lumbar pegadas. 2×5 lentos")}</div>
@@ -680,6 +689,9 @@ function renderA(d){
     <div class="row">${kgChips("a.tgu.kg", S().buKg, [8,12,16,20,24])}
     ${stepper("a.tgu.izq", { label:"Series izq.", def:1 })}${stepper("a.tgu.der", { label:"Series der.", def:1 })}</div></div>`;
 
+  b += `<div class="ex">${check("a.tk.done", "Press de rodillas (tall kneeling) · opcional", "Dos rodillas en el suelo, glúteos apretados, línea recta de la oreja a la rodilla. Inspira corto y presuriza, sube siseando sin vaciarte, antebrazo vertical, axila hacia la cadera. La serie se acaba si se sale la cadera, te echas atrás, pierdes glúteos o abdomen, sube el hombro o pierdes la respiración")}
+    <div class="row" style="margin-top:6px">${stepper("a.tk.reps", { label:"Reps limpias", def:3, metric:true })}</div></div>`;
+
   b += `<div class="ex"><div class="ex-t"><span class="n">4</span>Half Kneeling Press · ${S_}</div>
     <p class="ex-p">Campana en la mano opuesta a la rodilla apoyada. 3 series de 2-3 reps + 1 repetición sonda por serie.</p>
     <div class="row">${stepper("a.hk.series", { label:"Series", def:3 })}${stepper("a.hk.reps", { label:"Reps/serie", def:3 })}
@@ -696,7 +708,9 @@ function renderA(d){
     <div class="row" style="flex-direction:column;align-items:flex-start;gap:12px">
     ${timerField("a.oh.bu", "Bottoms-up · " + S_, { marks:"15,20", lead:true })}
     ${timerField("a.oh.lado", "Normal · " + S_, { marks:"15,20", lead:true })}
-    ${timerField("a.oh.otro", "Normal · " + O_, { marks:"15,20", lead:true })}</div></div>`;
+    ${timerField("a.oh.otro", "Normal · " + O_, { marks:"15,20", lead:true })}</div>
+    <p class="hint" style="margin-bottom:6px">Variantes del Dynami para el mismo bloqueo: el peso baja por el cuerpo hasta el talón, el hombro no lo sujeta.</p>
+    <div class="row">${toggle("a.oh.march", "Marcha con la campana arriba")}${toggle("a.oh.rot", "Rotaciones con la campana arriba")}</div></div>`;
 
   b += `<div class="ex"><div class="ex-t"><span class="n">7</span>Carry / march · ${S_} <span class="muted" style="font-weight:400">· opcional</span></div>
     <p class="ex-p">2-3 paseos cortos (20-30 m) sin ladearte ni abrir la costilla. Suitcase: campana colgando. Bottoms-up: en rack o camarero. BU march: clean boca abajo y 10-20 pasos de marcha en el sitio; se puede hacer con dos campanas.</p>
@@ -1424,6 +1438,9 @@ const AIF = {};
   b("hab.luz", "Anoche, luz apagada antes de las 23:30"); b("hab.cafe", "Café solo antes de las 14:00"); i("hab.prot", "Tomas con proteína", 0, 8);
   b("sup.cre", "Creatina"); b("sup.suero", "Suero");
   [["frog","Frog stretch"],["pull","Dead bug con pullover"],["bear","Oso"],["hollow","Hollow hold"],["legr","Leg raises"],["hang","Hanging hollow"],["plank","Plancha con pies en la pared"],["rot","Rotación torácica"],["bench","Extensión torácica en banco"],["ribgrab","Rib grab"],["flex","Flexor de cadera en half kneeling"],["wall","Wall slides"]].forEach(([k, t]) => b(`extra.${k}.done`, t));
+  b("extra.n90.done", "90/90 de cadera"); i("extra.n90.resp", "90/90: respiraciones por lado", 1, 40); e("extra.n90.dif", "90/90: lado que cuesta más", ["Izquierdo","Derecho","Igual"]);
+  b("a.tk.done", "Press de rodillas (tall kneeling)"); i("a.tk.reps", "Press de rodillas: reps limpias", 0, 10); b("a.oh.march", "Marcha con la campana arriba"); b("a.oh.rot", "Rotaciones con la campana arriba");
+  e("cuerpo.hIzq", "Test de hombro, izquierdo arriba (3 bien, 1 mal)", [1,2,3]); e("cuerpo.hDer", "Test de hombro, derecho arriba (3 bien, 1 mal)", [1,2,3]);
   i("extra.frog.resp", "Frog: respiraciones", 1, 30); i("extra.pull.reps", "Pullover: reps totales", 1, 60); e("extra.pull.kg", "Pullover: kg", [4,6,8,12]);
   i("extra.bear.secs", "Oso: segundos", 5, 600); e("extra.bear.var", "Oso: variante", ["Bear hold","Bear crawl"]);
   i("extra.hollow.secs", "Hollow: segundos", 5, 600); e("extra.hollow.var", "Hollow: variante", ["Rodillas recogidas","Brazos arriba","Piernas estiradas"]);
@@ -2509,7 +2526,7 @@ $("#fileIn").addEventListener("change", async e => {
 function toCSV(){
   const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","cadera_bajo_campana","contralateral","isometria_3pos","plancha_pared_s","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
-    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","tobillo_izq","tobillo_der","mov_nivel","mov_hechos","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","notas"];
+    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","tobillo_izq","tobillo_der","mov_nivel","mov_hechos","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","n90_resp","n90_lado_dificil","press_rodillas_reps","oh_marcha","oh_rotaciones","hombro_izq","hombro_der","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("p3.lateral") ? 1 : "", d.finDia, g("extra.flex.done") ? 1 : "", g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
@@ -2521,7 +2538,7 @@ function toCSV(){
     hasB(d) ? bMode(d, x) : "", ...FZ.flatMap(e => getp(d, "b.f."+e.k+".done") ? [g("b.f."+e.k+".kg"), g("b.f."+e.k+".series"), g("b.f."+e.k+".reps")] : ["","",""]),
     airDone(d) ? (g("air.tipo") ?? "sí") : "", g("air.rondas"), g("air.min"), g("air.vatios"), g("air.rpm"), g("air.kcal"), g("air.testW"), g("air.testRPM"), g("sup.cre") ? 1 : "", g("sup.suero") ? 1 : "",
     d.despertares, g("hab.luz") ? 1 : "", g("hab.cafe") ? 1 : "", g("hab.prot"), g("paseo.done") ? (g("paseo.min") ?? "sí") : "", g("cuerpo.peso"), g("cuerpo.cintura"), g("cuerpo.tobIzq"), g("cuerpo.tobDer"),
-    (() => { const m = movPlan(x); return m.lv && movDone(d) ? MOV_LV[m.lv] : ""; })(), movDone(d) || "", maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", d.notas].map(q).join(","); });
+    (() => { const m = movPlan(x); return m.lv && movDone(d) ? MOV_LV[m.lv] : ""; })(), movDone(d) || "", maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", g("extra.n90.done") ? (g("extra.n90.resp") ?? "sí") : "", g("extra.n90.dif"), g("a.tk.done") ? (g("a.tk.reps") ?? "sí") : "", g("a.oh.march") ? 1 : "", g("a.oh.rot") ? 1 : "", g("cuerpo.hIzq"), g("cuerpo.hDer"), d.notas].map(q).join(","); });
   return [cols.join(","), ...rows].join("\n");
 }
 
