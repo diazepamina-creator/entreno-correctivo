@@ -206,6 +206,12 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 .card.k-desp,.card.k-menu,.card.k-tanda,.card.k-pesc,.card.k-compra{--k:var(--k-cocina)}
 .pill.bad{background:var(--danger-bg);color:var(--danger)}
 .card.k-mov{--k:var(--k-mov)}
+.card.k-gaps{--k:var(--k-mov)}
+.lib-h{font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:14px 0 4px}
+.star{border:0;background:none;font-size:22px;line-height:1;padding:6px 4px 6px 8px;cursor:pointer;color:var(--ink-3);min-width:36px;min-height:44px}
+.star[aria-pressed="true"]{color:#d9a400}
+.gap-row{display:flex;flex-direction:column;gap:4px;padding:8px 0;border-top:1px solid var(--line)}
+.gap-row span{font-weight:600;font-size:15px}
 .card.k-coach,.card.k-coachlog,.card.k-coachchat,.card.k-coachinf,.card.k-coachmat,.card.k-coachcocina,.card.k-review{--k:var(--k-coach)}
 .md{font-size:15px;line-height:1.5}.md h3{font-size:15px;margin:12px 0 4px}.md p{margin:6px 0}.md ul,.md ol{padding-left:20px;margin:6px 0}.md li{margin:2px 0}
 .coach-out{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--surface-2)}
@@ -326,7 +332,7 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 <script src="capacitor.js"></script>
 <script>
 "use strict";
-const VERSION = "3.2.0";
+const VERSION = "3.3.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -427,7 +433,7 @@ function timerField(path, label, o = {}){
     <button class="timer-btn" data-action="timer-start" data-path="${path}" data-label="${esc(label)}" data-marks="${o.marks||""}" data-lead="${o.lead?1:0}" data-kind="hold">▶ Cronometrar</button>
     ${v != null ? `<button class="link" data-action="clear" data-path="${path}">borrar</button>` : ""}</div></div>`;
 }
-const CARD_ICO = { coach:"✦", coachlog:"✎", coachchat:"?", coachinf:"∑", coachmat:"⚙", coachcocina:"✦", review:"✦", p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋", compra:"≡", pesc:"≈", menu:"M", tanda:"T", desp:"D", mov:"↔" };
+const CARD_ICO = { gaps:"◎", coach:"✦", coachlog:"✎", coachchat:"?", coachinf:"∑", coachmat:"⚙", coachcocina:"✦", review:"✦", p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋", compra:"≡", pesc:"≈", menu:"M", tanda:"T", desp:"D", mov:"↔" };
 function card(key, title, sub, badge, body){
   const closed = !ui.open[key];
   const ico = CARD_ICO[key];
@@ -619,43 +625,67 @@ function rotChips(path){
   const v = getp(day(), path);
   return `<div class="chips">${ROT.map(([n,t]) => `<button class="chip sm" data-action="set" data-path="${path}" data-v="${n}" data-num="1" aria-pressed="${v===n}">${t}</button>`).join("")}</div>`;
 }
+/* ---- Biblioteca de movilidad y correctivos: "especias" (Mind the Gap) ---- */
+const GAP_AREAS = [
+  ["resp","Respiración"],["cuello","Cuello"],["tor","Columna torácica"],["hombro","Hombros"],["cadera","Cadera"],
+  ["ant","Cadena anterior (flexor y cuádriceps)"],["tobillo","Tobillo"],["estab","Estabilidad arriba (armbar, TGU)"],["unil","Fuerza a una pierna"],["core","Core"],
+];
+const GAP_ST = [["", "Sin revisar"],["hueco","Hueco"],["mejora","Mejorando"],["ok","Resuelto"]];
+const chipsSet = (path, vals) => `<div class="chips">${vals.map(v => `<button class="chip sm" data-action="set" data-path="${path}" data-v="${v}" aria-pressed="${getp(day(),path)===v}">${v}</button>`).join("")}</div>`;
+const LIB = [
+  { k:"n90", a:"cadera", t:"90/90 de cadera", s:"Una pierna a 90° delante y otra a 90° detrás, pelvis de frente. Exhala largo dejando que la cadera ceda; los dos lados, más tiempo en el que cueste",
+    x:() => stepper("extra.n90.resp", { label:"Resp./lado", def:5 }), y:() => `<div class="field"><label>Lado que cuesta más</label>${chipsSet("extra.n90.dif", ["Izquierdo","Derecho","Igual"])}</div>` },
+  { k:"couch", a:"ant", t:"Couch stretch", s:"Rodilla atrás con el empeine en una silla o banco, la otra pierna delante. Mete la pelvis y aprieta el glúteo; 3-5 respiraciones por lado sin arquear la lumbar",
+    x:() => stepper("extra.couch.resp", { label:"Resp./lado", def:4 }) },
+  { k:"armbar", a:"estab", t:"Kettlebell armbar", s:"Roll to press, rueda de lado con la pierna doblada delante. Campana vertical, puño mirando como el pecho; 15-30 s por lado. Si la campana baila, no avances",
+    x:() => stepper("extra.armbar.secs", { label:"Seg./lado", def:20, step:5 }), y:() => kgChips("extra.armbar.kg", undefined, [8,12,16]) },
+  { k:"barm", a:"hombro", t:"Bent armbar", s:"Desde el armbar, baja el codo hasta las costillas con el antebrazo vertical; 1-2 respiraciones. Sube abriendo el dorsal. Sin forzar el hombro" },
+  { k:"halo", a:"hombro", t:"Halo en half kneeling", s:"Campana bottoms-up en goblet, pelvis nivelada y alto por la coronilla. 4-6 halos por sentido sin perder la postura; para cuando empiece a bailar",
+    x:() => stepper("extra.halo.reps", { label:"Halos/lado", def:4 }) },
+  { k:"shext", a:"hombro", t:"Extensión de hombro sentado", s:"Sentado, manos detrás con los dedos hacia atrás, alto. Lleva la cadera adelante con la respiración hasta notar el estiramiento delante del hombro" },
+  { k:"sldl", a:"unil", t:"Peso muerto a una pierna", s:"Campana junto al pie de apoyo; la otra pierna se aleja rozando el suelo hasta despegar. Línea recta de la oreja al tobillo; 3-5 por lado. Compara lados",
+    x:() => stepper("extra.sldl.reps", { label:"Reps/lado", def:5 }), y:() => kgChips("extra.sldl.kg", undefined, [12,16,20,24]) },
+  { k:"frog", a:"resp", t:"Frog stretch", s:"Exhala largo, llena la espalda · primero antes del bottoms-up", x:() => stepper("extra.frog.resp", { label:"Respiraciones", def:5 }) },
+  { k:"pull", a:"core", t:"Dead bug con pullover", s:"Campana ligera con las dos manos; costillas y lumbar pegadas. 2×5 lentos",
+    x:() => stepper("extra.pull.reps", { label:"Reps totales", def:10 }), y:() => kgChips("extra.pull.kg", undefined, [4,6,8,12]) },
+  { k:"bear", a:"core", t:"Cuadrupedia / oso", s:"Espalda redonda, costillas abajo, rodillas a 2-3 cm del suelo",
+    x:() => stepper("extra.bear.secs", { label:"Segundos", def:20, step:10 }), y:() => chipsSet("extra.bear.var", ["Bear hold","Bear crawl"]) },
+  { k:"hollow", a:"core", t:"Hollow hold", s:"Lumbar pegada y costillas abajo; progresión de Neupert",
+    x:() => stepper("extra.hollow.secs", { label:"Segundos", def:15, step:5 }), y:() => chipsSet("extra.hollow.var", ["Rodillas recogidas","Brazos arriba","Piernas estiradas"]) },
+  { k:"legr", a:"core", t:"Short-lever leg raises", s:"Brazos atrás agarrando una campana (dorsal activo); estira las piernas sin despegar la lumbar", x:() => stepper("extra.legr.reps", { label:"Reps", def:5 }) },
+  { k:"hang", a:"core", t:"Hanging hollow hold", s:"Colgado, hombros abajo; acerca pelvis y costillas llevando las piernas delante. Sin balanceo", x:() => stepper("extra.hang.reps", { label:"Reps", def:5 }) },
+  { k:"plank", a:"core", t:"Plancha con pies en la pared", s:"Antebrazos en el suelo, pies apoyados en la pared; si se hunde la lumbar, resbalas. Meta: 1 minuto sólido", x:() => stepper("extra.plank.secs", { label:"Segundos", def:20, step:5 }) },
+  { k:"rot", a:"tor", t:"Rotación con lumbar bloqueada", s:"Postura del niño, mano detrás de la espalda; gira el pecho al techo exhalando. Haz más series hacia el lado que cueste",
+    y:() => `<div class="row" style="gap:14px"><div class="field"><label>Izquierda</label>${rotChips("extra.rot.izq")}</div><div class="field"><label>Derecha</label>${rotChips("extra.rot.der")}</div></div>` },
+  { k:"bench", a:"tor", t:"Extensión torácica en banco", s:"Codos en un banco, manos tras la cabeza; caderas a los talones y deja caer el pecho. 5 respiraciones" },
+  { k:"ribgrab", a:"tor", t:"Rib grab / Brettzel", s:"De lado, rodilla arriba sujeta; gira ojos, cuello y hombros dejando que la exhalación haga el trabajo" },
+];
+const SPICE_DEF = ["n90","armbar","couch"];
+const spices = () => { const s = S().spices; return Array.isArray(s) ? s.filter(k => LIB.some(i => i.k === k)) : SPICE_DEF.slice(); };
+function libItem(it, d){
+  const act = spices().includes(it.k);
+  return `<div class="lib-it"><div class="p3-item"><div style="flex:1">${check("extra." + it.k + ".done", it.t, it.s)}</div>${it.x ? it.x() : ""}
+    <button class="star" data-action="spice" data-k="${it.k}" aria-pressed="${act}" aria-label="${act ? "Quitar de mis especias" : "Añadir a mis especias"}">${act ? "★" : "☆"}</button></div>
+    ${it.y ? `<div style="margin:-2px 0 8px">${it.y()}</div>` : ""}</div>`;
+}
 function renderExtras(d){
-  const keys = ["n90","frog","pull","bear","hollow","legr","hang","plank","rot","bench","ribgrab"];
-  const n = keys.filter(k => getp(d, "extra."+k+".done")).length;
-  const sep = t => `<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:14px 0 4px">${t}</h3>`;
-  let b = `<p class="hint" style="margin-top:0">Elige 2-3 cada día, no todos. Regla común: si la lumbar se despega o la costilla se abre, termina la serie.</p>`;
-  b += sep("Cadera") + `<div class="p3-item"><div style="flex:1">${check("extra.n90.done", "90/90 de cadera", "Una pierna a 90° delante y otra a 90° detrás, pelvis de frente. Exhala largo dejando que la cadera ceda; los dos lados, más tiempo en el que cueste")}</div>
-      ${stepper("extra.n90.resp", { label:"Resp./lado", def:5 })}</div>
-    <div class="field" style="margin:-2px 0 6px"><label>Lado que cuesta más</label><div class="chips">${["Izquierdo","Derecho","Igual"].map(v =>
-      `<button class="chip sm" data-action="set" data-path="extra.n90.dif" data-v="${v}" aria-pressed="${getp(d,"extra.n90.dif")===v}">${v}</button>`).join("")}</div></div>
-`;
-  b += sep("Respiración y suelo") + `      <div class="p3-item" ><div style="flex:1">${check("extra.frog.done", "Frog stretch", "Exhala largo, llena la espalda · primer antes del bottoms-up")}</div>
-      ${stepper("extra.frog.resp", { label:"Respiraciones", def:5 })}</div>
-      <div class="p3-item"><div style="flex:1">${check("extra.pull.done", "Dead bug con pullover", "Campana ligera con las dos manos; costillas y lumbar pegadas. 2×5 lentos")}</div>
-      ${stepper("extra.pull.reps", { label:"Reps totales", def:10 })}</div>
-      <div class="row" style="margin:-2px 0 6px">${kgChips("extra.pull.kg", undefined, [4,6,8,12])}</div>
-      <div class="p3-item"><div style="flex:1">${check("extra.bear.done", "Cuadrupedia / oso", "Espalda redonda, costillas abajo, rodillas a 2-3 cm del suelo")}</div>
-      ${stepper("extra.bear.secs", { label:"Segundos", def:20, step:10 })}</div>
-      <div class="row" style="margin:-2px 0 6px">${["Bear hold","Bear crawl"].map(v =>
-        `<button class="chip sm" data-action="set" data-path="extra.bear.var" data-v="${v}" aria-pressed="${getp(d,"extra.bear.var")===v}">${v}</button>`).join("")}</div>
-`;
-  b += `<div class="p3-item"><div style="flex:1">${check("extra.hollow.done", "Hollow hold", "Lumbar pegada y costillas abajo; progresión de Neupert")}</div>
-      ${stepper("extra.hollow.secs", { label:"Segundos", def:15, step:5 })}</div>
-    <div class="row" style="margin:-2px 0 6px">${["Rodillas recogidas","Brazos arriba","Piernas estiradas"].map(v =>
-      `<button class="chip sm" data-action="set" data-path="extra.hollow.var" data-v="${v}" aria-pressed="${getp(d,"extra.hollow.var")===v}">${v}</button>`).join("")}</div>
-    <div class="p3-item"><div style="flex:1">${check("extra.legr.done", "Short-lever leg raises", "Brazos atrás agarrando una campana (dorsal activo); estira las piernas sin despegar la lumbar")}</div>
-      ${stepper("extra.legr.reps", { label:"Reps", def:5 })}</div>
-    <div class="p3-item"><div style="flex:1">${check("extra.hang.done", "Hanging hollow hold", "Colgado, hombros abajo; acerca pelvis y costillas llevando las piernas delante. Sin balanceo")}</div>
-      ${stepper("extra.hang.reps", { label:"Reps", def:5 })}</div>
-    <div class="p3-item"><div style="flex:1">${check("extra.plank.done", "Plancha con pies en la pared", "Antebrazos en el suelo, pies apoyados en la pared; si se hunde la lumbar, resbalas. Meta: 1 minuto sólido")}</div>
-      ${stepper("extra.plank.secs", { label:"Segundos", def:20, step:5 })}</div>`;
-  b += sep("Columna torácica") + `<div class="ex" style="margin-top:4px">${check("extra.rot.done", "Rotación con lumbar bloqueada", "Postura del niño, mano detrás de la espalda; gira el pecho al techo exhalando. Haz más series hacia el lado que cueste")}
-      <div class="row" style="margin-top:8px;gap:14px">
-        <div class="field"><label>Izquierda (hombro izq. al techo)</label>${rotChips("extra.rot.izq")}</div>
-        <div class="field"><label>Derecha (hombro der. al techo)</label>${rotChips("extra.rot.der")}</div></div></div>
-    ${check("extra.bench.done", "Extensión torácica en banco", "Codos en un banco, manos tras la cabeza; caderas a los talones y deja caer el pecho. 5 respiraciones")}
-    ${check("extra.ribgrab.done", "Rib grab / Brettzel", "De lado, rodilla arriba sujeta; gira ojos, cuello y hombros dejando que la exhalación haga el trabajo")}`;
-  return card("extras", "Core y movilidad · opcionales", "Todos los días que quieras, también en descanso", n ? `<span class="pill ok">${n}</span>` : "", b);
+  const act = spices(), n = LIB.filter(it => getp(d, "extra." + it.k + ".done")).length;
+  const gaps = S().gaps || {}, holes = GAP_AREAS.filter(([k]) => gaps[k] === "hueco").map(([, t]) => t);
+  let b = `<p class="hint" style="margin-top:0">Tus especias del bloque (máximo 4): hazlas a diario en el calentamiento. El resto está en la biblioteca; cámbialas con la estrella cada 4 semanas según tus huecos.</p>`;
+  b += LIB.filter(it => act.includes(it.k)).map(it => libItem(it, d)).join("") || `<p class="muted">Ninguna elegida: marca 2-4 con ☆ en la biblioteca.</p>`;
+  if (holes.length) b += `<p class="hint">Huecos marcados: ${esc(holes.join(", "))}.</p>`;
+  const open = !!ui.open.lib;
+  b += `<div class="ex" style="margin-top:8px"><button class="link" data-action="card" data-key="lib">${open ? "▾" : "▸"} Biblioteca (${LIB.length - act.filter(k => LIB.some(i => i.k === k)).length} más)</button>`;
+  if (open) GAP_AREAS.forEach(([a, t]) => { const its = LIB.filter(it => it.a === a && !act.includes(it.k)); if (its.length) b += `<h3 class="lib-h">${t}${gaps[a] === "hueco" ? " · hueco" : ""}</h3>` + its.map(it => libItem(it, d)).join(""); });
+  b += `</div>`;
+  return card("extras", "Movilidad · mis especias", act.length + " del bloque · biblioteca con " + LIB.length, n ? `<span class="pill ok">${n}</span>` : "", b);
+}
+function gapsCard(){
+  const g = S().gaps || {};
+  let b = `<p class="hint" style="margin-top:0">Hoja de huecos de <i>Mind the Gap</i> (Brett Jones). Marca cada zona y elige tus especias según los huecos; revísalo al final de cada bloque de 4 semanas, con los vídeos y las medidas.</p>`;
+  b += GAP_AREAS.map(([k, t]) => `<div class="gap-row"><span>${t}</span><div class="chips">${GAP_ST.slice(1).map(([v, l]) => `<button class="chip sm" data-action="gap" data-k="${k}" data-v="${v}" aria-pressed="${g[k] === v}">${l}</button>`).join("")}</div></div>`).join("");
+  const n = GAP_AREAS.filter(([k]) => g[k] === "hueco").length;
+  return card("gaps", "Mis huecos", n ? `${n} por resolver` : "Marca las zonas que te limitan", n ? `<span class="pill warn">${n}</span>` : "", b);
 }
 
 function renderA(d){
@@ -882,6 +912,7 @@ function renderSemana(){
   h += card("review", "Revisión con Claude", rv ? `Hecha el ${esc(fmtDate(rv.at.slice(0, 10)))} a las ${hhmm(rv.at)}` : "Lectura de la semana y plan para la siguiente", rv ? `<span class="pill ok">hecha</span>` : "",
     aiHasKey() ? `<div class="row">${aiBtn("ai-semana", rv ? "Rehacer la revisión" : "Revisar la semana", "btn accent", `data-mon="${mon}"`)}${rv ? `<button class="btn" data-action="ai-share-sem" data-mon="${mon}">Compartir</button>` : ""}</div>${aiErrHtml("ai-semana")}${rv ? `<div class="md coach-out">${md(rv.text)}</div>` : ""}`
       : `<p class="hint" style="margin-top:0">Pon tu clave de la API de Claude en Ajustes para que te revise la semana.</p><button class="btn" data-action="goto-tab" data-tab="ajustes">Ir a Ajustes</button>`);
+  h += gapsCard();
   h += `<p class="hint" style="text-align:center">Revisión del domingo: 5 minutos con esta pantalla.</p>`;
   $("#p-semana").innerHTML = h;
 }
@@ -1438,6 +1469,10 @@ const AIF = {};
   b("hab.luz", "Anoche, luz apagada antes de las 23:30"); b("hab.cafe", "Café solo antes de las 14:00"); i("hab.prot", "Tomas con proteína", 0, 8);
   b("sup.cre", "Creatina"); b("sup.suero", "Suero");
   [["frog","Frog stretch"],["pull","Dead bug con pullover"],["bear","Oso"],["hollow","Hollow hold"],["legr","Leg raises"],["hang","Hanging hollow"],["plank","Plancha con pies en la pared"],["rot","Rotación torácica"],["bench","Extensión torácica en banco"],["ribgrab","Rib grab"],["flex","Flexor de cadera en half kneeling"],["wall","Wall slides"]].forEach(([k, t]) => b(`extra.${k}.done`, t));
+  b("extra.couch.done", "Couch stretch"); i("extra.couch.resp", "Couch stretch: respiraciones por lado", 1, 20);
+  b("extra.armbar.done", "Kettlebell armbar"); i("extra.armbar.secs", "Armbar: segundos por lado", 5, 120); e("extra.armbar.kg", "Armbar: kg", [8,12,16]);
+  b("extra.barm.done", "Bent armbar"); b("extra.halo.done", "Halo en half kneeling"); i("extra.halo.reps", "Halo: halos por lado", 1, 20); b("extra.shext.done", "Extensión de hombro sentado");
+  b("extra.sldl.done", "Peso muerto a una pierna"); i("extra.sldl.reps", "Peso muerto a una pierna: reps por lado", 1, 15); e("extra.sldl.kg", "Peso muerto a una pierna: kg", [12,16,20,24]);
   b("extra.n90.done", "90/90 de cadera"); i("extra.n90.resp", "90/90: respiraciones por lado", 1, 40); e("extra.n90.dif", "90/90: lado que cuesta más", ["Izquierdo","Derecho","Igual"]);
   b("a.tk.done", "Press de rodillas (tall kneeling)"); i("a.tk.reps", "Press de rodillas: reps limpias", 0, 10); b("a.oh.march", "Marcha con la campana arriba"); b("a.oh.rot", "Rotaciones con la campana arriba");
   e("cuerpo.hIzq", "Test de hombro, izquierdo arriba (3 bien, 1 mal)", [1,2,3]); e("cuerpo.hDer", "Test de hombro, derecho arriba (3 bien, 1 mal)", [1,2,3]);
@@ -2344,6 +2379,10 @@ const A = {
     setp(d, p, getp(d, p) === v ? undefined : v); commit();
   },
   "clear": b => { setp(wday(), b.dataset.path, undefined); commit(); },
+  "spice": b => { const k = b.dataset.k, cur = spices().slice(), i = cur.indexOf(k);
+    if (i >= 0) cur.splice(i, 1); else { if (cur.length >= 4){ toast("Máximo 4 especias: quita una antes"); return; } cur.push(k); }
+    S().spices = cur; commit(); },
+  "gap": b => { const g = (S().gaps ||= {}); g[b.dataset.k] = g[b.dataset.k] === b.dataset.v ? "" : b.dataset.v; commit(); },
   "force-train": () => { ui.forceTrain[ui.date] = true; render(); },
   "timer-start": b => timerStart({ path:b.dataset.path, label:b.dataset.label, kind:"hold",
     marks:(b.dataset.marks || "").split(",").filter(Boolean).map(Number), lead:b.dataset.lead === "1" }),
@@ -2526,7 +2565,7 @@ $("#fileIn").addEventListener("change", async e => {
 function toCSV(){
   const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","cadera_bajo_campana","contralateral","isometria_3pos","plancha_pared_s","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
-    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","tobillo_izq","tobillo_der","mov_nivel","mov_hechos","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","n90_resp","n90_lado_dificil","press_rodillas_reps","oh_marcha","oh_rotaciones","hombro_izq","hombro_der","notas"];
+    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","tobillo_izq","tobillo_der","mov_nivel","mov_hechos","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","n90_resp","n90_lado_dificil","press_rodillas_reps","oh_marcha","oh_rotaciones","hombro_izq","hombro_der","couch_resp","armbar_s","armbar_kg","bent_armbar","halo","hombro_ext","sldl_reps","sldl_kg","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("p3.lateral") ? 1 : "", d.finDia, g("extra.flex.done") ? 1 : "", g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
@@ -2538,7 +2577,7 @@ function toCSV(){
     hasB(d) ? bMode(d, x) : "", ...FZ.flatMap(e => getp(d, "b.f."+e.k+".done") ? [g("b.f."+e.k+".kg"), g("b.f."+e.k+".series"), g("b.f."+e.k+".reps")] : ["","",""]),
     airDone(d) ? (g("air.tipo") ?? "sí") : "", g("air.rondas"), g("air.min"), g("air.vatios"), g("air.rpm"), g("air.kcal"), g("air.testW"), g("air.testRPM"), g("sup.cre") ? 1 : "", g("sup.suero") ? 1 : "",
     d.despertares, g("hab.luz") ? 1 : "", g("hab.cafe") ? 1 : "", g("hab.prot"), g("paseo.done") ? (g("paseo.min") ?? "sí") : "", g("cuerpo.peso"), g("cuerpo.cintura"), g("cuerpo.tobIzq"), g("cuerpo.tobDer"),
-    (() => { const m = movPlan(x); return m.lv && movDone(d) ? MOV_LV[m.lv] : ""; })(), movDone(d) || "", maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", g("extra.n90.done") ? (g("extra.n90.resp") ?? "sí") : "", g("extra.n90.dif"), g("a.tk.done") ? (g("a.tk.reps") ?? "sí") : "", g("a.oh.march") ? 1 : "", g("a.oh.rot") ? 1 : "", g("cuerpo.hIzq"), g("cuerpo.hDer"), d.notas].map(q).join(","); });
+    (() => { const m = movPlan(x); return m.lv && movDone(d) ? MOV_LV[m.lv] : ""; })(), movDone(d) || "", maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", g("extra.n90.done") ? (g("extra.n90.resp") ?? "sí") : "", g("extra.n90.dif"), g("a.tk.done") ? (g("a.tk.reps") ?? "sí") : "", g("a.oh.march") ? 1 : "", g("a.oh.rot") ? 1 : "", g("cuerpo.hIzq"), g("cuerpo.hDer"), g("extra.couch.done") ? (g("extra.couch.resp") ?? "sí") : "", g("extra.armbar.done") ? (g("extra.armbar.secs") ?? "sí") : "", g("extra.armbar.kg"), g("extra.barm.done") ? 1 : "", g("extra.halo.done") ? (g("extra.halo.reps") ?? "sí") : "", g("extra.shext.done") ? 1 : "", g("extra.sldl.done") ? (g("extra.sldl.reps") ?? "sí") : "", g("extra.sldl.kg"), d.notas].map(q).join(","); });
   return [cols.join(","), ...rows].join("\n");
 }
 
