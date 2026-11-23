@@ -82,7 +82,7 @@ main{max-width:640px;margin:0 auto;padding:12px 16px 24px}
 .card-h .sub{display:block;font-size:13px;font-weight:500;color:var(--ink-2)}
 .chev{transition:transform .2s;color:var(--ink-3)}
 .card.due{background:color-mix(in srgb,var(--k) 9%,var(--surface));border-color:color-mix(in srgb,var(--k) 55%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--k) 35%,transparent),0 4px 18px color-mix(in srgb,var(--k) 28%,transparent)}
-.due-tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em;vertical-align:2px;color:var(--surface);background:var(--k)}
+.due-tag{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .card.closed .card-b{display:none}.card.closed .chev{transform:rotate(-90deg)}
 .pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
 .pill.ok{background:var(--accent-soft);color:var(--accent)}
@@ -340,7 +340,7 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 <script src="capacitor.js"></script>
 <script>
 "use strict";
-const VERSION = "3.5.0";
+const VERSION = "3.5.1";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -476,7 +476,7 @@ function card(key, title, sub, badge, body, due){
   if (due === undefined) due = cardDue(key);
   return `<div class="card k-${key}${closed ? " closed" : ""}${due ? " due" : ""}" id="card-${key}">
     <button class="card-h" data-action="card" data-key="${key}" aria-expanded="${!closed}">
-      ${ico ? `<span class="ico" aria-hidden="true">${ico}</span>` : ""}<h2>${title}${due ? `<span class="due-tag">toca</span>` : ""}${sub ? `<span class="sub">${sub}</span>` : ""}</h2>${badge || ""}<span class="chev" aria-hidden="true">▾</span></button>
+      ${ico ? `<span class="ico" aria-hidden="true">${ico}</span>` : ""}<h2>${title}${due ? `<span class="due-tag">pendiente hoy</span>` : ""}${sub ? `<span class="sub">${sub}</span>` : ""}</h2>${badge || ""}<span class="chev" aria-hidden="true">▾</span></button>
     <div class="card-b">${body}</div></div>`;
 }
 
