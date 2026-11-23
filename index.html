@@ -81,6 +81,8 @@ main{max-width:640px;margin:0 auto;padding:12px 16px 24px}
 .daystrip button.off{opacity:.45}
 .card-h .sub{display:block;font-size:13px;font-weight:500;color:var(--ink-2)}
 .chev{transition:transform .2s;color:var(--ink-3)}
+.card.due{background:color-mix(in srgb,var(--k) 9%,var(--surface));border-color:color-mix(in srgb,var(--k) 55%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--k) 35%,transparent),0 4px 18px color-mix(in srgb,var(--k) 28%,transparent)}
+.due-tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em;vertical-align:2px;color:var(--surface);background:var(--k)}
 .card.closed .card-b{display:none}.card.closed .chev{transform:rotate(-90deg)}
 .pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
 .pill.ok{background:var(--accent-soft);color:var(--accent)}
@@ -206,7 +208,7 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 .card.k-desp,.card.k-menu,.card.k-tanda,.card.k-pesc,.card.k-compra{--k:var(--k-cocina)}
 .pill.bad{background:var(--danger-bg);color:var(--danger)}
 .card.k-mov{--k:var(--k-mov)}
-.card.k-gaps{--k:var(--k-mov)}
+.card.k-gaps,.card.k-fms{--k:var(--k-mov)}
 .lib-h{font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);margin:14px 0 4px}
 .star{border:0;background:none;font-size:22px;line-height:1;padding:6px 4px 6px 8px;cursor:pointer;color:var(--ink-3);min-width:36px;min-height:44px}
 .star[aria-pressed="true"]{color:#d9a400}
@@ -338,7 +340,7 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 <script src="capacitor.js"></script>
 <script>
 "use strict";
-const VERSION = "3.4.0";
+const VERSION = "3.5.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -382,7 +384,7 @@ const fmtDate = s => { const d = parseIso(s); return `${DOW[d.getDay()]} ${d.get
 const fmtSecs = s => s == null ? "—" : `${Math.floor(s/60)}:${pad(Math.floor(s%60))}`;
 
 /* ---------------- Estado de UI ---------------- */
-const ui = { tab:"hoy", date: todayIso(), open:{ coach:true, coachlog:true, coachchat:true, coachinf:false, coachmat:false, coachcocina:true, review:true, p3:true, extras:false, air:false, a:true, b:true, cierre:true, opt:false, retest:false, compra:true, pesc:true, menu:true, tanda:false, desp:false, mov:true }, tables:{}, forceTrain:{} };
+const ui = { tab:"hoy", date: todayIso(), open:{}, tables:{}, forceTrain:{} };
 const day = (d = ui.date) => DB.days[d] || {};
 const wday = (d = ui.date) => (DB.days[d] ||= {});
 const S = () => DB.settings;
@@ -439,13 +441,42 @@ function timerField(path, label, o = {}){
     <button class="timer-btn" data-action="timer-start" data-path="${path}" data-label="${esc(label)}" data-marks="${o.marks||""}" data-lead="${o.lead?1:0}" data-kind="hold">▶ Cronometrar</button>
     ${v != null ? `<button class="link" data-action="clear" data-path="${path}">borrar</button>` : ""}</div></div>`;
 }
-const CARD_ICO = { gaps:"◎", coach:"✦", coachlog:"✎", coachchat:"?", coachinf:"∑", coachmat:"⚙", coachcocina:"✦", review:"✦", p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋", compra:"≡", pesc:"≈", menu:"M", tanda:"T", desp:"D", mov:"↔" };
-function card(key, title, sub, badge, body){
+const CARD_ICO = { sleep:"☾", fms:"◇", gaps:"◎", coach:"✦", coachlog:"✎", coachchat:"?", coachinf:"∑", coachmat:"⚙", coachcocina:"✦", review:"✦", p3:"P3", extras:"＋", a:"A", b:"B", cierre:"✓", air:"≋", compra:"≡", pesc:"≈", menu:"M", tanda:"T", desp:"D", mov:"↔" };
+/* Tarjetas que tocan ahora: brillo y fondo con el color de la tarjeta (todas empiezan cerradas) */
+function cardDue(key){
+  const t = todayIso(), now = new Date(), hr = now.getHours(), dow = now.getDay();
+  if (["sleep","p3","extras","a","b","air","mov","cierre","coach"].includes(key)){
+    if (ui.date !== t) return false;
+    const d = day(), train = dayType(t) === "t";
+    switch (key){
+      case "sleep": return hr < 12 && !d.sueno;
+      case "p3": return !p3Full(d);
+      case "extras": return train && !spices().some(k => getp(d, "extra." + k + ".done"));
+      case "a": return train && !hasA(d);
+      case "b": return train && !hasB(d);
+      case "air": { const sg = airSuggest(t); return !!sg.tipo && sg.tipo !== "Rodaje suave" && !airDone(d); }
+      case "mov": { const m = movPlan(t); return m.phase === "cycle" && !!m.lv && !movDone(d); }
+      case "cierre": return hr >= 20 && !d.finDia;
+      case "coach": { const d0 = day(); return aiHasKey() && hr < 16 && !(d0.ai && d0.ai.plan); }
+    }
+  }
+  if (key === "review") return dow === 0 && (ui.wk || 0) === 0 && !AI().reviews[addDays(t, -6)];
+  if (["compra","tanda","menu"].includes(key)){
+    const c = K(), wk = cWeek(), cw = ui.cwk || 0;
+    if (key === "compra") return dow === 5 && cw === 0 && shopList().length > 0;
+    if (key === "tanda") { const td = c.tanda[monOf(t)] || {}; return (dow === 6 || dow === 0) && cw === 0 && TANDA.some(x => !td[x.k]); }
+    if (key === "menu") return !Object.keys(c.menu[wk] || {}).length && (cw === 0 || (cw === 1 && dow === 0));
+  }
+  if (key === "fms"){ const L = fmsLast(); return !L || daysBetween(L.date, t) >= 28; }
+  return false;
+}
+function card(key, title, sub, badge, body, due){
   const closed = !ui.open[key];
   const ico = CARD_ICO[key];
-  return `<div class="card k-${key}${closed ? " closed" : ""}" id="card-${key}">
+  if (due === undefined) due = cardDue(key);
+  return `<div class="card k-${key}${closed ? " closed" : ""}${due ? " due" : ""}" id="card-${key}">
     <button class="card-h" data-action="card" data-key="${key}" aria-expanded="${!closed}">
-      ${ico ? `<span class="ico" aria-hidden="true">${ico}</span>` : ""}<h2>${title}${sub ? `<span class="sub">${sub}</span>` : ""}</h2>${badge || ""}<span class="chev" aria-hidden="true">▾</span></button>
+      ${ico ? `<span class="ico" aria-hidden="true">${ico}</span>` : ""}<h2>${title}${due ? `<span class="due-tag">toca</span>` : ""}${sub ? `<span class="sub">${sub}</span>` : ""}</h2>${badge || ""}<span class="chev" aria-hidden="true">▾</span></button>
     <div class="card-b">${body}</div></div>`;
 }
 
@@ -567,8 +598,7 @@ function renderHoy(){
 
   h += coachCardHoy();
   const sleep = d.sueno;
-  h += `<div class="card k-sleep"><div class="card-h" style="cursor:default"><span class="ico" aria-hidden="true">☾</span><h2>Mañana<span class="sub">Sueño, energía y suplementos</span></h2></div><div class="card-b">
-    <div class="row">
+  h += card("sleep", "Mañana", "Sueño, energía y suplementos", sleep ? `<span class="pill ${sleep === "bien" ? "ok" : sleep === "mal" ? "warn" : ""}">${sleep}</span>` : "", `<div class="row">
       <div class="field"><label>Cómo has dormido</label><div class="chips">
         ${["bien","regular","mal"].map(v => `<button class="chip sm" data-action="set" data-path="sueno" data-v="${v}" aria-pressed="${sleep===v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div></div>
       <div class="field"><label>Energía</label><div class="chips">
@@ -578,7 +608,7 @@ function renderHoy(){
       ${toggle("hab.luz", "Anoche, luz apagada antes de las 23:30")}</div>
     <div class="field" style="margin-top:10px"><label>Suplementos de hoy</label><div class="chips">${toggle("sup.cre", "Creatina")}${toggle("sup.suero", "Suero")}</div></div>
     ${sleep === "mal" && train ? `<div class="note">Has dormido mal: el Bloque A no cambia, pero en el complejo baja un escalón de kg o haz menos rondas.</div>` : ""}
-  </div></div>`;
+  `);
 
   // P3
   const pd = p3Done(d);
