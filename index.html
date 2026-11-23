@@ -212,6 +212,11 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
 .star[aria-pressed="true"]{color:#d9a400}
 .gap-row{display:flex;flex-direction:column;gap:4px;padding:8px 0;border-top:1px solid var(--line)}
 .gap-row span{font-weight:600;font-size:15px}
+.fms-tab{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}.fms-tab th,.fms-tab td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:center}
+.fms-tab th:first-child,.fms-tab td:first-child{text-align:left}.fms-tab tr.on td{background:var(--surface-2,rgba(127,127,127,.12));font-weight:650}
+.fms-ul{margin:6px 0;padding-left:20px}.fms-ul li{margin:3px 0}
+.fms-crit{display:grid;gap:6px;margin:10px 0}.fms-crit div{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.fms-crit b{font-size:20px;min-width:16px}.fms-crit span{font-size:14px}
 .card.k-coach,.card.k-coachlog,.card.k-coachchat,.card.k-coachinf,.card.k-coachmat,.card.k-coachcocina,.card.k-review{--k:var(--k-coach)}
 .md{font-size:15px;line-height:1.5}.md h3{font-size:15px;margin:12px 0 4px}.md p{margin:6px 0}.md ul,.md ol{padding-left:20px;margin:6px 0}.md li{margin:2px 0}
 .coach-out{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--surface-2)}
@@ -326,13 +331,14 @@ nav.tabs button svg{padding:2px 6px;width:22px;height:22px;box-sizing:content-bo
   </div>
 </div>
 <div class="airses" id="airses" role="dialog" aria-modal="true" aria-label="Sesión de airbike"></div>
+<div class="airses" id="fmsov" role="dialog" aria-modal="true" aria-label="Chequeo de movimiento"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="fileIn" accept="application/json,.json" class="sr" aria-label="Importar copia de seguridad">
 
 <script src="capacitor.js"></script>
 <script>
 "use strict";
-const VERSION = "3.3.0";
+const VERSION = "3.4.0";
 const KEY = "correctivo.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -645,6 +651,10 @@ const LIB = [
   { k:"shext", a:"hombro", t:"Extensión de hombro sentado", s:"Sentado, manos detrás con los dedos hacia atrás, alto. Lleva la cadera adelante con la respiración hasta notar el estiramiento delante del hombro" },
   { k:"sldl", a:"unil", t:"Peso muerto a una pierna", s:"Campana junto al pie de apoyo; la otra pierna se aleja rozando el suelo hasta despegar. Línea recta de la oreja al tobillo; 3-5 por lado. Compara lados",
     x:() => stepper("extra.sldl.reps", { label:"Reps/lado", def:5 }), y:() => kgChips("extra.sldl.kg", undefined, [12,16,20,24]) },
+  { k:"llower", a:"cadera", t:"Bajada de pierna con apoyo", s:"Boca arriba junto al marco de una puerta, una pierna estirada apoyada en él. La otra sube recta y baja despacio hasta el suelo exhalando, sin que se mueva la pelvis. 5 por lado, más en el peor",
+    x:() => stepper("extra.llower.reps", { label:"Reps/lado", def:5 }) },
+  { k:"roll", a:"core", t:"Volteos (rolling)", s:"De boca arriba a boca abajo dirigiendo solo con un brazo (piernas muertas) y luego solo con una pierna (brazos muertos). Lento y sin empujar con el resto; más hacia el lado que cueste",
+    y:() => `<div class="field"><label>Lado que cuesta más</label>${chipsSet("extra.roll.dif", ["Izquierdo","Derecho","Igual"])}</div>` },
   { k:"frog", a:"resp", t:"Frog stretch", s:"Exhala largo, llena la espalda · primero antes del bottoms-up", x:() => stepper("extra.frog.resp", { label:"Respiraciones", def:5 }) },
   { k:"pull", a:"core", t:"Dead bug con pullover", s:"Campana ligera con las dos manos; costillas y lumbar pegadas. 2×5 lentos",
     x:() => stepper("extra.pull.reps", { label:"Reps totales", def:10 }), y:() => kgChips("extra.pull.kg", undefined, [4,6,8,12]) },
@@ -687,6 +697,141 @@ function gapsCard(){
   const n = GAP_AREAS.filter(([k]) => g[k] === "hueco").length;
   return card("gaps", "Mis huecos", n ? `${n} por resolver` : "Marca las zonas que te limitan", n ? `<span class="pill warn">${n}</span>` : "", b);
 }
+
+/* ---- Chequeo de movimiento: los 7 tests del FMS hechos en solitario (Gray Cook, «Movement», cap. 6 y 11) ---- */
+const FMS = [
+  { k:"squat", t:"Sentadilla profunda", bil:false, film:"De perfil y luego de frente, móvil apoyado a la altura de la cadera, a 2-3 m.",
+    prep:"Pies con el empeine bajo el borde de los hombros y las puntas rectas. Palo sobre la cabeza con los codos a 90° y, desde ahí, brazos estirados arriba.",
+    how:["Baja despacio todo lo que puedas: talones en el suelo, pecho y cabeza al frente, palo empujado arriba.","Si no sale el 3, repítelo con los talones sobre el listón o libro de unos 4 cm, con los pies igual."],
+    c:{3:"Sin listón: tronco paralelo a la tibia o más vertical, muslo por debajo de la horizontal, rodillas sobre los pies y palo por encima de los pies.",2:"Lo mismo, pero solo con los talones sobre el listón.",1:"Ni con el listón."} },
+  { k:"hurdle", t:"Paso de valla", bil:true, side:"la pierna que pasa", film:"De frente y luego de perfil.",
+    prep:"Valla: una cuerda o goma entre dos sillas, a la altura de tu tibia (del suelo al bulto bajo la rótula). Pies juntos, con las puntas tocando la base, justo debajo de la cuerda. Palo sobre los hombros, detrás del cuello.",
+    how:["Ponte lo más alto que puedas.","Pasa una pierna por encima, toca el suelo con el talón y vuelve. Lento y controlado.","El pie de apoyo no se mueve."],
+    c:{3:"Cadera, rodilla y tobillo alineados vistos de frente, la lumbar casi quieta y el palo paralelo a la cuerda.",2:"Se pierde la alineación, se mueve la lumbar o el palo se inclina.",1:"Tocas la cuerda o pierdes el equilibrio."} },
+  { k:"lunge", t:"Zancada en línea", bil:true, side:"la pierna de delante", film:"De frente y luego de perfil.",
+    prep:"Una línea de cinta en el suelo hace de tabla. Marca en ella la longitud de tu tibia: la punta del pie de atrás en el inicio y el talón del de delante en la marca, los dos sobre la línea. Palo vertical por la espalda tocando la cabeza, la espalda alta y el sacro. La mano contraria a la pierna de delante lo agarra en la nuca; la otra, en la lumbar.",
+    how:["Baja la rodilla de atrás hasta tocar la línea justo detrás del talón de delante.","Sube a la posición inicial. El palo, siempre vertical."],
+    c:{3:"El palo no pierde ninguno de los tres contactos, el tronco no se mueve, palo y pies siguen en la línea y la rodilla toca detrás del talón.",2:"Falla alguna de esas cosas.",1:"Pierdes el equilibrio."} },
+  { k:"sm", t:"Movilidad de hombro", bil:true, side:"el brazo de arriba", film:"Desde detrás, con una cinta métrica pegada en vertical a la pared, a un palmo de tu espalda, para leer la distancia en el vídeo. Si alguien de casa puede medir, mejor.",
+    prep:"Mide tu palmo: del pliegue de la muñeca a la punta del dedo corazón. De pie, pies juntos, puños cerrados con el pulgar dentro.",
+    how:["En un solo movimiento y a la vez: un puño por detrás del cuello y el otro por la espalda, hacia arriba.","No los acerques después a pequeños tirones.","Mide entre los puntos más cercanos de los dos puños."],
+    c:{3:"Menos de un palmo.",2:"Menos de palmo y medio.",1:"Más de palmo y medio. Si mide justo un palmo, puntúa el más bajo."},
+    note:"Crece alto, sin encorvarte ni adelantar la cabeza. Si solo llegas así, vale lo que mides erguido.",
+    clr:{ t:"Despeje de hombro", how:"Palma en el hombro contrario y sube el codo todo lo que puedas sin despegar la mano. Los dos lados." } },
+  { k:"aslr", t:"Elevación de pierna recta", bil:true, side:"la pierna que sube", film:"De lado, con el móvil a ras de suelo.",
+    prep:"Boca arriba, brazos a los lados con las palmas arriba y la cabeza en el suelo. Un libro o listón bajo las rodillas y las puntas de los pies hacia arriba. Pega una tira de cinta en el lateral del muslo, a medio camino entre el hueso de delante de la cadera y la línea de la rodilla, y otra en esa línea.",
+    how:["Sube una pierna estirada, con el pie flexionado, hasta donde llegue.","La otra rodilla sigue apoyada en el libro, con la punta arriba, y la cabeza no se levanta."],
+    c:{3:"El tobillo pasa la vertical de la marca del medio del muslo.",2:"Se queda entre esa marca y la rodilla.",1:"No llega a la vertical de la rodilla."} },
+  { k:"tspu", t:"Flexión de estabilidad", bil:false, film:"De perfil, con el móvil a ras de suelo.",
+    prep:"Boca abajo, manos a la anchura de los hombros con los pulgares a la altura de la parte alta de la frente. Rodillas estiradas y puntas de los pies apoyadas.",
+    how:["Haz una flexión: el cuerpo sube entero, como una tabla. Pecho y abdomen despegan a la vez.","Si no sale, baja las manos hasta que los pulgares queden a la altura de la barbilla y repite.","Las manos no se desplazan al prepararte."],
+    c:{3:"Subes en bloque con los pulgares a la frente.",2:"Subes en bloque con los pulgares a la barbilla.",1:"Tampoco a la barbilla: la lumbar se queda atrás o no subes."},
+    clr:{ t:"Despeje de extensión", how:"Desde boca abajo, estira los brazos y arquea la espalda con la pelvis en el suelo (la cobra)." } },
+  { k:"rs", t:"Estabilidad rotatoria", bil:true, side:"el brazo que se mueve", film:"De lado y un poco desde arriba.",
+    prep:"A cuatro patas sobre una línea de cinta: pulgares, rodillas y pies tocándola. Caderas y hombros a 90°, espalda plana.",
+    how:["Mismo lado: estira a la vez el brazo adelante y la pierna atrás; luego junta codo y rodilla por encima de la línea y vuelve a estirar.","Si no sale, haz la diagonal (brazo y pierna contrarios): codo y rodilla tienen que tocarse sobre la línea."],
+    c:{3:"El mismo lado sale completo sin salirte de la línea.",2:"Sale la diagonal y codo y rodilla se tocan sobre la línea.",1:"Tampoco la diagonal."},
+    clr:{ t:"Despeje de flexión", how:"Postura del niño: glúteos a los talones, pecho a los muslos y brazos estirados delante." } },
+];
+const FMS_ORD = ["aslr","sm","rs","tspu","lunge","hurdle","squat"];   // jerarquía correctiva del libro (cap. 11)
+const FMS_FIX = { aslr:["llower","couch","n90"], sm:["shext","ribgrab","rot","barm"], rs:["roll","bear","pull"], tspu:["plank","hollow","bear"], lunge:["halo","couch","n90"], hurdle:["sldl","n90","couch"], squat:["frog","n90"] };
+const FMS_PARK = {
+  aslr:"Peso muerto y swing pesados, aparcados: solo ligeros y técnicos.",
+  sm:"Press pesado y bottoms-up pesado del lado peor, aparcados: press de rodillas ligero con los criterios de parada y armbar ligero. El doble press espera.",
+  rs:"TGU y complejo con peso moderado, sin series duras.",
+  tspu:"TGU y complejo con peso moderado, sin series duras. Flexiones solo si el cuerpo sube en bloque.",
+  lunge:"Zancadas y trabajo a una pierna con carga, aparcados.",
+  hurdle:"Trabajo a una pierna con carga, aparcado; peso muerto a una pierna solo ligero.",
+  squat:"Front squat ligero, hasta la profundidad que mantengas con la espalda en su sitio.",
+};
+const fmsT = k => FMS.find(x => x.k === k);
+const fmsLast = () => { const a = S().fms; return Array.isArray(a) && a.length ? a[a.length - 1] : null; };
+function fmsFinal(r, k){
+  const t = fmsT(k), s = (r.sc || {})[k] || {};
+  if ((r.dolor || {})[k] || (r.clr || {})[k]) return 0;
+  if (t.bil) return s.l != null && s.r != null ? Math.min(s.l, s.r) : null;
+  return s.v ?? null;
+}
+function fmsAsym(r, k){ const t = fmsT(k), s = (r.sc || {})[k] || {}; return t.bil && s.l != null && s.r != null && s.l !== s.r; }
+function fmsAnalyze(r){
+  const fin = Object.fromEntries(FMS.map(t => [t.k, fmsFinal(r, t.k)]));
+  const pain = FMS_ORD.filter(k => fin[k] === 0);
+  const done = FMS.every(t => fin[t.k] != null);
+  const total = done ? FMS.reduce((s, t) => s + fin[t.k], 0) : null;
+  let focus = FMS_ORD.find(k => fin[k] === 1 || (fin[k] != null && fin[k] > 0 && fmsAsym(r, k)));
+  if (!focus) focus = FMS_ORD.find(k => fin[k] === 2);
+  const park = FMS_ORD.filter(k => fin[k] === 1 || (fin[k] > 0 && fmsAsym(r, k)));
+  return { fin, pain, done, total, focus, park, asym: FMS_ORD.filter(k => fmsAsym(r, k)) };
+}
+const fmsSide = (r, k) => { const s = (r.sc || {})[k] || {}; return s.l != null && s.r != null && s.l !== s.r ? (s.l < s.r ? "izquierdo" : "derecho") : ""; };
+function fmsResultHtml(r, saved){
+  const a = fmsAnalyze(r);
+  let h = `<table class="fms-tab"><thead><tr><th>Test</th><th>Izq.</th><th>Der.</th><th>Final</th></tr></thead><tbody>` +
+    FMS_ORD.map(k => { const t = fmsT(k), s = (r.sc || {})[k] || {}, f = a.fin[k];
+      return `<tr class="${k === a.focus ? "on" : ""}"><td>${t.t}</td><td>${t.bil ? (s.l ?? "–") : ""}</td><td>${t.bil ? (s.r ?? "–") : ""}</td><td><b>${f ?? "–"}</b>${fmsAsym(r, k) ? " ≠" : ""}</td></tr>`; }).join("") +
+    `</tbody></table><p class="hint">Ordenados como los trabaja el libro: de arriba abajo. ≠ = diferencia entre lados.${a.total != null ? ` Total: ${a.total}/21 (lo importante no es el total, sino el primer eslabón flojo).` : ""}</p>`;
+  if (a.pain.length) h += `<div class="note bad">Dolor en: ${a.pain.map(k => fmsT(k).t.toLowerCase()).join(", ")}. Ese patrón no se trabaja ni se carga por tu cuenta: es para un fisioterapeuta. Lo demás puedes seguir haciéndolo.</div>`;
+  if (a.focus){
+    const t = fmsT(a.focus), side = fmsSide(r, a.focus), fix = FMS_FIX[a.focus].filter(x => LIB.some(i => i.k === x));
+    h += `<div class="note ok"><b>Tu foco: ${t.t.toLowerCase()}${side ? `, lado ${side}` : ""}.</b> ${a.fin[a.focus] === 2 && !fmsAsym(r, a.focus) ? "Todo lo anterior está en 3; ahora se busca el 3 aquí." : "Es el primer eslabón flojo de la cadena: primero igualar lados y llegar al 2, luego el resto."}</div>
+      <p class="ex-p full">Correctivos para el foco (de tu biblioteca): ${fix.map(x => esc(LIB.find(i => i.k === x).t)).join(" · ")}. Pocos y aquí: repite <b>solo este test</b> al acabar cada sesión de correctivos (2 minutos). Si no se mueve en 2-3 sesiones, cambia de correctivo.</p>
+      ${saved ? `<button class="btn accent" data-action="fms-spices" data-k="${a.focus}">Usar como mis especias</button>` : ""}`;
+  } else if (a.done && !a.pain.length) h += `<div class="note ok">Todo en 3 y simétrico: luz verde para cargar. Repite el chequeo cada 4 semanas.</div>`;
+  if (a.park.length) h += `<p class="ex-p full" style="margin-top:10px"><b>Qué aparcar mientras tanto</b> (el libro: primero se quita, luego se añade):</p><ul class="fms-ul">${[...new Set(a.park.map(k => FMS_PARK[k]))].map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+  return h;
+}
+function fmsCard(){
+  const L = fmsLast(), dr = S().fmsDraft;
+  let b = `<p class="hint" style="margin-top:0">Los 7 tests del FMS (Gray Cook, <i>Movement</i>) adaptados para hacerlos solo con el móvil, un palo, cinta y una cuerda. Unos 20 minutos, sin calentar antes. Te dice cuál es tu primer eslabón flojo y qué correctivos tocan: el resto, fuera.</p>`;
+  if (L) b += `<p class="ex-p full"><b>Último chequeo: ${esc(fmtDate(L.date))}.</b></p>` + fmsResultHtml(L, true);
+  b += `<button class="btn${L ? "" : " accent"}" style="width:100%;margin-top:10px" data-action="fms-open">${dr ? "Seguir con el chequeo empezado" : L ? "Repetir el chequeo completo" : "Hacer el chequeo"}</button>`;
+  const hist = (S().fms || []).slice(0, -1).reverse();
+  if (hist.length) b += `<p class="hint">Anteriores: ${hist.map(r => `${esc(fmtDate(r.date))} → ${(a => a.focus ? fmsT(a.focus).t.toLowerCase() : "todo en 3")(fmsAnalyze(r))}`).join(" · ")}</p>`;
+  const a = L && fmsAnalyze(L);
+  return card("fms", "Chequeo de movimiento", L ? (a.focus ? `Foco: ${fmsT(a.focus).t.toLowerCase()}` : "Sin foco pendiente") : "Los 7 tests del FMS, guiado", L && a.focus ? `<span class="pill warn">${a.fin[a.focus]}</span>` : "", b);
+}
+const fmsChips = (k, s, v) => `<div class="chips">${[3,2,1].map(n => `<button class="chip" data-action="fms-sc" data-k="${k}" data-s="${s}" data-v="${n}" aria-pressed="${v === n}">${n}</button>`).join("")}</div>`;
+function fmsRender(){
+  const el = $("#fmsov"); if (!el || !ui.fmsOn) return;
+  const r = S().fmsDraft, i = ui.fmsI || 0, N = FMS.length;
+  let h = `<div class="as-wrap"><div class="as-top"><button class="btn" data-action="fms-close">Cerrar</button><span class="as-conn">${i === 0 ? "Antes de empezar" : i <= N ? `Test ${i} de ${N}` : "Resultado"}</span></div>`;
+  if (i === 0){
+    h += `<h2 class="as-h">Chequeo de movimiento</h2>
+      <p class="ex-p full"><b>Material:</b> palo de escoba, cinta de carrocero, cinta métrica, una cuerda o goma y dos sillas, un libro o listón de unos 4 cm y el móvil apoyado en algo para grabar.</p>
+      <ul class="fms-ul"><li>Sin calentar ni estirar antes: se trata de ver cómo te mueves de verdad.</li><li>Hasta 3 intentos por test; cuenta el mejor.</li><li>No te corrijas ni hagas trampas: es una foto, no un ejercicio.</li><li>En caso de duda, puntúa el más bajo. Mira el vídeo antes de decidir.</li><li>Si algo duele, ese test vale 0 y no se insiste.</li></ul>
+      <div class="row" style="gap:16px;margin-top:10px">
+        <div class="field"><label for="fmsPalmo">Tu palmo (cm)</label><input class="num" id="fmsPalmo" inputmode="decimal" data-sbind="fmsDraft.palmo" data-num="1" value="${r.palmo ?? ""}" placeholder="muñeca–dedo"></div>
+        <div class="field"><label for="fmsTibia">Tu tibia (cm)</label><input class="num" id="fmsTibia" inputmode="decimal" data-sbind="fmsDraft.tibia" data-num="1" value="${r.tibia ?? ""}" placeholder="suelo–rodilla"></div></div>
+      <p class="hint">Tibia: del suelo al bulto que hay justo debajo de la rótula. Es la altura de la valla y la distancia de la zancada.</p>`;
+  } else if (i <= N){
+    const t = FMS[i - 1], s = (r.sc || {})[t.k] || {};
+    const med = t.k === "sm" && r.palmo ? ` Tu palmo: ${r.palmo} cm, así que 3 = menos de ${r.palmo} cm y 2 = menos de ${Math.round(r.palmo * 15) / 10} cm.` : (t.k === "hurdle" || t.k === "lunge") && r.tibia ? ` Tu tibia: ${r.tibia} cm.` : "";
+    h += `<h2 class="as-h">${t.t}</h2>
+      <p class="ex-p full"><b>Prepara:</b> ${esc(t.prep)}${esc(med)}</p>
+      <ol class="fms-ul">${t.how.map(x => `<li>${esc(x)}</li>`).join("")}</ol>
+      ${t.note ? `<p class="ex-p full">${esc(t.note)}</p>` : ""}
+      <p class="hint">Graba: ${esc(t.film)}</p>
+      <div class="fms-crit">${[3,2,1].map(n => `<div><b>${n}</b><span>${esc(t.c[n])}</span></div>`).join("")}</div>
+      ${t.bil ? `<p class="hint" style="margin-bottom:4px">Se puntúa ${esc(t.side)}.</p>
+        <div class="row" style="gap:18px"><div class="field"><label>Izquierdo</label>${fmsChips(t.k, "l", s.l)}</div><div class="field"><label>Derecho</label>${fmsChips(t.k, "r", s.r)}</div></div>`
+        : `<div class="field"><label>Puntuación</label>${fmsChips(t.k, "v", s.v)}</div>`}
+      <div style="margin-top:10px"><button class="chip" data-action="fms-pain" data-k="${t.k}" data-w="dolor" aria-pressed="${!!(r.dolor || {})[t.k]}">Ha dolido durante el test</button></div>
+      ${t.clr ? `<div class="ex" style="margin-top:12px"><div class="ex-t">${esc(t.clr.t)}</div><p class="ex-p full">${esc(t.clr.how)} No se puntúa: solo miras si duele.</p>
+        <button class="chip" data-action="fms-pain" data-k="${t.k}" data-w="clr" aria-pressed="${!!(r.clr || {})[t.k]}">Duele en el despeje</button></div>` : ""}`;
+  } else {
+    h += `<h2 class="as-h">Resultado</h2>` + fmsResultHtml(r, false);
+    const miss = FMS.filter(t => fmsFinal(r, t.k) == null);
+    h += miss.length ? `<div class="note">Faltan: ${miss.map(t => t.t.toLowerCase()).join(", ")}.</div>` : `<button class="btn accent as-wide" data-action="fms-save">Guardar el chequeo</button>`;
+  }
+  h += `<div class="row as-runbtns">${i > 0 ? `<button class="btn" data-action="fms-go" data-d="-1">‹ Anterior</button>` : ""}${i <= N ? `<button class="btn accent" data-action="fms-go" data-d="1">${i === 0 ? "Empezar" : i === N ? "Ver el resultado" : "Siguiente ›"}</button>` : ""}</div></div>`;
+  el.innerHTML = h;
+}
+function fmsOpen(){
+  if (!S().fmsDraft) S().fmsDraft = { date: todayIso(), sc:{}, dolor:{}, clr:{}, palmo: (fmsLast() || {}).palmo, tibia: (fmsLast() || {}).tibia };
+  ui.fmsOn = true; if (ui.fmsI == null) ui.fmsI = 0; save();
+  $("#fmsov").classList.add("on"); document.body.style.overflow = "hidden"; fmsRender();
+}
+function fmsClose(){ ui.fmsOn = false; $("#fmsov").classList.remove("on"); document.body.style.overflow = ""; render(); }
 
 function renderA(d){
   const S_ = sideL(), O_ = otherL();
@@ -912,6 +1057,7 @@ function renderSemana(){
   h += card("review", "Revisión con Claude", rv ? `Hecha el ${esc(fmtDate(rv.at.slice(0, 10)))} a las ${hhmm(rv.at)}` : "Lectura de la semana y plan para la siguiente", rv ? `<span class="pill ok">hecha</span>` : "",
     aiHasKey() ? `<div class="row">${aiBtn("ai-semana", rv ? "Rehacer la revisión" : "Revisar la semana", "btn accent", `data-mon="${mon}"`)}${rv ? `<button class="btn" data-action="ai-share-sem" data-mon="${mon}">Compartir</button>` : ""}</div>${aiErrHtml("ai-semana")}${rv ? `<div class="md coach-out">${md(rv.text)}</div>` : ""}`
       : `<p class="hint" style="margin-top:0">Pon tu clave de la API de Claude en Ajustes para que te revise la semana.</p><button class="btn" data-action="goto-tab" data-tab="ajustes">Ir a Ajustes</button>`);
+  h += fmsCard();
   h += gapsCard();
   h += `<p class="hint" style="text-align:center">Revisión del domingo: 5 minutos con esta pantalla.</p>`;
   $("#p-semana").innerHTML = h;
@@ -1450,6 +1596,7 @@ function aiSesion(){
 - Airbike: tests de vatios máximos (sprint de 10 s) y MAS (RPM medias en 5 min); lunes A&A, viernes alta estimulación, fin de semana rodaje suave; dos bloques de 4 semanas y retest en la semana 9.
 - Movilidad Quicksilver: ciclos de 8 semanas (front split, luego straddle cargado), días pesado, medio y ligero de lunes a viernes.
 - Cierre: costilla al final del día, paseo, tomas de proteína, café, peso, cintura, tobillo, vídeo y notas.
+- Chequeo de movimiento (pestaña Semana): los 7 tests del FMS hechos solo, cada 4 semanas. Da un foco (primer eslabón flojo según la jerarquía de Gray Cook: elevación de pierna recta, hombro, estabilidad rotatoria, flexión de estabilidad, zancada, valla, sentadilla), sus correctivos y qué aparcar. El patrón con dolor no se carga: fisioterapeuta.
 - Cocina: despensa, lista de la compra, pescado (bonito o atún, máximo 3 raciones a la semana), menú semanal con platos tipo y tanda de cocina.`;
 }
 function htmlText(h){
@@ -1473,6 +1620,8 @@ const AIF = {};
   b("extra.armbar.done", "Kettlebell armbar"); i("extra.armbar.secs", "Armbar: segundos por lado", 5, 120); e("extra.armbar.kg", "Armbar: kg", [8,12,16]);
   b("extra.barm.done", "Bent armbar"); b("extra.halo.done", "Halo en half kneeling"); i("extra.halo.reps", "Halo: halos por lado", 1, 20); b("extra.shext.done", "Extensión de hombro sentado");
   b("extra.sldl.done", "Peso muerto a una pierna"); i("extra.sldl.reps", "Peso muerto a una pierna: reps por lado", 1, 15); e("extra.sldl.kg", "Peso muerto a una pierna: kg", [12,16,20,24]);
+  b("extra.llower.done", "Bajada de pierna con apoyo"); i("extra.llower.reps", "Bajada de pierna: reps por lado", 1, 20);
+  b("extra.roll.done", "Volteos (rolling)"); e("extra.roll.dif", "Volteos: lado que cuesta más", ["Izquierdo","Derecho","Igual"]);
   b("extra.n90.done", "90/90 de cadera"); i("extra.n90.resp", "90/90: respiraciones por lado", 1, 40); e("extra.n90.dif", "90/90: lado que cuesta más", ["Izquierdo","Derecho","Igual"]);
   b("a.tk.done", "Press de rodillas (tall kneeling)"); i("a.tk.reps", "Press de rodillas: reps limpias", 0, 10); b("a.oh.march", "Marcha con la campana arriba"); b("a.oh.rot", "Rotaciones con la campana arriba");
   e("cuerpo.hIzq", "Test de hombro, izquierdo arriba (3 bien, 1 mal)", [1,2,3]); e("cuerpo.hDer", "Test de hombro, derecho arriba (3 bien, 1 mal)", [1,2,3]);
@@ -1545,6 +1694,7 @@ function aiContext(o = {}){
     rachaP3Completo: p3Streak(),
     ultimaFuerza: Object.fromEntries(FZ.map(e => [e.k, lastFz(e.k, addDays(t, 1))])),
     retestTGU: retestDue(t),
+    chequeoFMS: (L => L ? (a => ({ fecha: L.date, puntuaciones: Object.fromEntries(FMS.map(x => [x.t, { ...(L.sc[x.k] || {}), final: a.fin[x.k] }])), dolor: a.pain.map(k => fmsT(k).t), foco: a.focus ? fmsT(a.focus).t : null, aparcar: [...new Set(a.park.map(k => FMS_PARK[k]))] }))(fmsAnalyze(L)) : null)(fmsLast()),
     dias: aiDays(o.days || 14, o.end || t),
   };
   if (o.cocina) ctx.cocina = aiCocina(o.wk);
@@ -2382,6 +2532,13 @@ const A = {
   "spice": b => { const k = b.dataset.k, cur = spices().slice(), i = cur.indexOf(k);
     if (i >= 0) cur.splice(i, 1); else { if (cur.length >= 4){ toast("Máximo 4 especias: quita una antes"); return; } cur.push(k); }
     S().spices = cur; commit(); },
+  "fms-open": () => fmsOpen(),
+  "fms-close": () => fmsClose(),
+  "fms-go": b => { ui.fmsI = Math.max(0, Math.min(FMS.length + 1, (ui.fmsI || 0) + Number(b.dataset.d))); fmsRender(); $("#fmsov").scrollTo(0, 0); },
+  "fms-sc": b => { const r = S().fmsDraft; if (!r) return; const o = (r.sc[b.dataset.k] ||= {}), v = Number(b.dataset.v); o[b.dataset.s] = o[b.dataset.s] === v ? undefined : v; save(); fmsRender(); },
+  "fms-pain": b => { const r = S().fmsDraft; if (!r) return; const o = (r[b.dataset.w] ||= {}); o[b.dataset.k] = !o[b.dataset.k]; save(); fmsRender(); },
+  "fms-save": () => { const r = S().fmsDraft; if (!r) return; r.date = todayIso(); (S().fms ||= []).push(r); delete S().fmsDraft; ui.fmsI = null; save(); fmsClose(); ui.open.fms = true; render(); toast("Chequeo guardado"); },
+  "fms-spices": b => { const fix = FMS_FIX[b.dataset.k].filter(x => LIB.some(i => i.k === x)).slice(0, 3); S().spices = fix; commit(); toast("Especias: " + fix.map(x => LIB.find(i => i.k === x).t).join(", ")); },
   "gap": b => { const g = (S().gaps ||= {}); g[b.dataset.k] = g[b.dataset.k] === b.dataset.v ? "" : b.dataset.v; commit(); },
   "force-train": () => { ui.forceTrain[ui.date] = true; render(); },
   "timer-start": b => timerStart({ path:b.dataset.path, label:b.dataset.label, kind:"hold",
@@ -2565,7 +2722,7 @@ $("#fileIn").addEventListener("change", async e => {
 function toCSV(){
   const cols = ["fecha","sueno","energia","p3_completos","lateral_simetrica","fin_dia_costilla","flexor_hk","frog_resp","pullover_reps","pullover_kg","oso","oso_s","hollow_s","hollow_var","leg_raises","hanging_hollow","rot_izq","rot_der","ext_banco","rib_grab","wall_slides","bu_kg","bu_series","bu_reps","arrastre_reps","arrastre_sin_bu","cadera_bajo_campana","contralateral","isometria_3pos","plancha_pared_s","tgu_kg","tgu_izq","tgu_der",
     "hk_series","hk_reps","hk_reps_antes_ardor","hk_sonda_ok","pie_reps_antes_ardor","pie_costilla_abre","oh_bu_s","oh_lado_s","oh_otro_s","carry","carry_kg","carry_paseos","retest",
-    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","tobillo_izq","tobillo_der","mov_nivel","mov_hechos","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","n90_resp","n90_lado_dificil","press_rodillas_reps","oh_marcha","oh_rotaciones","hombro_izq","hombro_der","couch_resp","armbar_s","armbar_kg","bent_armbar","halo","hombro_ext","sldl_reps","sldl_kg","notas"];
+    "b_modo","fsq_kg","fsq_series","fsq_reps","swing_kg","swing_series","swing_reps","row_kg","row_series","row_reps","scarry_kg","scarry_series","scarry_paseos","airbike_tipo","airbike_intervalos","airbike_min","airbike_vatios","airbike_rpm","airbike_kcal","test_vatios_max","test_rpm_mas","creatina","suero","despertares","luz_antes_2330","cafe_antes_14","tomas_proteina","paseo_min","peso","cintura","tobillo_izq","tobillo_der","mov_nivel","mov_hechos","b_kg_max","b_kg_rondas","b_rondas","b_rondas_completas","b_limpia_video","video","n90_resp","n90_lado_dificil","press_rodillas_reps","oh_marcha","oh_rotaciones","hombro_izq","hombro_der","couch_resp","armbar_s","armbar_kg","bent_armbar","halo","hombro_ext","sldl_reps","sldl_kg","bajada_pierna","volteos","notas"];
   const q = v => v == null ? "" : /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
   const rows = Object.keys(DB.days).sort().map(x => { const d = DB.days[x], g = p => getp(d, p); return [x, d.sueno, d.energia, p3Done(d), g("p3.lateral") ? 1 : "", d.finDia, g("extra.flex.done") ? 1 : "", g("extra.frog.done") ? (g("extra.frog.resp") ?? "sí") : "",
     g("extra.pull.done") ? (g("extra.pull.reps") ?? "sí") : "", g("extra.pull.kg"), g("extra.bear.done") ? (g("extra.bear.var") ?? "sí") : "", g("extra.bear.secs"),
@@ -2577,7 +2734,7 @@ function toCSV(){
     hasB(d) ? bMode(d, x) : "", ...FZ.flatMap(e => getp(d, "b.f."+e.k+".done") ? [g("b.f."+e.k+".kg"), g("b.f."+e.k+".series"), g("b.f."+e.k+".reps")] : ["","",""]),
     airDone(d) ? (g("air.tipo") ?? "sí") : "", g("air.rondas"), g("air.min"), g("air.vatios"), g("air.rpm"), g("air.kcal"), g("air.testW"), g("air.testRPM"), g("sup.cre") ? 1 : "", g("sup.suero") ? 1 : "",
     d.despertares, g("hab.luz") ? 1 : "", g("hab.cafe") ? 1 : "", g("hab.prot"), g("paseo.done") ? (g("paseo.min") ?? "sí") : "", g("cuerpo.peso"), g("cuerpo.cintura"), g("cuerpo.tobIzq"), g("cuerpo.tobDer"),
-    (() => { const m = movPlan(x); return m.lv && movDone(d) ? MOV_LV[m.lv] : ""; })(), movDone(d) || "", maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", g("extra.n90.done") ? (g("extra.n90.resp") ?? "sí") : "", g("extra.n90.dif"), g("a.tk.done") ? (g("a.tk.reps") ?? "sí") : "", g("a.oh.march") ? 1 : "", g("a.oh.rot") ? 1 : "", g("cuerpo.hIzq"), g("cuerpo.hDer"), g("extra.couch.done") ? (g("extra.couch.resp") ?? "sí") : "", g("extra.armbar.done") ? (g("extra.armbar.secs") ?? "sí") : "", g("extra.armbar.kg"), g("extra.barm.done") ? 1 : "", g("extra.halo.done") ? (g("extra.halo.reps") ?? "sí") : "", g("extra.shext.done") ? 1 : "", g("extra.sldl.done") ? (g("extra.sldl.reps") ?? "sí") : "", g("extra.sldl.kg"), d.notas].map(q).join(","); });
+    (() => { const m = movPlan(x); return m.lv && movDone(d) ? MOV_LV[m.lv] : ""; })(), movDone(d) || "", maxBkg(d), roundKgs(d).join("/"), (g("b.rounds")||[]).length || "", roundsDone(d) || "", g("b.limpia") ? 1 : "", d.video ? 1 : "", g("extra.n90.done") ? (g("extra.n90.resp") ?? "sí") : "", g("extra.n90.dif"), g("a.tk.done") ? (g("a.tk.reps") ?? "sí") : "", g("a.oh.march") ? 1 : "", g("a.oh.rot") ? 1 : "", g("cuerpo.hIzq"), g("cuerpo.hDer"), g("extra.couch.done") ? (g("extra.couch.resp") ?? "sí") : "", g("extra.armbar.done") ? (g("extra.armbar.secs") ?? "sí") : "", g("extra.armbar.kg"), g("extra.barm.done") ? 1 : "", g("extra.halo.done") ? (g("extra.halo.reps") ?? "sí") : "", g("extra.shext.done") ? 1 : "", g("extra.sldl.done") ? (g("extra.sldl.reps") ?? "sí") : "", g("extra.sldl.kg"), g("extra.llower.done") ? (g("extra.llower.reps") ?? "sí") : "", g("extra.roll.done") ? (g("extra.roll.dif") ?? "sí") : "", d.notas].map(q).join(","); });
   return [cols.join(","), ...rows].join("\n");
 }
 
